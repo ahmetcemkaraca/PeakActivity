@@ -17,4 +17,4 @@ export const authenticate = (context: functions.https.CallableRequest) => {
       'The function must be called while authenticated.'
     );
   }
-}; 
+};

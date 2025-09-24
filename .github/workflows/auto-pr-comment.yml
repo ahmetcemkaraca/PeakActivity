@@ -20,4 +20,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Yeni çekme isteğiniz için teşekkür ederiz! Lütfen projenizin katkı sağlama yönergelerini incelediğinizden emin olun. Otomatik inceleme sürecimiz başlatılmıştır.'
-            }) 
+            })

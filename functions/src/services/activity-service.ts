@@ -12,13 +12,22 @@ export class ActivityService {
   constructor() {
     this.db = firestore();
     const nodeEncryptionService = new NodeEncryptionService();
-    
+
     this.activityDataProcessor = new ActivityDataProcessor(nodeEncryptionService);
   }
 
-  async saveActivity(userId: string, activityData: any, transmissionType: DataTransmissionType, userKey?: string) {
+  async saveActivity(
+    userId: string,
+    activityData: any,
+    transmissionType: DataTransmissionType,
+    userKey?: string
+  ) {
     try {
-      const { processedData, transmissionType: finalTransmissionType, metadata } = await this.activityDataProcessor.processActivityData(
+      const {
+        processedData,
+        transmissionType: finalTransmissionType,
+        metadata,
+      } = await this.activityDataProcessor.processActivityData(
         JSON.stringify(activityData),
         transmissionType,
         userKey
@@ -36,8 +45,8 @@ export class ActivityService {
       });
       return { success: true, activityId: activityRef.id };
     } catch (error) {
-      console.error("Error saving activity:", error);
-      throw new Error("Failed to save activity.");
+      console.error('Error saving activity:', error);
+      throw new Error('Failed to save activity.');
     }
   }
 
@@ -59,8 +68,8 @@ export class ActivityService {
 
       return snapshot.docs.map(doc => doc.data() as ActivityEvent);
     } catch (error) {
-      console.error("Error getting activities in interval:", error);
-      throw new Error("Failed to get activities in interval.");
+      console.error('Error getting activities in interval:', error);
+      throw new Error('Failed to get activities in interval.');
     }
   }
-} 
+}

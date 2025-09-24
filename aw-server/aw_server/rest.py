@@ -10,7 +10,11 @@ import requests
 import yaml
 from aw_core import schema
 from aw_core.models import Event
-from aw_core.exceptions import AWNetworkException, AWValidationException, AWFirebaseException
+from aw_core.exceptions import (
+    AWNetworkException,
+    AWValidationException,
+    AWFirebaseException,
+)
 from aw_query.exceptions import QueryException
 from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_restx import Api, Resource, fields
@@ -261,7 +265,9 @@ class EventsRawResource(Resource):
         elif isinstance(data, list):
             events_data = data
         else:
-            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries.")
+            raise BadRequest(
+                "Invalid POST data", "Expected a dictionary or a list of dictionaries."
+            )
 
         validated_events = []
         for event_data in events_data:
@@ -279,7 +285,7 @@ class EventsRawResource(Resource):
 
 @api.route("/0/buckets/<string:bucket_id>/events/encrypted-ai")
 class EventsEncryptedAIResource(Resource):
-    @api.expect(event) # TODO: Define a proper model for encrypted events
+    @api.expect(event)  # TODO: Define a proper model for encrypted events
     @copy_doc(ServerAPI.create_encrypted_ai_events)
     def post(self, bucket_id):
         data = request.get_json()
@@ -294,17 +300,22 @@ class EventsEncryptedAIResource(Resource):
         elif isinstance(data, list):
             encrypted_events_data = data
         else:
-            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries for encrypted events.")
+            raise BadRequest(
+                "Invalid POST data",
+                "Expected a dictionary or a list of dictionaries for encrypted events.",
+            )
 
         # TODO: Add more robust validation for encrypted data structure (payload, metadata)
-        
-        event = current_app.api.create_encrypted_ai_events(bucket_id, encrypted_events_data)
+
+        event = current_app.api.create_encrypted_ai_events(
+            bucket_id, encrypted_events_data
+        )
         return event.to_json_dict() if event else None, 200
 
 
 @api.route("/0/buckets/<string:bucket_id>/events/encrypted-noai")
 class EventsEncryptedNoAIResource(Resource):
-    @api.expect(event) # TODO: Define a proper model for encrypted events
+    @api.expect(event)  # TODO: Define a proper model for encrypted events
     @copy_doc(ServerAPI.create_encrypted_noai_events)
     def post(self, bucket_id):
         data = request.get_json()
@@ -319,11 +330,16 @@ class EventsEncryptedNoAIResource(Resource):
         elif isinstance(data, list):
             encrypted_events_data = data
         else:
-            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries for encrypted events.")
+            raise BadRequest(
+                "Invalid POST data",
+                "Expected a dictionary or a list of dictionaries for encrypted events.",
+            )
 
         # TODO: Add more robust validation for encrypted data structure (payload, metadata)
-        
-        event = current_app.api.create_encrypted_noai_events(bucket_id, encrypted_events_data)
+
+        event = current_app.api.create_encrypted_noai_events(
+            bucket_id, encrypted_events_data
+        )
         return event.to_json_dict() if event else None, 200
 
 
@@ -535,12 +551,15 @@ class MicroSurveyResource(Resource):
         )
         return event.to_json_dict() if event else None, 200
 
+
 # AI Endpoints (NEW SECTION)
 
 focus_quality_score_input = api.model(
     "FocusQualityScoreInput",
     {
-        "events": fields.List(fields.Raw, required=True, description="List of activity events"),
+        "events": fields.List(
+            fields.Raw, required=True, description="List of activity events"
+        ),
         "user_tz": fields.String(required=True, description="User's timezone"),
     },
 )
@@ -554,6 +573,7 @@ focus_quality_score_output = api.model(
     },
 )
 
+
 @api.route("/0/ai/focus-quality-score")
 class FocusQualityScoreResource(Resource):
     @api.expect(focus_quality_score_input)
@@ -564,7 +584,9 @@ class FocusQualityScoreResource(Resource):
         user_tz = data.get("user_tz")
 
         if not events or not user_tz:
-            raise BadRequest("Missing required fields", "Both 'events' and 'user_tz' are required.")
+            raise BadRequest(
+                "Missing required fields", "Both 'events' and 'user_tz' are required."
+            )
 
         try:
             # Firebase Fonksiyonunun URL'sini buradan çağırın
@@ -575,25 +597,40 @@ class FocusQualityScoreResource(Resource):
             return response.json(), 200
         except requests.exceptions.Timeout as timeout_e:
             logger.error("Firebase Function call timed out: %s", timeout_e)
-            raise BadRequest("Request Timeout", "Firebase Function call timed out") from timeout_e
+            raise BadRequest(
+                "Request Timeout", "Firebase Function call timed out"
+            ) from timeout_e
         except requests.exceptions.ConnectionError as conn_e:
             logger.error("Firebase Function connection failed: %s", conn_e)
-            raise BadRequest("Connection Error", "Unable to connect to Firebase Function") from conn_e
+            raise BadRequest(
+                "Connection Error", "Unable to connect to Firebase Function"
+            ) from conn_e
         except requests.exceptions.HTTPError as http_e:
             logger.error("Firebase Function HTTP error: %s", http_e)
-            raise BadRequest("HTTP Error", f"Firebase Function returned error: {http_e}") from http_e
+            raise BadRequest(
+                "HTTP Error", f"Firebase Function returned error: {http_e}"
+            ) from http_e
         except requests.exceptions.RequestException as req_e:
             logger.error("Firebase Function request failed: %s", req_e)
-            raise BadRequest("Request Error", f"Firebase Function request failed: {req_e}") from req_e
+            raise BadRequest(
+                "Request Error", f"Firebase Function request failed: {req_e}"
+            ) from req_e
         except (json.JSONDecodeError, ValueError) as json_e:
             logger.error("Firebase Function response parsing failed: %s", json_e)
-            raise BadRequest("Response Format Error", "Invalid response from Firebase Function") from json_e
+            raise BadRequest(
+                "Response Format Error", "Invalid response from Firebase Function"
+            ) from json_e
+
 
 behavioral_trends_input = api.model(
     "BehavioralTrendsInput",
     {
-        "daily_totals": fields.List(fields.Raw, required=True, description="List of daily activity totals"),
-        "window": fields.Integer(required=True, description="Number of days for the analysis window"),
+        "daily_totals": fields.List(
+            fields.Raw, required=True, description="List of daily activity totals"
+        ),
+        "window": fields.Integer(
+            required=True, description="Number of days for the analysis window"
+        ),
     },
 )
 
@@ -606,6 +643,7 @@ behavioral_trends_output = api.model(
     },
 )
 
+
 @api.route("/0/ai/behavioral-trends")
 class BehavioralTrendsResource(Resource):
     @api.expect(behavioral_trends_input)
@@ -616,7 +654,10 @@ class BehavioralTrendsResource(Resource):
         window = data.get("window")
 
         if not daily_totals or window is None:
-            raise BadRequest("Missing required fields", "Both 'daily_totals' and 'window' are required.")
+            raise BadRequest(
+                "Missing required fields",
+                "Both 'daily_totals' and 'window' are required.",
+            )
 
         try:
             # Firebase Fonksiyonunun URL'sini buradan çağırın
@@ -626,27 +667,49 @@ class BehavioralTrendsResource(Resource):
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
         except requests.exceptions.Timeout as timeout_e:
-            logger.error("Behavioral trends Firebase Function call timed out: %s", timeout_e)
-            raise BadRequest("Request Timeout", "Behavioral trends analysis timed out") from timeout_e
+            logger.error(
+                "Behavioral trends Firebase Function call timed out: %s", timeout_e
+            )
+            raise BadRequest(
+                "Request Timeout", "Behavioral trends analysis timed out"
+            ) from timeout_e
         except requests.exceptions.ConnectionError as conn_e:
-            logger.error("Behavioral trends Firebase Function connection failed: %s", conn_e)
-            raise BadRequest("Connection Error", "Unable to connect to behavioral trends service") from conn_e
+            logger.error(
+                "Behavioral trends Firebase Function connection failed: %s", conn_e
+            )
+            raise BadRequest(
+                "Connection Error", "Unable to connect to behavioral trends service"
+            ) from conn_e
         except requests.exceptions.HTTPError as http_e:
             logger.error("Behavioral trends Firebase Function HTTP error: %s", http_e)
-            raise BadRequest("HTTP Error", f"Behavioral trends service error: {http_e}") from http_e
+            raise BadRequest(
+                "HTTP Error", f"Behavioral trends service error: {http_e}"
+            ) from http_e
         except requests.exceptions.RequestException as req_e:
-            logger.error("Behavioral trends Firebase Function request failed: %s", req_e)
-            raise BadRequest("Request Error", f"Behavioral trends request failed: {req_e}") from req_e
+            logger.error(
+                "Behavioral trends Firebase Function request failed: %s", req_e
+            )
+            raise BadRequest(
+                "Request Error", f"Behavioral trends request failed: {req_e}"
+            ) from req_e
         except (json.JSONDecodeError, ValueError) as json_e:
             logger.error("Behavioral trends response parsing failed: %s", json_e)
-            raise BadRequest("Response Format Error", "Invalid response from behavioral trends service") from json_e
+            raise BadRequest(
+                "Response Format Error",
+                "Invalid response from behavioral trends service",
+            ) from json_e
+
 
 # Anomaly Detection Endpoints
 
 anomaly_detection_input = api.model(
     "AnomalyDetectionInput",
     {
-        "daily_totals": fields.List(fields.Raw, required=True, description="List of daily activity totals for anomaly detection"),
+        "daily_totals": fields.List(
+            fields.Raw,
+            required=True,
+            description="List of daily activity totals for anomaly detection",
+        ),
     },
 )
 
@@ -659,6 +722,7 @@ anomaly_detection_output = api.model(
         "explanation": fields.String(required=True),
     },
 )
+
 
 @api.route("/0/ai/anomaly-detection")
 class AnomalyDetectionResource(Resource):
@@ -679,27 +743,47 @@ class AnomalyDetectionResource(Resource):
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
         except requests.exceptions.Timeout as timeout_e:
-            logger.error("Anomaly detection Firebase Function call timed out: %s", timeout_e)
-            raise BadRequest("Request Timeout", "Anomaly detection analysis timed out") from timeout_e
+            logger.error(
+                "Anomaly detection Firebase Function call timed out: %s", timeout_e
+            )
+            raise BadRequest(
+                "Request Timeout", "Anomaly detection analysis timed out"
+            ) from timeout_e
         except requests.exceptions.ConnectionError as conn_e:
-            logger.error("Anomaly detection Firebase Function connection failed: %s", conn_e)
-            raise BadRequest("Connection Error", "Unable to connect to anomaly detection service") from conn_e
+            logger.error(
+                "Anomaly detection Firebase Function connection failed: %s", conn_e
+            )
+            raise BadRequest(
+                "Connection Error", "Unable to connect to anomaly detection service"
+            ) from conn_e
         except requests.exceptions.HTTPError as http_e:
             logger.error("Anomaly detection Firebase Function HTTP error: %s", http_e)
-            raise BadRequest("HTTP Error", f"Anomaly detection service error: {http_e}") from http_e
+            raise BadRequest(
+                "HTTP Error", f"Anomaly detection service error: {http_e}"
+            ) from http_e
         except requests.exceptions.RequestException as req_e:
-            logger.error("Anomaly detection Firebase Function request failed: %s", req_e)
-            raise BadRequest("Request Error", f"Anomaly detection request failed: {req_e}") from req_e
+            logger.error(
+                "Anomaly detection Firebase Function request failed: %s", req_e
+            )
+            raise BadRequest(
+                "Request Error", f"Anomaly detection request failed: {req_e}"
+            ) from req_e
         except (json.JSONDecodeError, ValueError) as json_e:
             logger.error("Anomaly detection response parsing failed: %s", json_e)
-            raise BadRequest("Response Format Error", "Invalid response from anomaly detection service") from json_e
+            raise BadRequest(
+                "Response Format Error",
+                "Invalid response from anomaly detection service",
+            ) from json_e
+
 
 # Automatic Categorization / Labeling Endpoints
 
 auto_categorization_input = api.model(
     "AutoCategorizationInput",
     {
-        "events": fields.List(fields.Raw, required=True, description="List of events to categorize"),
+        "events": fields.List(
+            fields.Raw, required=True, description="List of events to categorize"
+        ),
     },
 )
 
@@ -709,6 +793,7 @@ auto_categorization_output = api.model(
         "labels": fields.List(fields.Raw, required=True),
     },
 )
+
 
 @api.route("/0/ai/auto-categorization")
 class AutoCategorizationResource(Resource):
@@ -724,7 +809,9 @@ class AutoCategorizationResource(Resource):
         try:
             # Firebase Fonksiyonunun URL'sini buradan çağırın
             # Fonksiyonun URL'si dağıtıldıktan sonra edinilmelidir
-            firebase_function_url = "YOUR_FIREBASE_AUTO_CATEGORIZATION_FUNCTION_URL_HERE"
+            firebase_function_url = (
+                "YOUR_FIREBASE_AUTO_CATEGORIZATION_FUNCTION_URL_HERE"
+            )
             response = requests.post(firebase_function_url, json=data)
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
@@ -735,13 +822,16 @@ class AutoCategorizationResource(Resource):
             logger.error(f"An unexpected error occurred: {e}")
             raise BadRequest("Internal Server Error", str(e))
 
+
 # Community-Based Rule Sets Endpoints
 
 community_rules_input = api.model(
     "CommunityRulesInput",
     {
         "event": fields.Raw(required=True, description="The event to categorize"),
-        "community_rules": fields.List(fields.Raw, required=True, description="List of community rules"),
+        "community_rules": fields.List(
+            fields.Raw, required=True, description="List of community rules"
+        ),
     },
 )
 
@@ -754,6 +844,7 @@ community_rules_output = api.model(
     },
 )
 
+
 @api.route("/0/ai/community-rules")
 class CommunityRulesResource(Resource):
     @api.expect(community_rules_input)
@@ -764,7 +855,9 @@ class CommunityRulesResource(Resource):
         community_rules = data.get("community_rules")
 
         if not event or not community_rules:
-            raise BadRequest("Missing required fields", "'event' and 'community_rules' are required.")
+            raise BadRequest(
+                "Missing required fields", "'event' and 'community_rules' are required."
+            )
 
         try:
             # Firebase Fonksiyonunun URL'sini buradan çağırın
@@ -780,13 +873,18 @@ class CommunityRulesResource(Resource):
             logger.error(f"An unexpected error occurred: {e}")
             raise BadRequest("Internal Server Error", str(e))
 
+
 # Contextual Categorization Endpoints
 
 contextual_categorization_input = api.model(
     "ContextualCategorizationInput",
     {
-        "context": fields.String(required=True, description="Text context for categorization"),
-        "language": fields.String(required=False, description="Language of the context (e.g., 'en', 'tr')"),
+        "context": fields.String(
+            required=True, description="Text context for categorization"
+        ),
+        "language": fields.String(
+            required=False, description="Language of the context (e.g., 'en', 'tr')"
+        ),
     },
 )
 
@@ -798,6 +896,7 @@ contextual_categorization_output = api.model(
         "rationale": fields.String(required=True),
     },
 )
+
 
 @api.route("/0/ai/contextual-categorization")
 class ContextualCategorizationResource(Resource):
@@ -814,11 +913,13 @@ class ContextualCategorizationResource(Resource):
         try:
             # Firebase Fonksiyonunun URL'sini buradan çağırın
             # Fonksiyonun URL'si dağıtıldıktan sonra edinilmelidir
-            firebase_function_url = "YOUR_FIREBASE_CONTEXTUAL_CATEGORIZATION_FUNCTION_URL_HERE"
+            firebase_function_url = (
+                "YOUR_FIREBASE_CONTEXTUAL_CATEGORIZATION_FUNCTION_URL_HERE"
+            )
             payload = {"context": context}
             if language:
                 payload["language"] = language
-            
+
             response = requests.post(firebase_function_url, json=payload)
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
@@ -828,6 +929,7 @@ class ContextualCategorizationResource(Resource):
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
             raise BadRequest("Internal Server Error", str(e))
+
 
 # AGENT GENERATION
 agent_generation_request = api.model(
@@ -841,6 +943,7 @@ agent_generation_request = api.model(
         ),
     },
 )
+
 
 @api.route("/0/agents/generate")
 class AgentGenerationResource(Resource):
@@ -861,9 +964,14 @@ class AgentGenerationResource(Resource):
 
         try:
             # AgentsGenerator örneğini oluştur ve ajanları çalıştır
-            generator = AgentsGenerator(agent_config_data=agent_config_data, api_key=gemini_api_key)
+            generator = AgentsGenerator(
+                agent_config_data=agent_config_data, api_key=gemini_api_key
+            )
             result = generator.generate_and_run_agents(topic=topic)
-            return {"message": "Agent generation and execution started successfully", "result": result}, 200
+            return {
+                "message": "Agent generation and execution started successfully",
+                "result": result,
+            }, 200
         except Exception as e:
             logger.exception(f"Error during agent generation and execution: {e}")
             raise BadRequest("Agent Generation Error", str(e))

@@ -1,9 +1,11 @@
 # PeakActivity Geliştirme Checklist
 
-*Tüm özellikler tamamlandıkça işaretlenmelidir.*
+_Tüm özellikler tamamlandıkça işaretlenmelidir._
 
 ## Aşama 1 – Temel Veri Toplama ve Zenginleştirme
+
 ### 1.1 Manuel / Offline Aktivite Entegrasyonu
+
 - [x] **Veri Modeli ve API**
   - [x] Firestore'da offline_activities collection şeması
   - [x] Cloud Functions ile offline aktivite CRUD operasyonları
@@ -26,6 +28,7 @@
   - Tamamlandı: 2025-07-11 02:59:32
 
 ### 1.2 Duygu & Bağlam Mikro Anketleri
+
 - [x] **Anket Sistemi Altyapısı**
   - [x] Firestore'da micro_surveys collection
   - [x] Anket şablonları ve soru tipleri
@@ -48,6 +51,7 @@
   - Tamamlandı: 2025-07-11 02:59:32
 
 ### 1.3 IDE İçi Kod Yazma / Hata Ayıklama Ayrımı
+
 - [ ] **Aktivite Türü Tespiti**
   - [ ] Klavye/mouse aktivite analizi
   - [ ] IDE debug mode tespiti
@@ -67,6 +71,7 @@
   - [ ] Hata ayıklama etkinlik haritası
 
 ### 1.4 "Düşünme Süresi" Etiketi
+
 - [ ] **Pasif Aktivite Tespiti**
   - [ ] Klavye/mouse inaktivite analizi
   - [ ] Pencere odaklanma durumu
@@ -86,7 +91,9 @@
   - [ ] Thinking pattern analizi
 
 ## Aşama 2 – Temel Yapay Zeka Analitik Motoru
+
 ### 2.1 Odaklanma Kalitesi Skoru
+
 - [x] **Skor Hesaplama Algoritması**
   - [x] Temel skor hesaplama (100 puan üzerinden)
   - [x] Bağlam değiştirme cezaları
@@ -109,6 +116,7 @@
   - [ ] Karşılaştırmalı analiz (anonim)
 
 ### 2.2 Davranışsal Desenler ve Trend Analizi
+
 - [x] **Trend Tespit Algoritması**
   - [x] Lineer regresyon tabanlı trend analizi
   - [x] Kategori bazlı eğilim hesaplama
@@ -130,6 +138,7 @@
   - [ ] Tahminleme modeli entegrasyonu
 
 ### 2.3 Anomali Tespiti
+
 - [x] **İstatistiksel Anomali Tespiti**
   - [x] Z-score tabanlı anomali hesaplama
   - [x] Günlük toplam süre analizi
@@ -151,6 +160,7 @@
   - [ ] Proaktif anomali uyarıları
 
 ### 2.4 Otomatik Kategorizasyon / Etiketleme
+
 - [x] **Temel Kategorizasyon**
   - [x] TF-IDF tabanlı kategori önerisi
   - [x] Uygulama/process tabanlı mapping
@@ -172,6 +182,7 @@
   - [ ] Hiyerarşik kategori yapısı
 
 ### 2.5 Topluluk Tabanlı Kural Setleri
+
 - [x] **Kural Eşleştirme Motoru**
   - [x] Glob pattern ve regex desteği
   - [x] Popülerlik tabanlı sıralama
@@ -193,6 +204,7 @@
   - [ ] Kural performans istatistikleri
 
 ### 2.6 Bağlamsal Kategorizasyon (Başlık/İçerik Analizi)
+
 - [x] **NLP Tabanlı Analiz**
   - [x] Zero-shot classification
   - [x] Çoklu dil desteği
@@ -214,10 +226,13 @@
   - [ ] Dil tespit ve otomatik çeviri
 
 ## Aşama 3 – Kullanıcı Araçları & Otomasyon
+
 ### 3.1 Hedef Takibi ve İlerleme Durumu
+
 - [x] **Hedef Veri Modeli Tasarımı**
   - [x] Firestore'da goals collection şeması oluşturma
-  - [x] Hedef türleri tanımlama (time_based, count_based, habit_based, milestone_based)
+  - [x] Hedef türleri tanımlama (time_based, count_based, habit_based,
+        milestone_based)
   - [x] İlerleme takip mekanizması (progress tracking)
   - [x] Hedef başarı/başarısızlık kriterleri
   - Tamamlandı: 2025-07-11 04:08:00
@@ -235,7 +250,7 @@
   - [x] İlerleme çubuğu ve görselleştirme
   - [x] Hedef düzenleme/silme işlemleri
   - Tamamlandı: 2025-07-11 03:42:45
-  
+
 - [x] **Tauri Entegrasyonu**
   - [x] Yerel hedef verisi senkronizasyonu
   - [x] Sistem bildirimleri (hedef hatırlatmaları)
@@ -244,6 +259,7 @@
   - Tamamlandı: 2025-07-11 03:45:55
 
 ### 3.2 Akıllı Kurallar ve Otomasyon Motoru (IFTTT Tarzı)
+
 - [x] **Kural Motoru Mimarisi**
   - [x] Firestore'da automation_rules collection tasarımı
   - [x] Tetikleyici (trigger) türleri tanımlama
@@ -255,56 +271,73 @@
 ## Aşama 4 – Web Arayüzü İyileştirmeleri
 
 ### 4.1 Kullanıcı Etkinlik Verilerini Görüntüleme ve Yönetme
+
 - [x] **Backend Entegrasyonu**
   - [x] Kullanıcının günlük etkinliklerini çeken API entegrasyonu
   - [x] Belirli etkinlikleri düzenleme veya silme API entegrasyonu
 - [x] **Frontend Bileşenleri**
-  - [x] Etkinlik verilerini görselleştiren bileşenler (`ActivityChart.vue`, `ActivityTable.vue`)
+  - [x] Etkinlik verilerini görselleştiren bileşenler (`ActivityChart.vue`,
+        `ActivityTable.vue`)
   - [x] Etkinlik verilerini filtreleme, sıralama ve arama yetenekleri
   - [x] Belirli etkinlikleri düzenleme veya silme işlevselliği
 - Tamamlandı: 2025-07-11 04:30:47
 
 ### 4.2 Anomali Tespiti ve Görselleştirme
+
 - [x] **Backend Entegrasyonu**
   - [x] Anomali tespiti API'lerinden veri çeken entegrasyon
 - [x] **Frontend Bileşenleri**
-  - [x] Tespit edilen anomalileri görselleştiren bileşenler (`AnomalyDetectionDisplay.vue`)
-  - [x] Tespit edilen anomalileri vurgulayan ve detaylı bilgi sağlayan UI öğeleri
+  - [x] Tespit edilen anomalileri görselleştiren bileşenler
+        (`AnomalyDetectionDisplay.vue`)
+  - [x] Tespit edilen anomalileri vurgulayan ve detaylı bilgi sağlayan UI
+        öğeleri
 - Tamamlandı: 2025-07-11 04:30:47
 
 ### 4.3 Otomatik Kategorizasyon ve Etiketleme Yönetimi
+
 - [x] **Backend Entegrasyonu**
   - [x] Otomatik kategorizasyon API'lerinden veri çeken entegrasyon
 - [x] **Frontend Bileşenleri**
-  - [x] Kullanıcının kategori kurallarını yönetmesini sağlayan bileşenler (`AutoCategorizationDisplay.vue`)
-  - [x] Kullanıcıların yeni kurallar eklemesine, mevcut kuralları düzenlemesine veya silmesine olanak tanıyan formlar ve tablolar
+  - [x] Kullanıcının kategori kurallarını yönetmesini sağlayan bileşenler
+        (`AutoCategorizationDisplay.vue`)
+  - [x] Kullanıcıların yeni kurallar eklemesine, mevcut kuralları düzenlemesine
+        veya silmesine olanak tanıyan formlar ve tablolar
 - Tamamlandı: 2025-07-11 04:30:47
 
 ### 4.4 Davranışsal Desenler ve Eğilim Analizi Görselleştirmesi
+
 - [x] **Backend Entegrasyonu**
   - [x] Davranışsal analiz API'lerinden veri çeken entegrasyon
 - [x] **Frontend Bileşenleri**
-  - [x] Kullanıcı davranışlarındaki trendleri görselleştiren bileşenler (`BehavioralTrendsDisplay.vue`)
-  - [x] Haftalık/aylık trendleri, üretkenlik değişimlerini ve odaklanma sürelerini gösteren grafikler
+  - [x] Kullanıcı davranışlarındaki trendleri görselleştiren bileşenler
+        (`BehavioralTrendsDisplay.vue`)
+  - [x] Haftalık/aylık trendleri, üretkenlik değişimlerini ve odaklanma
+        sürelerini gösteren grafikler
 - Tamamlandı: 2025-07-11 04:30:47
 
 ### 4.5 Odak Kalitesi Puanı Görselleştirmesi
+
 - [x] **Backend Entegrasyonu**
   - [x] Odak kalitesi puanı API'lerinden veri çeken entegrasyon
 - [x] **Frontend Bileşenleri**
-  - [x] Kullanıcının odaklanma performansını görselleştiren bileşenler (`FocusQualityScoreDisplay.vue`)
-  - [x] Günlük, haftalık ve aylık odak puanlarını gösteren grafikler ve performans metrikleri
+  - [x] Kullanıcının odaklanma performansını görselleştiren bileşenler
+        (`FocusQualityScoreDisplay.vue`)
+  - [x] Günlük, haftalık ve aylık odak puanlarını gösteren grafikler ve
+        performans metrikleri
 - Tamamlandı: 2025-07-11 04:30:47
 
 ### 4.6 Akıllı Kurallar ve Otomasyon Motoru Yönetimi
+
 - [x] **Backend Entegrasyonu**
   - [x] Otomasyon kuralı API'sinin entegrasyonu
 - [x] **Frontend Bileşenleri**
-  - [x] Otomasyon kurallarını görüntüleme, oluşturma, düzenleme ve silme bileşeni (`AutomationRules.vue`)
+  - [x] Otomasyon kurallarını görüntüleme, oluşturma, düzenleme ve silme
+        bileşeni (`AutomationRules.vue`)
   - [x] Web arayüzüne yeni rota ekleme ve Header.vue'ye bağlantı
 - Tamamlandı: 2025-07-11 04:35:22
 
 ### 4.7 Proje Tamamlama Tahmini Görselleştirmesi
+
 - [x] **Backend Entegrasyonu**
   - [x] Proje tamamlama tahmini API'sinden veri çeken entegrasyon
 - [x] **Frontend Bileşenleri**
@@ -313,25 +346,30 @@
 - Tamamlandı: 2025-07-11 04:38:15
 
 ### 4.3 Topluluk Tabanlı Kural Setleri Entegrasyonu
+
 - [x] **Backend Entegrasyonu**
   - [x] Topluluk kurallarını çeken API entegrasyonu
   - [x] Topluluk kuralını indirme ve uygulama API entegrasyonu
 - [x] **Frontend Bileşenleri**
-  - [x] Topluluk kurallarını listeleyen ve detaylarını gösteren bileşen (`CommunityRules.vue`)
+  - [x] Topluluk kurallarını listeleyen ve detaylarını gösteren bileşen
+        (`CommunityRules.vue`)
   - [x] Kural arama, filtreleme ve sıralama yetenekleri
   - [x] Kural indirme ve kendi kurallarına ekleme işlevselliği
 - Tamamlandı: 2025-07-11 04:41:00
 
 ### 4.4 Bağlamsal Kategorizasyon Yönetimi
+
 - [x] **Backend Entegrasyonu**
   - [x] Bağlamsal kategorizasyon kurallarını yöneten API entegrasyonu
   - [x] Metin kategorizasyon API entegrasyonu
 - [x] **Frontend Bileşenleri**
-  - [x] Bağlamsal kural oluşturma, düzenleme ve silme formu/listesi (`ContextualCategorization.vue`)
+  - [x] Bağlamsal kural oluşturma, düzenleme ve silme formu/listesi
+        (`ContextualCategorization.vue`)
   - [x] Metin ile kategorizasyon testi arayüzü
 - Tamamlandı: 2025-07-11 04:43:00
 
 ### 4.5 Hedef Takibi ve İlerleme Durumu Modülü
+
 - [x] **Backend Entegrasyonu**
   - [x] Hedef yönetimi API entegrasyonu (CRUD operasyonları)
   - [x] Hedef ilerleme durumu API entegrasyonu
@@ -341,6 +379,7 @@
 - Tamamlandı: 2025-07-11 04:45:00
 
 ### 4.6 Raporlama ve Analiz Gösterge Tablosu
+
 - [x] **Backend Entegrasyonu**
   - [x] Rapor yönetimi API entegrasyonu (CRUD operasyonları)
   - [x] Rapor verisi oluşturma API entegrasyonu
@@ -352,7 +391,9 @@
 ---
 
 ## Aşama 5 – Entegrasyon ve Dağıtım
+
 ### 5.1 Gelişmiş Sistem Entegrasyonu
+
 - [x] **Native Bildirim Sistemi**
   - [x] Windows Toast bildirimleri entegrasyonu
   - [x] Özelleştirilebilir bildirim sesleri
@@ -364,6 +405,7 @@
   - [x] Otomatik güncelleme mekanizması
 
 ### 5.2 Yerel Veritabanı Optimizasyonu
+
 - [x] **SQLite/IndexedDB Kullanımı**
   - [x] Offline modda veri depolama
   - [x] Senkronizasyon çakışması çözümü
@@ -375,6 +417,7 @@
   - [x] Yetkisiz erişim önleme
 
 ### 5.3 Sistem Kaynak İzleme
+
 - [x] **Performans Metrikleri**
   - [x] CPU/RAM kullanımı takibi
   - [x] Disk G/Ç izleme
@@ -385,7 +428,9 @@
   - [ ] Detaylı sistem raporları
 
 ## Aşama 6 – Firebase ve Google Cloud Optimizasyonları
+
 ### 6.1 Firestore Optimizasyonları
+
 - [x] **Veri Yapısı Optimizasyonu**
   - [x] Collection grupları ve alt koleksiyonlar
   - [x] Denormalizasyon stratejileri
@@ -397,6 +442,7 @@
   - [x] Query bazlı güvenlik
 
 ### 6.2 Cloud Functions Optimizasyonları
+
 - [x] **Performans İyileştirmeleri**
   - [x] Soğuk başlangıç sürelerinin azaltılması
   - [x] Bellek ve CPU optimizasyonları
@@ -408,6 +454,7 @@
   - [ ] Uyarı ve bütçe limitleri
 
 ### 6.3 Firebase Hosting ve CDN
+
 - [x] **Web Uygulaması Dağıtımı**
   - [x] Küresel CDN kullanımı
   - [x] Hızlı yükleme süreleri
@@ -419,6 +466,7 @@
   - [x] Geri alma mekanizmaları
 
 ### 6.4 Firebase Machine Learning (ML) Entegrasyonu
+
 - [x] **Custom Model Dağıtımı**
   - [x] Özel ML modelleri dağıtımı
   - [x] Model sürümü ve yönetimi
@@ -430,7 +478,9 @@
   - [x] Kullanıcı davranışı tahmini
 
 ## Aşama 7 – Gelişmiş Yapay Zeka Özellikleri
+
 ### 7.1 Üretken Yapay Zeka ile Akıllı Öneriler
+
 - [x] **İçerik Oluşturma**
   - [x] Üretken yazma asistanı (e-posta, rapor)
   - [x] Otomatik özetleme (toplantı notları)
@@ -442,6 +492,7 @@
   - [x] Bağlama duyarlı tavsiyeler
 
 ### 7.2 Doğal Dil İşleme (NLP) Yetenekleri
+
 - [x] **Metin Analizi**
   - [x] Duygu analizi (kullanıcı geri bildirimi)
   - [x] Konu tespiti (aktivite açıklamaları)
@@ -453,6 +504,7 @@
   - [x] Kişiselleştirilmiş etkileşim
 
 ### 7.3 Zaman Serisi Analizi ve Tahminleme
+
 - [x] **Gelişmiş Tahmin Modelleri**
   - [x] LSTM veya Transformer modelleri
   - [x] Uzun vadeli davranış tahmini
@@ -464,7 +516,9 @@
   - [x] Değişim noktası uyarısı
 
 ## Aşama 8 – Harici Servis Entegrasyonları
+
 ### 8.1 Takvim ve Görev Yönetimi Araçları
+
 - [x] **Google Calendar Entegrasyonu**
   - [x] Etkinlik senkronizasyonu
   - [x] Boş zaman tespiti
@@ -476,12 +530,16 @@
   - [x] Görev tamamlama tahmini
 
 Ek Görevler (Tamamlandı):
-  - [x] Lint script platform bağımsız hâle getirildi (`functions/package.json`)
-  - [x] Tek tırnak/apostrof kaynaklı derleme hataları düzeltildi (Google Calendar, Trello/Jira, Task Completion Prediction API)
 
-Not: Lint hatası giderildi ve Firebase Cloud Functions dağıtımı engeli kaldırıldı.
+- [x] Lint script platform bağımsız hâle getirildi (`functions/package.json`)
+- [x] Tek tırnak/apostrof kaynaklı derleme hataları düzeltildi (Google Calendar,
+      Trello/Jira, Task Completion Prediction API)
+
+Not: Lint hatası giderildi ve Firebase Cloud Functions dağıtımı engeli
+kaldırıldı.
 
 ### 8.2 İletişim Araçları
+
 - [x] **Slack/Teams Entegrasyonu**
   - [x] Bildirim gönderme
   - [x] Mesajlaşma analizi
@@ -493,6 +551,7 @@ Not: Lint hatası giderildi ve Firebase Cloud Functions dağıtımı engeli kald
   - [x] E-posta yazma asistanı
 
 ### 8.3 Sağlık ve Zindelik Uygulamaları
+
 - [x] **Uyku Takip Cihazları**
   - [x] Uyku kalitesi verisi entegrasyonu
   - [x] Enerji seviyesi korelasyonu
@@ -503,4 +562,6 @@ Not: Lint hatası giderildi ve Firebase Cloud Functions dağıtımı engeli kald
   - [x] Zihinsel durum korelasyonu
   - [x] Stres seviyesi analizi
 
-``` 
+```
+
+```

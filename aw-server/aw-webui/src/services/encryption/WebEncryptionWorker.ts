@@ -15,14 +15,14 @@ const textDecoder = new TextDecoder();
 async function importKey(base64Key: string): Promise<CryptoKey> {
   const keyBytes = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
   return crypto.subtle.importKey(
-    "raw",
+    'raw',
     keyBytes,
     {
-      name: "AES-GCM",
+      name: 'AES-GCM',
       length: 256,
     },
     true,
-    ["encrypt", "decrypt"]
+    ['encrypt', 'decrypt']
   );
 }
 
@@ -51,13 +51,17 @@ self.onmessage = async (event: MessageEvent) => {
 
       const encrypted = await crypto.subtle.encrypt(
         {
-          name: "AES-GCM",
+          name: 'AES-GCM',
           iv: ivBytes,
         },
         importedKey,
         encodedData
       );
-      self.postMessage({ id, status: 'completed', result: bytesToBase64(new Uint8Array(encrypted)) });
+      self.postMessage({
+        id,
+        status: 'completed',
+        result: bytesToBase64(new Uint8Array(encrypted)),
+      });
     } else if (type === 'decrypt') {
       const encryptedBytes = base64ToBytes(data);
       const importedKey = await importKey(key);
@@ -65,7 +69,7 @@ self.onmessage = async (event: MessageEvent) => {
 
       const decrypted = await crypto.subtle.decrypt(
         {
-          name: "AES-GCM",
+          name: 'AES-GCM',
           iv: ivBytes,
         },
         importedKey,
@@ -75,11 +79,10 @@ self.onmessage = async (event: MessageEvent) => {
     } else if (type === 'generateIv') {
       const iv = generateRandomBytes(16);
       self.postMessage({ id, status: 'completed', result: bytesToBase64(iv) });
-    }
-     else {
+    } else {
       self.postMessage({ id, status: 'error', error: 'Bilinmeyen işlem türü: ' + type });
     }
   } catch (error: any) {
     self.postMessage({ id, status: 'error', error: error.message });
   }
-}; 
+};

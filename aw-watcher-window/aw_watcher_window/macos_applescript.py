@@ -9,7 +9,7 @@ from Foundation import NSAppleScript
 
 class MacOSAppleScriptWindowWatcher:
     """MacOS window watcher using AppleScript for getting active window information."""
-    
+
     def __init__(self):
         """Initialize the watcher with AppleScript source."""
         self._script: Optional[NSAppleScript] = None
@@ -35,10 +35,10 @@ return frontAppName & "
 
     def get_info(self) -> Dict[str, str]:
         """Get information about the current active window.
-        
+
         Returns:
             Dict with 'app' and 'title' keys containing application name and window title.
-            
+
         Raises:
             Exception: If AppleScript execution fails.
         """
@@ -62,11 +62,11 @@ return frontAppName & "
 
     def _get_app(self, info: str) -> str:
         """Extract application name from AppleScript output."""
-        return info.split('\n')[0]
+        return info.split("\n")[0]
 
     def _get_title(self, info: str) -> str:
         """Extract window title from AppleScript output."""
-        return info.split('\n')[1]
+        return info.split("\n")[1]
 
 
 # Global instance for backwards compatibility
@@ -75,7 +75,7 @@ _watcher_instance = MacOSAppleScriptWindowWatcher()
 
 def getInfo() -> Dict[str, str]:
     """Get window information using global watcher instance.
-    
+
     This function is kept for backwards compatibility.
     Consider using MacOSAppleScriptWindowWatcher class directly.
     """
@@ -84,12 +84,12 @@ def getInfo() -> Dict[str, str]:
 
 def getApp(info: str) -> str:
     """Extract application name from info string (backwards compatibility)."""
-    return info.split('\n')[0]
+    return info.split("\n")[0]
 
 
 def getTitle(info: str) -> str:
     """Extract window title from info string (backwards compatibility)."""
-    return info.split('\n')[1]
+    return info.split("\n")[1]
 
 
 if __name__ == "__main__":

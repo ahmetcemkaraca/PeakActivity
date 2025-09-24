@@ -1,6 +1,6 @@
 /**
  * Application Constants
- * 
+ *
  * Bu dosya uygulama genelinde kullanılan sabitleri içerir.
  */
 
@@ -8,10 +8,10 @@
 export const THEMES = {
   LIGHT: 'light',
   DARK: 'dark',
-  AUTO: 'auto'
+  AUTO: 'auto',
 } as const;
 
-export type Theme = typeof THEMES[keyof typeof THEMES];
+export type Theme = (typeof THEMES)[keyof typeof THEMES];
 
 // Duration constants (milliseconds)
 export const DURATIONS = {
@@ -49,7 +49,7 @@ export const BUCKET_TYPES = {
   CUSTOM: 'custom',
 } as const;
 
-export type BucketType = typeof BUCKET_TYPES[keyof typeof BUCKET_TYPES];
+export type BucketType = (typeof BUCKET_TYPES)[keyof typeof BUCKET_TYPES];
 
 // Event status types
 export const EVENT_STATUS = {
@@ -58,7 +58,7 @@ export const EVENT_STATUS = {
   UNKNOWN: 'unknown',
 } as const;
 
-export type EventStatus = typeof EVENT_STATUS[keyof typeof EVENT_STATUS];
+export type EventStatus = (typeof EVENT_STATUS)[keyof typeof EVENT_STATUS];
 
 // Category rule types
 export const CATEGORY_RULE_TYPES = {
@@ -66,7 +66,7 @@ export const CATEGORY_RULE_TYPES = {
   NONE: 'none',
 } as const;
 
-export type CategoryRuleType = typeof CATEGORY_RULE_TYPES[keyof typeof CATEGORY_RULE_TYPES];
+export type CategoryRuleType = (typeof CATEGORY_RULE_TYPES)[keyof typeof CATEGORY_RULE_TYPES];
 
 // View element types
 export const VIEW_ELEMENT_TYPES = {
@@ -81,7 +81,7 @@ export const VIEW_ELEMENT_TYPES = {
   SUMMARY: 'summary',
 } as const;
 
-export type ViewElementType = typeof VIEW_ELEMENT_TYPES[keyof typeof VIEW_ELEMENT_TYPES];
+export type ViewElementType = (typeof VIEW_ELEMENT_TYPES)[keyof typeof VIEW_ELEMENT_TYPES];
 
 // Colors
 export const COLORS = {
@@ -117,7 +117,7 @@ export const ERROR_CODES = {
   TIMEOUT_ERROR: 'TIMEOUT_ERROR',
 } as const;
 
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 
 // Validation patterns
 export const VALIDATION_PATTERNS = {
@@ -130,7 +130,7 @@ export const VALIDATION_PATTERNS = {
 
 // Time format patterns
 export const TIME_FORMATS = {
-  ISO: 'yyyy-MM-dd\'T\'HH:mm:ss.SSSXXX',
+  ISO: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
   DATE_ONLY: 'yyyy-MM-dd',
   TIME_ONLY: 'HH:mm:ss',
   DISPLAY: 'MMM dd, yyyy HH:mm',
@@ -148,7 +148,7 @@ export const QUERY_LIMITS = {
 // File size limits (bytes)
 export const FILE_LIMITS = {
   MAX_UPLOAD_SIZE: 10 * 1024 * 1024, // 10MB
-  MAX_IMAGE_SIZE: 5 * 1024 * 1024,   // 5MB
+  MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
   MAX_DOCUMENT_SIZE: 50 * 1024 * 1024, // 50MB
 } as const;
 
@@ -168,7 +168,7 @@ export const FEATURE_FLAGS = {
   BETA_FEATURES: 'beta_features',
 } as const;
 
-export type FeatureFlag = typeof FEATURE_FLAGS[keyof typeof FEATURE_FLAGS];
+export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 
 // Default settings
 export const DEFAULT_SETTINGS = {
@@ -196,4 +196,4 @@ export const WS_EVENTS = {
   ERROR: 'error',
 } as const;
 
-export type WSEventType = typeof WS_EVENTS[keyof typeof WS_EVENTS];
+export type WSEventType = (typeof WS_EVENTS)[keyof typeof WS_EVENTS];

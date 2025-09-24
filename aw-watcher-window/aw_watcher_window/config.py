@@ -38,9 +38,9 @@ def parse_args():
     parser.add_argument(
         "--exclude-titles",
         dest="exclude_titles",
-        nargs='+',
+        nargs="+",
         default=default_exclude_titles,
-        help="Exclude window titles by regular expression. Can specify multiple times."
+        help="Exclude window titles by regular expression. Can specify multiple times.",
     )
     parser.add_argument("--verbose", dest="verbose", action="store_true")
     parser.add_argument(

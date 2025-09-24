@@ -1,6 +1,6 @@
 /**
  * Core Module Barrel Exports
- * 
+ *
  * Bu dosya core modüllerinin merkezi export noktasıdır.
  * Clean architecture patterns için barrel exports kullanılır.
  */
@@ -26,5 +26,5 @@ export type {
   QueryResult,
   APIResponse,
   APIError,
-  ValidationError
+  ValidationError,
 } from './core';

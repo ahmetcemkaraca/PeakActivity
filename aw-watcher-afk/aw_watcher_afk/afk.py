@@ -30,7 +30,9 @@ td1ms = timedelta(milliseconds=1)
 
 
 class Settings:
-    def __init__(self, config_section, timeout=None, poll_time=None, thinking_timeout=None):
+    def __init__(
+        self, config_section, timeout=None, poll_time=None, thinking_timeout=None
+    ):
         # Time without input before we're considering the user as AFK
         self.timeout = timeout or config_section["timeout"]
         # Time without input before we're considering the user as thinking
@@ -40,14 +42,19 @@ class Settings:
 
         assert self.timeout >= self.poll_time
         assert self.thinking_timeout >= self.poll_time
-        assert self.timeout > self.thinking_timeout # AFK zaman aşımı düşünme zamanından büyük olmalı
+        assert (
+            self.timeout > self.thinking_timeout
+        )  # AFK zaman aşımı düşünme zamanından büyük olmalı
 
 
 class AFKWatcher:
     def __init__(self, args, testing=False):
         # Read settings from config
         self.settings = Settings(
-            load_config(testing), timeout=args.timeout, poll_time=args.poll_time, thinking_timeout=args.thinking_timeout
+            load_config(testing),
+            timeout=args.timeout,
+            poll_time=args.poll_time,
+            thinking_timeout=args.thinking_timeout,
         )
 
         self.client = ActivityWatchClient(
@@ -109,7 +116,8 @@ class AFKWatcher:
                         # AFK veya düşünme durumundaysak, süreyi güncelleyerek ping gönder
                         self.ping(
                             new_status,
-                            timestamp=last_input + td1ms, # Bir sonraki olayın zaman damgasını doğru ayarla
+                            timestamp=last_input
+                            + td1ms,  # Bir sonraki olayın zaman damgasını doğru ayarla
                             duration=seconds_since_input,
                         )
                     else:

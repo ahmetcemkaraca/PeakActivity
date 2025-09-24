@@ -3,9 +3,7 @@ import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
 const genkitApp = genkit({
-  plugins: [
-    googleAI(),
-  ],
+  plugins: [googleAI()],
 });
 
 interface ActivityEvent {
@@ -59,17 +57,28 @@ const TAXONOMY = [
 
 // Basitleştirilmiş anahtar kelime tabanlı kategorizasyon ve uygulama eşleştirmeleri
 const KEYWORD_MAPPINGS: { [key: string]: string[] } = {
-  'coding': ['code', 'github', 'stackoverflow', 'vscode', 'intellij', 'bug', 'develop', 'programming', 'jira', 'gitlab'],
-  'design': ['photoshop', 'figma', 'sketch', 'design', 'ui', 'ux', 'illustrator', 'blender'],
-  'research': ['wiki', 'scholar', 'research', 'article', 'paper', 'learn', 'study', 'analyze'],
-  'social': ['facebook', 'twitter', 'linkedin', 'instagram', 'social', 'chat', 'meet', 'discord'],
-  'gaming': ['game', 'steam', 'epic', 'play', 'fortnite', 'lol'],
-  'productivity': ['todo', 'task', 'notion', 'jira', 'asana', 'excel', 'docs', 'word', 'powerpoint'],
-  'communication': ['email', 'outlook', 'gmail', 'slack', 'teams', 'zoom', 'call'],
-  'education': ['udemy', 'coursera', 'edx', 'lesson', 'course', 'school', 'university'],
-  'entertainment': ['youtube', 'netflix', 'twitch', 'movie', 'film', 'music', 'spotify'],
-  'news': ['haber', 'news', 'gündem', 'cnn', 'bbc', 'aljazeera'],
-  'shopping': ['amazon', 'ebay', 'trendyol', 'n11', 'hepsiburada', 'shop'],
+  coding: [
+    'code',
+    'github',
+    'stackoverflow',
+    'vscode',
+    'intellij',
+    'bug',
+    'develop',
+    'programming',
+    'jira',
+    'gitlab',
+  ],
+  design: ['photoshop', 'figma', 'sketch', 'design', 'ui', 'ux', 'illustrator', 'blender'],
+  research: ['wiki', 'scholar', 'research', 'article', 'paper', 'learn', 'study', 'analyze'],
+  social: ['facebook', 'twitter', 'linkedin', 'instagram', 'social', 'chat', 'meet', 'discord'],
+  gaming: ['game', 'steam', 'epic', 'play', 'fortnite', 'lol'],
+  productivity: ['todo', 'task', 'notion', 'jira', 'asana', 'excel', 'docs', 'word', 'powerpoint'],
+  communication: ['email', 'outlook', 'gmail', 'slack', 'teams', 'zoom', 'call'],
+  education: ['udemy', 'coursera', 'edx', 'lesson', 'course', 'school', 'university'],
+  entertainment: ['youtube', 'netflix', 'twitch', 'movie', 'film', 'music', 'spotify'],
+  news: ['haber', 'news', 'gündem', 'cnn', 'bbc', 'aljazeera'],
+  shopping: ['amazon', 'ebay', 'trendyol', 'n11', 'hepsiburada', 'shop'],
 };
 
 const APP_MAPPINGS: { [key: string]: string } = {
@@ -174,7 +183,8 @@ export const autoCategorizeFlow = genkitApp.defineFlow(
 
       // Eğer mevcut mantıkla tatmin edici bir sonuç bulunamazsa veya AI'dan daha iyi bir tahmin isteniyorsa
       // AI modelini kullan
-      if (confidence < 0.7 || assignedCategory === 'uncategorized') { // Güven eşiği ayarlanabilir
+      if (confidence < 0.7 || assignedCategory === 'uncategorized') {
+        // Güven eşiği ayarlanabilir
         try {
           const eventUrlHostname = event.url ? new URL(event.url).hostname : '';
           const prompt = `Aşağıdaki etkinliği en uygun kategoriye ayırın. Mevcut kategoriler: ${TAXONOMY.join(', ')}. Etkinlik uygulaması: ${event.app}, başlık: ${event.title}, URL/Alan Adı: ${eventUrlHostname}. Sadece tek bir kategori adı döndürün.`;
@@ -197,12 +207,12 @@ export const autoCategorizeFlow = genkitApp.defineFlow(
             confidence = 0.5;
           }
         } catch (error) {
-          console.error("GenKit AI kategorizasyon sırasında hata oluştu:", error);
+          console.error('GenKit AI kategorizasyon sırasında hata oluştu:', error);
           assignedCategory = 'uncategorized'; // Hata durumunda varsayılan
           confidence = 0.3;
         }
       }
-      
+
       labels.push({
         index: i,
         category: assignedCategory as string,
@@ -212,4 +222,4 @@ export const autoCategorizeFlow = genkitApp.defineFlow(
 
     return { labels };
   }
-); 
+);

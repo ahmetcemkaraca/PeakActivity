@@ -16,10 +16,17 @@
         <h4>Oturum Detayları:</h4>
         <ul>
           <li v-for="session in sessionScores" :key="session.session_id">
-            <strong>Oturum ID:</strong> {{ session.session_id }} <br/>
-            <strong>Skor:</strong> {{ session.focus_quality_score }} <br/>
-            <strong>Dikkat Dağınıklığı:</strong> {{ session.distractions }} <br/>
-            <strong>Bağlam Değiştirme Cezası:</strong> {{ session.context_switch_penalty }}
+            <strong>Oturum ID:</strong>
+            {{ session.session_id }}
+            <br />
+            <strong>Skor:</strong>
+            {{ session.focus_quality_score }}
+            <br />
+            <strong>Dikkat Dağınıklığı:</strong>
+            {{ session.distractions }}
+            <br />
+            <strong>Bağlam Değiştirme Cezası:</strong>
+            {{ session.context_switch_penalty }}
           </li>
         </ul>
       </div>
@@ -59,9 +66,9 @@ export default defineComponent({
             timestamp_start: new Date(Date.now() - 3600 * 1000).toISOString(),
             timestamp_end: new Date().toISOString(),
             duration_sec: 3600,
-            app: "Visual Studio Code",
-            title: "index.ts",
-            category: "coding",
+            app: 'Visual Studio Code',
+            title: 'index.ts',
+            category: 'coding',
             window_change_count: 5,
             input_frequency: 0.9,
             is_afk: false,
@@ -70,13 +77,13 @@ export default defineComponent({
             timestamp_start: new Date(Date.now() - 7200 * 1000).toISOString(),
             timestamp_end: new Date(Date.now() - 3600 * 1000).toISOString(),
             duration_sec: 200,
-            app: "Facebook",
-            title: "News Feed",
-            category: "social",
+            app: 'Facebook',
+            title: 'News Feed',
+            category: 'social',
             window_change_count: 2,
             input_frequency: 0.5,
             is_afk: false,
-          }
+          },
         ];
         const user_tz = Intl.DateTimeFormat().resolvedOptions().timeZone; // Get user's current timezone
 
@@ -137,4 +144,4 @@ li {
   border-radius: 5px;
   background-color: #fff;
 }
-</style> 
+</style>

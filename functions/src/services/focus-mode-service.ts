@@ -1,6 +1,5 @@
-
-import * as functions from "firebase-functions";
-import { db } from "../firebaseAdmin";
+import * as functions from 'firebase-functions';
+import { db } from '../firebaseAdmin';
 
 interface FocusModeDocument {
   id: string;
@@ -30,7 +29,13 @@ export class FocusModeService {
    * @param modeData The data for the new focus mode.
    * @returns The created focus mode document.
    */
-  async createFocusMode(userId: string, modeData: Omit<FocusModeDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version' | 'is_active'>): Promise<FocusModeDocument> {
+  async createFocusMode(
+    userId: string,
+    modeData: Omit<
+      FocusModeDocument,
+      'id' | 'user_id' | 'created_at' | 'updated_at' | 'version' | 'is_active'
+    >
+  ): Promise<FocusModeDocument> {
     const newModeRef = db.collection(`users/${userId}/focus_modes`).doc();
     const timestamp = Date.now();
     const focusMode: FocusModeDocument = {
@@ -67,7 +72,11 @@ export class FocusModeService {
    * @param updates The fields to update.
    * @returns The updated focus mode document, or null if not found.
    */
-  async updateFocusMode(userId: string, modeId: string, updates: Partial<Omit<FocusModeDocument, 'id' | 'user_id' | 'created_at'>>): Promise<FocusModeDocument | null> {
+  async updateFocusMode(
+    userId: string,
+    modeId: string,
+    updates: Partial<Omit<FocusModeDocument, 'id' | 'user_id' | 'created_at'>>
+  ): Promise<FocusModeDocument | null> {
     const modeRef = db.collection(`users/${userId}/focus_modes`).doc(modeId);
     const timestamp = Date.now();
     await modeRef.update({
@@ -112,9 +121,12 @@ export class FocusModeService {
    */
   async setActiveFocusMode(userId: string, modeId: string): Promise<FocusModeDocument | null> {
     const batch = db.batch();
-    
+
     // Deactivate all other focus modes for this user
-    const currentActiveModes = await db.collection(`users/${userId}/focus_modes`).where('is_active', '==', true).get();
+    const currentActiveModes = await db
+      .collection(`users/${userId}/focus_modes`)
+      .where('is_active', '==', true)
+      .get();
     currentActiveModes.docs.forEach(doc => {
       batch.update(doc.ref, { is_active: false });
     });
@@ -131,4 +143,4 @@ export class FocusModeService {
     }
     return updatedDoc.data() as FocusModeDocument;
   }
-} 
+}

@@ -20,11 +20,12 @@ div.aw-container
 import Vue from 'vue';
 import { useCategoryStore } from '~/stores/categories';
 
-const SEP = " > ";
+const SEP = ' > ';
 
 export default Vue.extend({
   props: {
-    value: { // Mevcut seçili kategoriler
+    value: {
+      // Mevcut seçili kategoriler
       type: Array as () => string[][],
       default: () => [],
     },
@@ -39,7 +40,7 @@ export default Vue.extend({
     options() {
       const classes = useCategoryStore().classes;
       return classes.map(category => category.name.join(SEP));
-    }
+    },
   },
 
   watch: {
@@ -65,7 +66,7 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import "../style/globals";
+@import '../style/globals';
 
 .badge {
   background-color: $activeHighlightColor;

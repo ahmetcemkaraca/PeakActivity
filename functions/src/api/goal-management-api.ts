@@ -1,7 +1,6 @@
-
 import { onCall, HttpsError, CallableRequest } from 'firebase-functions/v2/https';
-import { authenticate } from "../firebaseAdmin";
-import { GoalManagementService } from "../services/goal-management-service";
+import { authenticate } from '../firebaseAdmin';
+import { GoalManagementService } from '../services/goal-management-service';
 
 const goalManagementService = new GoalManagementService();
 
@@ -13,32 +12,37 @@ export const createGoal = onCall(async (request: CallableRequest) => {
   authenticate(request);
 
   const userId = request.auth!.uid;
-  const { name, description, targetValue, currentValue, startDate, endDate, category } = request.data as {
-    name: string;
-    description?: string;
-    targetValue: number;
-    currentValue: number;
-    startDate: number;
-    endDate: number;
-    category: string[];
-  };
+  const { name, description, targetValue, currentValue, startDate, endDate, category } =
+    request.data as {
+      name: string;
+      description?: string;
+      targetValue: number;
+      currentValue: number;
+      startDate: number;
+      endDate: number;
+      category: string[];
+    };
 
   if (!name || !targetValue || !startDate || !endDate || !category) {
     throw new HttpsError(
       'invalid-argument',
-      "Hedef adı, hedef değeri, başlangıç tarihi, bitiş tarihi ve kategori gereklidir."
+      'Hedef adı, hedef değeri, başlangıç tarihi, bitiş tarihi ve kategori gereklidir.'
     );
   }
 
   try {
-    const newGoal = await goalManagementService.createGoal(userId, { name, description, targetValue, currentValue, startDate, endDate, category });
+    const newGoal = await goalManagementService.createGoal(userId, {
+      name,
+      description,
+      targetValue,
+      currentValue,
+      startDate,
+      endDate,
+      category,
+    });
     return { success: true, goal: newGoal };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      'Hedef oluşturulurken hata oluştu.',
-      error.message
-    );
+    throw new HttpsError('internal', 'Hedef oluşturulurken hata oluştu.', error.message);
   }
 });
 
@@ -53,21 +57,14 @@ export const getGoal = onCall(async (request: CallableRequest) => {
   const { goalId } = request.data as { goalId: string };
 
   if (!goalId) {
-    throw new HttpsError(
-      'invalid-argument',
-      "Hedef ID'si gereklidir."
-    );
+    throw new HttpsError('invalid-argument', "Hedef ID'si gereklidir.");
   }
 
   try {
     const goal = await goalManagementService.getGoal(userId, goalId);
     return { success: true, goal };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      'Hedef getirilirken hata oluştu.',
-      error.message
-    );
+    throw new HttpsError('internal', 'Hedef getirilirken hata oluştu.', error.message);
   }
 });
 
@@ -82,21 +79,14 @@ export const updateGoal = onCall(async (request: CallableRequest) => {
   const { goalId, updates } = request.data as { goalId: string; updates: any };
 
   if (!goalId || !updates) {
-    throw new HttpsError(
-      'invalid-argument',
-      "Hedef ID'si ve güncellemeler gereklidir."
-    );
+    throw new HttpsError('invalid-argument', "Hedef ID'si ve güncellemeler gereklidir.");
   }
 
   try {
     const updatedGoal = await goalManagementService.updateGoal(userId, goalId, updates);
     return { success: true, goal: updatedGoal };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      'Hedef güncellenirken hata oluştu.',
-      error.message
-    );
+    throw new HttpsError('internal', 'Hedef güncellenirken hata oluştu.', error.message);
   }
 });
 
@@ -111,21 +101,14 @@ export const deleteGoal = onCall(async (request: CallableRequest) => {
   const { goalId } = request.data as { goalId: string };
 
   if (!goalId) {
-    throw new HttpsError(
-      'invalid-argument',
-      "Hedef ID'si gereklidir."
-    );
+    throw new HttpsError('invalid-argument', "Hedef ID'si gereklidir.");
   }
 
   try {
     await goalManagementService.deleteGoal(userId, goalId);
     return { success: true };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      'Hedef silinirken hata oluştu.',
-      error.message
-    );
+    throw new HttpsError('internal', 'Hedef silinirken hata oluştu.', error.message);
   }
 });
 
@@ -142,10 +125,6 @@ export const listGoals = onCall(async (request: CallableRequest) => {
     const goals = await goalManagementService.listGoals(userId);
     return { success: true, goals };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      'Hedefler listelenirken hata oluştu.',
-      error.message
-    );
+    throw new HttpsError('internal', 'Hedefler listelenirken hata oluştu.', error.message);
   }
-}); 
+});

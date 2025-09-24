@@ -1,2 +1,2 @@
 class MemoryStorage:
-    pass 
+    pass

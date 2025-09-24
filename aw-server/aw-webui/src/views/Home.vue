@@ -79,17 +79,20 @@ export default defineComponent({
   setup() {
     const isAuthenticated = ref(false);
     const authService = new AuthService();
-    
+
     const totalTimeTracked = ref(3600 * 5 + 120);
     const focusScore = ref(85.5);
 
     let unsubscribeAuth: () => void;
 
     // Theme management
-    const selectedTheme = ref(localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode'));
+    const selectedTheme = ref(
+      localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode')
+    );
 
     onMounted(() => {
-      unsubscribeAuth = authService.onAuthChange((user) => {
+      unsubscribeAuth = authService.onAuthChange(user => {
         isAuthenticated.value = !!user;
       });
     });
@@ -126,7 +129,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import "../style/globals";
+@import '../style/globals';
 
 .home-container {
   padding: 30px;
@@ -149,7 +152,10 @@ p {
   background-color: var(--background-color);
   border: 1px solid var(--light-border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .card-title {
@@ -170,7 +176,9 @@ p {
   background-color: var(--active-highlight-color);
   border-color: var(--active-highlight-color);
   color: white;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .btn-primary:hover {
@@ -182,7 +190,10 @@ p {
   background-color: transparent;
   color: var(--active-highlight-color);
   border: 1px solid var(--active-highlight-color);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .btn-outline-secondary:hover {
@@ -195,5 +206,4 @@ p {
   background-color: var(--active-highlight-color);
   border-color: var(--active-highlight-color);
 }
-
 </style>

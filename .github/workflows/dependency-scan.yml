@@ -18,49 +18,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install --no-root
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install --no-root
+        working-directory: aw-server
 
-    - name: Install pip-audit
-      run: pip install pip-audit
-      
-    - name: Run Python Dependency Audit (aw-server)
-      run: pip-audit
-      working-directory: aw-server
+      - name: Install pip-audit
+        run: pip install pip-audit
 
-    - name: Set up Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Run Python Dependency Audit (aw-server)
+        run: pip-audit
+        working-directory: aw-server
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Run npm audit (functions)
-      run: npm audit
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Run npm audit (functions)
+        run: npm audit
+        working-directory: functions
 
-    - name: Run npm audit (aw-webui)
-      run: npm audit
-      working-directory: aw-server/aw-webui 
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
+
+      - name: Run npm audit (aw-webui)
+        run: npm audit
+        working-directory: aw-server/aw-webui

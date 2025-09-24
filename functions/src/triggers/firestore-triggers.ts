@@ -6,35 +6,35 @@ import * as admin from 'firebase-admin'; // FieldValue için
 
 /**
  * Firestore trigger: Aktivite oluşturulduğunda tetiklenir
- * 
+ *
  * Bu trigger, users/{userId}/activities/{activityId} path'inde yeni bir doküman
  * oluşturulduğunda otomatik olarak çalışır. Ana görevleri:
- * 
+ *
  * 1. Kullanıcıya yeni aktivite bildirimi gönderir
  * 2. Günlük aktivite özetini (dailySummaries) günceller
  * 3. Hedef ilerlemesini kontrol eder
  * 4. Anomali tespiti yapar (şu anda devre dışı)
  * 5. İlgili bildirimleri gönderir
- * 
+ *
  * Tetiklenme zamanı: Yeni aktivite dokümanı Firestore'a yazıldığında
- * Kullanım senaryoları: 
+ * Kullanım senaryoları:
  * - ActivityWatch watcher'larından gelen otomatik aktivite kayıtları
  * - Manuel aktivite girişleri
  * - Toplu aktivite import işlemleri
  */
 export const onActivityCreated = onDocumentCreated(
   'users/{userId}/activities/{activityId}',
-  async (event) => {
+  async event => {
     const snapshot = event.data;
     const { userId, activityId } = event.params;
-    
+
     if (!snapshot) {
       console.warn(`Activity not found: ${activityId}`);
       return;
     }
 
     const activityData = snapshot.data();
-    
+
     try {
       // Yeni etkinlik oluşturulduğunda bildirim gönder
       await new NotificationService().createNotification(userId, {
@@ -51,7 +51,7 @@ export const onActivityCreated = onDocumentCreated(
 
       const dailySummaryRef = db.collection(`users/${userId}/dailySummaries`).doc(activityDate);
 
-      await db.runTransaction(async (transaction) => {
+      await db.runTransaction(async transaction => {
         const doc = await transaction.get(dailySummaryRef);
         if (!doc.exists) {
           transaction.set(dailySummaryRef, {
@@ -74,27 +74,21 @@ export const onActivityCreated = onDocumentCreated(
 
       // 1. Update focus score (AnalyticsService kaldırıldı, ilgili servis çağrısı gerekiyorsa buraya eklenecek)
       // 2. Check goal progress
-      const goalUpdates = await GoalService.checkGoalProgress(
-        userId, 
-        activityData
-      );
-      
+      const goalUpdates = await GoalService.checkGoalProgress(userId, activityData);
+
       // 3. Perform anomaly detection (AnalyticsService kaldırıldı, ilgili servis çağrısı gerekiyorsa buraya eklenecek)
       const anomalies: any[] = []; // Geçici olarak boş dizi, anomali tespiti yeniden implement edilmeli
-      
+
       // 4. Trigger notifications
       if (anomalies.length > 0) {
         await NotificationService.sendAnomalyNotifications(userId, anomalies);
       }
-      
+
       if (goalUpdates && Object.keys(goalUpdates).length > 0) {
-        await NotificationService.sendGoalProgressNotifications(
-          userId, 
-          goalUpdates
-        );
+        await NotificationService.sendGoalProgressNotifications(userId, goalUpdates);
       }
     } catch (error) {
       console.error(`Error processing activity creation (${activityId}):`, error);
     }
   }
-); 
+);

@@ -1,4 +1,3 @@
-
 export abstract class BaseEncryptionService {
   abstract encrypt(data: string, key: string, iv: string): Promise<string>;
   abstract decrypt(encryptedData: string, key: string, iv: string): Promise<string>;
@@ -18,4 +17,4 @@ export abstract class BaseEncryptionService {
   protected base64ToBytes(base64: string): Uint8Array {
     return Buffer.from(base64, 'base64');
   }
-} 
+}

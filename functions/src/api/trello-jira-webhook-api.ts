@@ -39,7 +39,6 @@ export const trelloJiraWebhookHandler = onRequest(async (request, response) => {
         // TODO: Firestore'daki ilgili görevi güncelleyin
         // await trelloJiraService.updateTrelloTaskStatus(userId, cardId, { status: newStatus });
       }
-
     } else if (userAgent.includes('Jira')) {
       // Jira webhook'unu işleme
       const jiraEvent = request.body;
@@ -49,7 +48,11 @@ export const trelloJiraWebhookHandler = onRequest(async (request, response) => {
       // const jiraSignature = request.headers['x-atlassian-signature'];
 
       // Jira olay türüne göre işlem yapın (örneğin, sorun güncellendi)
-      if (jiraEvent.issue && jiraEvent.issue.id && jiraEvent.webhookEvent === 'jira:issue_updated') {
+      if (
+        jiraEvent.issue &&
+        jiraEvent.issue.id &&
+        jiraEvent.webhookEvent === 'jira:issue_updated'
+      ) {
         const issueId = jiraEvent.issue.id;
         const newStatus = jiraEvent.issue.fields.status.name;
 
@@ -57,7 +60,6 @@ export const trelloJiraWebhookHandler = onRequest(async (request, response) => {
         // TODO: Firestore'daki ilgili görevi güncelleyin
         // await trelloJiraService.updateJiraTaskStatus(userId, issueId, { status: newStatus });
       }
-
     } else {
       console.warn('Bilinmeyen webhook kaynağı.', userAgent);
       response.status(400).send('Bilinmeyen Webhook Kaynağı');
@@ -78,4 +80,4 @@ function verifyTrelloSignature(rawBody: Buffer, signature: string, secret: strin
   const hash = crypto.createHmac('sha1', secret).update(rawBody).digest('base64');
   return hash === signature;
 }
-*/ 
+*/

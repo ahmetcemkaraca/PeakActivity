@@ -1,15 +1,17 @@
 ---
-applyTo: "functions/**/*.ts,aw-server/**/*.py"
-description: "Firebase integration patterns and cloud architecture guidelines"
+applyTo: 'functions/**/*.ts,aw-server/**/*.py'
+description: 'Firebase integration patterns and cloud architecture guidelines'
 ---
 
 # Firebase Entegrasyon Kılavuzu
 
-Bu dosya, ActivityWatch ile Firebase entegrasyonu için mimari kalıpları ve en iyi uygulamaları tanımlar.
+Bu dosya, ActivityWatch ile Firebase entegrasyonu için mimari kalıpları ve en
+iyi uygulamaları tanımlar.
 
 ## ActivityWatch Server Firebase Entegrasyonu
 
 ### Storage Method Selection
+
 ```python
 # aw-server/main.py içinde depolama metodu seçimi
 storage_methods = {
@@ -20,8 +22,10 @@ storage_methods = {
 ```
 
 ### Core Data Models
+
 - **Event**: `{id, timestamp, duration, data}` - Temel aktivite takip birimi
-- **Bucket**: Type'a göre event container'ları (`"afk.status"`, `"window.title"`)
+- **Bucket**: Type'a göre event container'ları (`"afk.status"`,
+  `"window.title"`)
 - **Datastore**: Storage backend'leri için abstract interface
 
 ## Firebase Cloud Functions Mimarisi
@@ -30,7 +34,7 @@ storage_methods = {
 functions/src/
 ├── api/                    // ActivityWatch API endpoints
 │   ├── buckets.ts         // Bucket CRUD operations
-│   ├── events.ts          // Event management  
+│   ├── events.ts          // Event management
 │   ├── heartbeat.ts       // Real-time heartbeat
 │   └── query.ts           // Query2 engine
 ├── triggers/               // Firestore triggers
@@ -49,6 +53,7 @@ functions/src/
 ## Authentication Patterns
 
 ### Middleware Pattern
+
 ```typescript
 export const requireAuth = (handler: Function) => {
   return async (data: any, context: CallableContext) => {
@@ -59,23 +64,27 @@ export const requireAuth = (handler: Function) => {
 ```
 
 ### Multi-device Authorization
+
 ```typescript
-export async function checkDeviceLimit(userId: string, deviceId: string): Promise<boolean> {
+export async function checkDeviceLimit(
+  userId: string,
+  deviceId: string
+): Promise<boolean> {
   const userDoc = await firestore().collection('users').doc(userId).get();
   const userData = userDoc.data();
-  
+
   const deviceLimit = userData.customClaims?.device_limit || 3;
   const registeredDevices = userData.devices || [];
-  
+
   if (registeredDevices.includes(deviceId)) return true;
   if (registeredDevices.length < deviceLimit) {
     await userDoc.ref.update({
       devices: [...registeredDevices, deviceId],
-      lastSeen: new Date()
+      lastSeen: new Date(),
     });
     return true;
   }
-  
+
   return false;
 }
 ```
@@ -83,6 +92,7 @@ export async function checkDeviceLimit(userId: string, deviceId: string): Promis
 ## Firestore Data Modeling
 
 ### Collection Hierarchy
+
 ```
 /users/{userId}/
 ├── buckets/{bucketId}/
@@ -93,6 +103,7 @@ export async function checkDeviceLimit(userId: string, deviceId: string): Promis
 ```
 
 ### Data Conversion Patterns
+
 ```typescript
 function convertAWEventToFirebase(event: AWEvent, bucketId: string) {
   return {
@@ -100,7 +111,7 @@ function convertAWEventToFirebase(event: AWEvent, bucketId: string) {
     bucket_id: bucketId,
     date_key: format(event.timestamp, 'yyyy-MM-dd'),
     hour_key: format(event.timestamp, 'yyyy-MM-dd-HH'),
-    created_at: new Date()
+    created_at: new Date(),
   };
 }
 ```

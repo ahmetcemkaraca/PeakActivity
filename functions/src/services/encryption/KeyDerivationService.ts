@@ -8,9 +8,9 @@ export class KeyDerivationService {
       salt: s,
       type: argon2.argon2id, // Recommended for password hashing
       memoryCost: 65536, // 64MB
-      timeCost: 3,        // 3 iterations
+      timeCost: 3, // 3 iterations
       parallelism: 1,
-      hashLength: 32,     // 32 bytes (256 bits) key
+      hashLength: 32, // 32 bytes (256 bits) key
       raw: true,
     });
     return { key: Buffer.from(key).toString('base64'), salt: s };
@@ -23,4 +23,4 @@ export class KeyDerivationService {
   async generateSalt(length: number = 16): Promise<Uint8Array> {
     return randomBytes(length);
   }
-} 
+}

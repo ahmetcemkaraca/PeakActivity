@@ -70,9 +70,13 @@ class ServerAPI:
         self.testing = testing
         # Önbellek: 1024 öğe, 300 saniye (5 dakika) TTL
         self.last_event_cache = TTLCache(maxsize=1024, ttl=300)
-        self.firebase_db = FirestoreStorage(testing=testing) # Firestore depolamasını başlat
-        self.synchronizer = DataSynchronizer(local_db=self.db, firebase_db=self.firebase_db) # Senkronizasyon nesnesini başlat
-        self.anonymizer = Anonymizer() # Anonymizer başlat
+        self.firebase_db = FirestoreStorage(
+            testing=testing
+        )  # Firestore depolamasını başlat
+        self.synchronizer = DataSynchronizer(
+            local_db=self.db, firebase_db=self.firebase_db
+        )  # Senkronizasyon nesnesini başlat
+        self.anonymizer = Anonymizer()  # Anonymizer başlat
 
     def get_info(self) -> Dict[str, Any]:
         """Get server info"""
@@ -266,7 +270,9 @@ class ServerAPI:
         Returns the inserted event when a single event was inserted, otherwise None."""
         anonymized_events = []
         for event in events:
-            anonymized_events.append(self.anonymizer.anonymize_event(event.to_json_dict()))
+            anonymized_events.append(
+                self.anonymizer.anonymize_event(event.to_json_dict())
+            )
 
         # Convert back to Event objects after anonymization
         events_to_insert = [Event(**e) for e in anonymized_events]
@@ -274,7 +280,9 @@ class ServerAPI:
         return self.db[bucket_id].insert(events_to_insert)
 
     @check_bucket_exists
-    def create_encrypted_ai_events(self, bucket_id: str, encrypted_events: List[Dict[str, Any]]) -> Optional[Event]:
+    def create_encrypted_ai_events(
+        self, bucket_id: str, encrypted_events: List[Dict[str, Any]]
+    ) -> Optional[Event]:
         """Create encrypted and AI-enabled events for a bucket.
 
         This method will decrypt the events (placeholder for now) and prepare them for AI processing.
@@ -285,10 +293,10 @@ class ServerAPI:
             # Şifreli verinin metadata'sını al (örneğin, iv, salt, algorithm)
             # encrypted_payload = event_data["payload"]
             # metadata = event_data["metadata"]
-            
+
             # Şimdilik sadece payload'u alıp Event objesine dönüştürüyoruz
             # Gerçekte burada şifre çözme işlemi olacak
-            decrypted_events_data.append(event_data.get("payload", {})) 
+            decrypted_events_data.append(event_data.get("payload", {}))
 
         # Verify and convert to Event objects (similar to create_raw_events)
         events_to_insert = []
@@ -306,7 +314,9 @@ class ServerAPI:
         return self.db[bucket_id].insert(events_to_insert)
 
     @check_bucket_exists
-    def create_encrypted_noai_events(self, bucket_id: str, encrypted_events: List[Dict[str, Any]]) -> Optional[Event]:
+    def create_encrypted_noai_events(
+        self, bucket_id: str, encrypted_events: List[Dict[str, Any]]
+    ) -> Optional[Event]:
         """Create encrypted events for a bucket without AI processing.
 
         This method will decrypt the events (placeholder for now) and store them directly.
@@ -354,15 +364,17 @@ class ServerAPI:
     def _get_last_event(self, bucket_id: str) -> Event | None:
         """Get the last event from cache or database for a given bucket."""
         last_event = self.last_event_cache.get(bucket_id)
-        
+
         if not last_event:
             last_events = self.db[bucket_id].get(limit=1)
             if len(last_events) > 0:
                 last_event = last_events[0]
-        
+
         return last_event
-    
-    def _try_merge_heartbeat(self, bucket_id: str, last_event: Event, heartbeat: Event, pulsetime: float) -> Event | None:
+
+    def _try_merge_heartbeat(
+        self, bucket_id: str, last_event: Event, heartbeat: Event, pulsetime: float
+    ) -> Event | None:
         """
         Try to merge heartbeat with last event if data matches.
         Returns merged event if successful, None if merge failed.
@@ -374,14 +386,12 @@ class ServerAPI:
                 )
             )
             return None
-        
+
         merged = heartbeat_merge(last_event, heartbeat, pulsetime)
         if merged is not None:
             # Heartbeat was merged into last_event
             logger.debug(
-                "Received valid heartbeat, merging. (bucket: {})".format(
-                    bucket_id
-                )
+                "Received valid heartbeat, merging. (bucket: {})".format(bucket_id)
             )
             self.last_event_cache[bucket_id] = merged
             self.db[bucket_id].replace_last(merged)
@@ -393,8 +403,10 @@ class ServerAPI:
                 )
             )
             return None
-    
-    def _insert_new_heartbeat(self, bucket_id: str, heartbeat: Event, reason: str) -> Event:
+
+    def _insert_new_heartbeat(
+        self, bucket_id: str, heartbeat: Event, reason: str
+    ) -> Event:
         """Insert heartbeat as a new event and update cache."""
         if reason == "empty_bucket":
             logger.info(
@@ -414,12 +426,14 @@ class ServerAPI:
                     bucket_id
                 )
             )
-        
+
         self.db[bucket_id].insert(heartbeat)
         self.last_event_cache[bucket_id] = heartbeat
         return heartbeat
-    
-    def _log_heartbeat_received(self, bucket_id: str, heartbeat: Event, pulsetime: float) -> None:
+
+    def _log_heartbeat_received(
+        self, bucket_id: str, heartbeat: Event, pulsetime: float
+    ) -> None:
         """Log the received heartbeat details."""
         logger.debug(
             "Received heartbeat in bucket '{}'\n\ttimestamp: {}, duration: {}, pulsetime: {}\n\tdata: {}".format(
@@ -454,16 +468,20 @@ class ServerAPI:
         Inspired by: https://wakatime.com/developers#heartbeats
         """
         self._log_heartbeat_received(bucket_id, heartbeat, pulsetime)
-        
+
         last_event = self._get_last_event(bucket_id)
-        
+
         if last_event:
-            merged_event = self._try_merge_heartbeat(bucket_id, last_event, heartbeat, pulsetime)
+            merged_event = self._try_merge_heartbeat(
+                bucket_id, last_event, heartbeat, pulsetime
+            )
             if merged_event:
                 return merged_event
-            
+
             # If merge failed, insert as new event
-            return self._insert_new_heartbeat(bucket_id, heartbeat, "pulse_window_expired")
+            return self._insert_new_heartbeat(
+                bucket_id, heartbeat, "pulse_window_expired"
+            )
         else:
             # No last event, insert as new event
             return self._insert_new_heartbeat(bucket_id, heartbeat, "empty_bucket")
@@ -498,8 +516,13 @@ class ServerAPI:
         self.settings[key] = value
         return value
 
-    def log_manual_activity(self, event_data: Any, bucket_id: Optional[str] = None,
-                           client: str = "manual", hostname: str = "!local") -> Optional[Event]:
+    def log_manual_activity(
+        self,
+        event_data: Any,
+        bucket_id: Optional[str] = None,
+        client: str = "manual",
+        hostname: str = "!local",
+    ) -> Optional[Event]:
         """Create (if needed) a bucket of type 'manualactivity' and insert the provided event(s).
 
         If *bucket_id* is omitted, a default bucket id of the form
@@ -541,8 +564,13 @@ class ServerAPI:
         # Insert and return result following create_events semantics
         return self.create_events(bucket_id, events)
 
-    def log_microsurvey(self, event_data: Any, bucket_id: Optional[str] = None,
-                        client: str = "survey", hostname: str = "!local") -> Optional[Event]:
+    def log_microsurvey(
+        self,
+        event_data: Any,
+        bucket_id: Optional[str] = None,
+        client: str = "survey",
+        hostname: str = "!local",
+    ) -> Optional[Event]:
         """Create bucket (if required) for microsurvey and insert event(s)."""
         if hostname == "!local":
             info = self.get_info()
@@ -550,7 +578,12 @@ class ServerAPI:
         if bucket_id is None:
             bucket_id = f"microsurvey_{hostname}"
         if bucket_id not in self.db.buckets():
-            self.create_bucket(bucket_id, event_type=MICROSURVEY_EVENT_TYPE, client=client, hostname=hostname)
+            self.create_bucket(
+                bucket_id,
+                event_type=MICROSURVEY_EVENT_TYPE,
+                client=client,
+                hostname=hostname,
+            )
         if isinstance(event_data, dict):
             events = [Event(**event_data)]
         elif isinstance(event_data, list):
@@ -559,37 +592,64 @@ class ServerAPI:
             raise TypeError("event_data must be dict or list")
         return self.create_events(bucket_id, events)
 
-    async def sync_data(self, sync_type: str = "full", bucket_id: Optional[str] = None) -> Dict[str, str]:
+    async def sync_data(
+        self, sync_type: str = "full", bucket_id: Optional[str] = None
+    ) -> Dict[str, str]:
         """Initiates a data synchronization with Firebase."""
         if sync_type == "full":
             await self.synchronizer.full_sync()
             return {"status": "success", "message": "Tam senkronizasyon başlatıldı."}
         elif sync_type == "upload" and bucket_id:
             await self.synchronizer.sync_events_to_firebase(bucket_id)
-            return {"status": "success", "message": f"Kova {bucket_id} Firebase'e yüklendi."}
+            return {
+                "status": "success",
+                "message": f"Kova {bucket_id} Firebase'e yüklendi.",
+            }
         elif sync_type == "download":
             await self.synchronizer.sync_from_firebase()
             return {"status": "success", "message": "Firebase'den veriler indirildi."}
         else:
-            return {"status": "error", "message": "Geçersiz senkronizasyon türü veya eksik kova ID'si."}
+            return {
+                "status": "error",
+                "message": "Geçersiz senkronizasyon türü veya eksik kova ID'si.",
+            }
 
-    async def get_anomaly_detection_insight(self, userId: str, startDate: str, endDate: str) -> Dict[str, Any]:
+    async def get_anomaly_detection_insight(
+        self, userId: str, startDate: str, endDate: str
+    ) -> Dict[str, Any]:
         """Fetches anomaly detection insights from Firebase Cloud Functions."""
         from firebase_admin import functions
-        callable_func = functions.https_callable(functions.get_app(), 'detectAnomaly')
-        result = await callable_func({"userId": userId, "startDate": startDate, "endDate": endDate})
+
+        callable_func = functions.https_callable(functions.get_app(), "detectAnomaly")
+        result = await callable_func(
+            {"userId": userId, "startDate": startDate, "endDate": endDate}
+        )
         return result.data
 
-    async def get_behavioral_trends_insight(self, userId: str, startDate: str, endDate: str) -> Dict[str, Any]:
+    async def get_behavioral_trends_insight(
+        self, userId: str, startDate: str, endDate: str
+    ) -> Dict[str, Any]:
         """Fetches behavioral trends insights from Firebase Cloud Functions."""
         from firebase_admin import functions
-        callable_func = functions.https_callable(functions.get_app(), 'analyzeBehavioralPatterns')
-        result = await callable_func({"userId": userId, "startDate": startDate, "endDate": endDate})
+
+        callable_func = functions.https_callable(
+            functions.get_app(), "analyzeBehavioralPatterns"
+        )
+        result = await callable_func(
+            {"userId": userId, "startDate": startDate, "endDate": endDate}
+        )
         return result.data
 
-    async def get_focus_quality_score_insight(self, userId: str, startDate: str, endDate: str) -> Dict[str, Any]:
+    async def get_focus_quality_score_insight(
+        self, userId: str, startDate: str, endDate: str
+    ) -> Dict[str, Any]:
         """Fetches focus quality score insights from Firebase Cloud Functions."""
         from firebase_admin import functions
-        callable_func = functions.https_callable(functions.get_app(), 'calculateFocusQualityScore')
-        result = await callable_func({"userId": userId, "startDate": startDate, "endDate": endDate})
+
+        callable_func = functions.https_callable(
+            functions.get_app(), "calculateFocusQualityScore"
+        )
+        result = await callable_func(
+            {"userId": userId, "startDate": startDate, "endDate": endDate}
+        )
         return result.data

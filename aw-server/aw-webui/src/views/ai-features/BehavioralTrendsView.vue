@@ -7,22 +7,37 @@
         <div class="row g-3 align-items-center">
           <div class="col-md-4">
             <label for="userId" class="form-label">Kullanıcı ID:</label>
-            <input type="text" class="form-control" id="userId" v-model="userId" placeholder="Kullanıcı ID girin">
+            <input
+              type="text"
+              class="form-control"
+              id="userId"
+              v-model="userId"
+              placeholder="Kullanıcı ID girin"
+            />
           </div>
           <div class="col-md-4">
             <label for="timeRange" class="form-label">Zaman Aralığı:</label>
-            <input type="text" class="form-control" id="timeRange" v-model="timeRange" placeholder="Örn: last 7 days">
+            <input
+              type="text"
+              class="form-control"
+              id="timeRange"
+              v-model="timeRange"
+              placeholder="Örn: last 7 days"
+            />
           </div>
           <div class="col-md-auto">
             <button class="btn btn-primary mt-4" @click="fetchInsight" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span
+                v-if="loading"
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
               <span v-else>İçgörü Getir</span>
             </button>
           </div>
         </div>
-        <div v-if="error" class="alert alert-danger mt-3" role="alert">
-          Hata: {{ error }}
-        </div>
+        <div v-if="error" class="alert alert-danger mt-3" role="alert">Hata: {{ error }}</div>
       </div>
     </div>
 
@@ -32,7 +47,11 @@
       </div>
       <div class="card-body">
         <pre class="bg-light p-3 rounded mb-3">{{ JSON.stringify(insight, null, 2) }}</pre>
-        <BarChart v-if="chartData.datasets.length" :chartData="chartData" :chartOptions="chartOptions" />
+        <BarChart
+          v-if="chartData.datasets.length"
+          :chartData="chartData"
+          :chartOptions="chartOptions"
+        />
       </div>
     </div>
 
@@ -47,18 +66,23 @@
         </div>
         <ul class="list-group" v-else>
           <li class="list-group-item" v-for="pattern in realtimePatterns" :key="pattern.timestamp">
-            <strong>Tür:</strong> {{ pattern.pattern_type_display }}
-            <br/>
-            <strong>Açıklama:</strong> {{ pattern.description }}
-            <br/>
-            <strong>Zaman:</strong> {{ new Date(pattern.timestamp).toLocaleString('tr-TR') }}
-            <br/>
+            <strong>Tür:</strong>
+            {{ pattern.pattern_type_display }}
+            <br />
+            <strong>Açıklama:</strong>
+            {{ pattern.description }}
+            <br />
+            <strong>Zaman:</strong>
+            {{ new Date(pattern.timestamp).toLocaleString('tr-TR') }}
+            <br />
             <span v-if="pattern.confidence_score">
-              <strong>Güven Skoru:</strong> {{ pattern.confidence_score.toFixed(2) }}
-              <br/>
+              <strong>Güven Skoru:</strong>
+              {{ pattern.confidence_score.toFixed(2) }}
+              <br />
             </span>
             <span v-if="pattern.model_version">
-              <strong>Model Versiyonu:</strong> {{ pattern.model_version }}
+              <strong>Model Versiyonu:</strong>
+              {{ pattern.model_version }}
             </span>
           </li>
         </ul>
@@ -72,13 +96,27 @@ import { defineComponent, ref, computed, onMounted, onUnmounted } from 'vue';
 import { AIFeatureService } from '@/util/ai-feature-service';
 import BarChart from '@/components/BarChart.vue';
 import { ChartData, ChartOptions } from 'chart.js';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, Unsubscribe, limit } from 'firebase/firestore'; // limit ekledik
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  Unsubscribe,
+  limit,
+} from 'firebase/firestore'; // limit ekledik
 import { getAuth } from 'firebase/auth';
 
 interface RealtimeBehavioralPattern {
   user_id: string;
   timestamp: string; // Olayın zaman damgası
-  pattern_type: 'idle_detection' | 'focus_shift' | 'high_activity' | 'low_activity' | 'unusual_category_use';
+  pattern_type:
+    | 'idle_detection'
+    | 'focus_shift'
+    | 'high_activity'
+    | 'low_activity'
+    | 'unusual_category_use';
   description: string; // Tespit edilen örüntünün açıklaması
   confidence_score?: number; // Güven skoru (0-1 arası, ML entegrasyonu için)
   related_activity_id?: string; // İlgili aktivite olayının ID'si
@@ -118,7 +156,7 @@ export default defineComponent({
       }
     };
 
-    const chartData = computed<ChartData<"bar">>(() => {
+    const chartData = computed<ChartData<'bar'>>(() => {
       if (!insight.value || !insight.value.trends) {
         return { labels: [], datasets: [] };
       }
@@ -137,7 +175,7 @@ export default defineComponent({
       return { labels, datasets };
     });
 
-    const chartOptions = computed<ChartOptions<"bar">>(() => ({
+    const chartOptions = computed<ChartOptions<'bar'>>(() => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
@@ -171,7 +209,9 @@ export default defineComponent({
       const user = auth.currentUser;
 
       if (!user) {
-        console.warn('Gerçek zamanlı davranışsal örüntü dinleyicisini başlatmak için kullanıcı oturum açmış olmalıdır.');
+        console.warn(
+          'Gerçek zamanlı davranışsal örüntü dinleyicisini başlatmak için kullanıcı oturum açmış olmalıdır.'
+        );
         realtimePatterns.value = [];
         return;
       }
@@ -183,37 +223,51 @@ export default defineComponent({
 
       const db = getFirestore();
       const patternsRef = collection(db, `users/${user.uid}/realtime_behavioral_patterns`);
-      
+
       // En yeni örüntüleri almak için sorgu
       const q = query(patternsRef, orderBy('timestamp', 'desc'), limit(10)); // Son 10 örüntüyü getir
 
-      realtimeUnsubscribe.value = onSnapshot(q, (snapshot) => {
-        const fetchedPatterns: RealtimeBehavioralPattern[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          fetchedPatterns.push({
-            ...data,
-            timestamp: data.timestamp instanceof Date ? data.timestamp.toISOString() : data.timestamp, // Firestore Timestamp'ı ISO string'e çevir
-            pattern_type_display: getPatternTypeDisplay(data.pattern_type), // Okunabilir isim
-          } as RealtimeBehavioralPattern);
-        });
-        realtimePatterns.value = fetchedPatterns;
-        console.log('Gerçek zamanlı davranışsal örüntüler güncellendi:', realtimePatterns.value.length);
-      }, (err) => {
-        console.error('Gerçek zamanlı davranışsal örüntü dinlenirken hata oluştu:', err);
-        error.value = 'Gerçek zamanlı örüntüler yüklenemedi.';
-      });
+      realtimeUnsubscribe.value = onSnapshot(
+        q,
+        snapshot => {
+          const fetchedPatterns: RealtimeBehavioralPattern[] = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            fetchedPatterns.push({
+              ...data,
+              timestamp:
+                data.timestamp instanceof Date ? data.timestamp.toISOString() : data.timestamp, // Firestore Timestamp'ı ISO string'e çevir
+              pattern_type_display: getPatternTypeDisplay(data.pattern_type), // Okunabilir isim
+            } as RealtimeBehavioralPattern);
+          });
+          realtimePatterns.value = fetchedPatterns;
+          console.log(
+            'Gerçek zamanlı davranışsal örüntüler güncellendi:',
+            realtimePatterns.value.length
+          );
+        },
+        err => {
+          console.error('Gerçek zamanlı davranışsal örüntü dinlenirken hata oluştu:', err);
+          error.value = 'Gerçek zamanlı örüntüler yüklenemedi.';
+        }
+      );
     };
 
     // Pattern type'ı okunabilir bir string'e çeviren helper fonksiyon
     const getPatternTypeDisplay = (type: string): string => {
       switch (type) {
-        case 'idle_detection': return 'Hareketsizlik Tespiti';
-        case 'focus_shift': return 'Odak Kayması';
-        case 'high_activity': return 'Yüksek Aktivite';
-        case 'low_activity': return 'Düşük Aktivite';
-        case 'unusual_category_use': return 'Alışılmadık Kategori Kullanımı';
-        default: return type;
+        case 'idle_detection':
+          return 'Hareketsizlik Tespiti';
+        case 'focus_shift':
+          return 'Odak Kayması';
+        case 'high_activity':
+          return 'Yüksek Aktivite';
+        case 'low_activity':
+          return 'Düşük Aktivite';
+        case 'unusual_category_use':
+          return 'Alışılmadık Kategori Kullanımı';
+        default:
+          return type;
       }
     };
 
@@ -270,4 +324,4 @@ pre {
   border-color: var(--light-border-color);
   color: var(--text-color);
 }
-</style> 
+</style>

@@ -63,9 +63,9 @@ jobs:
           else
             PR_NUMBER=${{ github.event.pull_request.number }}
           fi
-          
+
           echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-          
+
           # Extract additional instructions from comment (if triggered by comment)
           ADDITIONAL_INSTRUCTIONS=""
           if [ "${{ github.event_name }}" = "issue_comment" ]; then
@@ -73,11 +73,11 @@ jobs:
             ADDITIONAL_INSTRUCTIONS=$(echo "$COMMENT_BODY" | sed 's/.*@gemini//' | xargs)
           fi
           echo "additional_instructions=$ADDITIONAL_INSTRUCTIONS" >> "$GITHUB_OUTPUT"
-          
+
           # Get PR details
           PR_DATA=$(gh pr view $PR_NUMBER --json title,body,additions,deletions,changedFiles,baseRefName,headRefName)
           echo "pr_data=$PR_DATA" >> "$GITHUB_OUTPUT"
-          
+
           # Get file changes
           CHANGED_FILES=$(gh pr diff $PR_NUMBER --name-only)
           echo "changed_files<<EOF" >> "$GITHUB_OUTPUT"
@@ -187,14 +187,14 @@ jobs:
             - Be constructive and specific in feedback
             - Highlight both issues and positive aspects
             - Suggest improvements with examples when possible
-            
+
             Review Areas:
             - **Security**: Authentication, authorization, input validation, data sanitization
             - **Performance**: Algorithms, database queries, caching, resource usage
             - **Reliability**: Error handling, logging, testing coverage, edge cases
             - **Maintainability**: Code structure, documentation, naming conventions
             - **Functionality**: Logic correctness, requirements fulfillment
-            
+
             Output Format:
             Structure your review using this exact format with markdown:
 

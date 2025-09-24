@@ -1,6 +1,6 @@
 /**
  * Bundle Optimization and Lazy Loading (156-160)
- * 
+ *
  * Code splitting, lazy loading strategies, ve bundle size optimization.
  * Dynamic imports, preloading strategies ve resource optimization.
  */
@@ -65,11 +65,16 @@ export class LazyLoadingManager {
   registerComponent(
     name: string,
     loader: () => Promise<any>,
-    strategy: LoadingStrategy = { immediate: false, preload: false, prefetch: false, priority: 'medium' }
+    strategy: LoadingStrategy = {
+      immediate: false,
+      preload: false,
+      prefetch: false,
+      priority: 'medium',
+    }
   ): () => Promise<Component> {
     return async () => {
       const startTime = performance.now();
-      
+
       // Check if already loading
       if (this.loadingPromises.has(name)) {
         return this.loadingPromises.get(name)!;
@@ -142,7 +147,7 @@ export class LazyLoadingManager {
     const observer = new IntersectionObserver(callback, {
       rootMargin: '50px',
       threshold: 0.1,
-      ...options
+      ...options,
     });
 
     observer.observe(element);
@@ -155,7 +160,7 @@ export class LazyLoadingManager {
    */
   getBundleMetrics(): ResourceMetrics {
     const chunks = Array.from(this.chunkMetrics.values());
-    
+
     return {
       totalBundleSize: chunks.reduce((sum, chunk) => sum + chunk.size, 0),
       lazyChunksCount: chunks.filter(chunk => chunk.isLazyLoaded).length,
@@ -165,10 +170,11 @@ export class LazyLoadingManager {
       preloadedChunksSize: chunks
         .filter(chunk => this.preloadedChunks.has(chunk.name))
         .reduce((sum, chunk) => sum + chunk.size, 0),
-      averageLoadTime: chunks.length > 0 
-        ? chunks.reduce((sum, chunk) => sum + chunk.loadTime, 0) / chunks.length 
-        : 0,
-      cacheHitRate: this.calculateCacheHitRate()
+      averageLoadTime:
+        chunks.length > 0
+          ? chunks.reduce((sum, chunk) => sum + chunk.loadTime, 0) / chunks.length
+          : 0,
+      cacheHitRate: this.calculateCacheHitRate(),
     };
   }
 
@@ -177,7 +183,7 @@ export class LazyLoadingManager {
    */
   optimizeLoadingStrategy(): void {
     const metrics = this.getBundleMetrics();
-    
+
     // If average load time is high, increase preloading
     if (metrics.averageLoadTime > 200) {
       this.increasePreloadingAggression();
@@ -192,15 +198,19 @@ export class LazyLoadingManager {
     this.generateOptimizationSuggestions();
   }
 
-  private async loadComponent(name: string, loader: () => Promise<any>, startTime: number): Promise<Component> {
+  private async loadComponent(
+    name: string,
+    loader: () => Promise<any>,
+    startTime: number
+  ): Promise<Component> {
     try {
       const component = await loader();
       const loadTime = performance.now() - startTime;
-      
+
       this.loadedChunks.add(name);
       this.trackLoadTime(name, loadTime);
       this.loadingPromises.delete(name);
-      
+
       return component;
     } catch (error) {
       this.loadingPromises.delete(name);
@@ -220,7 +230,7 @@ export class LazyLoadingManager {
         loadTime,
         isLazyLoaded: true,
         dependencies: [],
-        usageFrequency: 1
+        usageFrequency: 1,
       });
     }
   }
@@ -242,7 +252,7 @@ export class LazyLoadingManager {
     if ('IntersectionObserver' in window) {
       this.intersectionObserver = new IntersectionObserver(() => {}, {
         rootMargin: '50px',
-        threshold: 0.1
+        threshold: 0.1,
       });
     }
   }
@@ -277,7 +287,8 @@ export class LazyLoadingManager {
     const metrics = this.getBundleMetrics();
     const suggestions: string[] = [];
 
-    if (metrics.totalBundleSize > 2 * 1024 * 1024) { // 2MB
+    if (metrics.totalBundleSize > 2 * 1024 * 1024) {
+      // 2MB
       suggestions.push('Consider splitting large components into smaller chunks');
     }
 
@@ -317,12 +328,12 @@ export class ResourcePreloader {
       link.rel = 'preload';
       link.as = 'style';
       link.href = href;
-      
+
       link.onload = () => {
         this.preloadedResources.add(href);
         resolve();
       };
-      
+
       link.onerror = reject;
       document.head.appendChild(link);
     });
@@ -339,12 +350,12 @@ export class ResourcePreloader {
       const link = document.createElement('link');
       link.rel = 'modulepreload';
       link.href = src;
-      
+
       link.onload = () => {
         this.preloadedResources.add(src);
         resolve();
       };
-      
+
       link.onerror = reject;
       document.head.appendChild(link);
     });
@@ -363,16 +374,16 @@ export class ResourcePreloader {
 
     const promise = new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
-      
+
       if (priority === 'high') {
         img.fetchPriority = 'high';
       }
-      
+
       img.onload = () => {
         this.preloadedResources.add(src);
         resolve(img);
       };
-      
+
       img.onerror = reject;
       img.src = src;
     });
@@ -384,7 +395,9 @@ export class ResourcePreloader {
   /**
    * Batch preload resources
    */
-  async batchPreload(resources: Array<{ type: 'css' | 'js' | 'image'; src: string; priority?: 'high' | 'low' }>): Promise<void> {
+  async batchPreload(
+    resources: Array<{ type: 'css' | 'js' | 'image'; src: string; priority?: 'high' | 'low' }>
+  ): Promise<void> {
     const promises = resources.map(resource => {
       switch (resource.type) {
         case 'css':
@@ -408,7 +421,10 @@ export class ResourcePreloader {
     return {
       preloadedCount: this.preloadedResources.size,
       totalRequests: this.preloadPromises.size,
-      successRate: this.preloadPromises.size > 0 ? (this.preloadedResources.size / this.preloadPromises.size) * 100 : 0
+      successRate:
+        this.preloadPromises.size > 0
+          ? (this.preloadedResources.size / this.preloadPromises.size) * 100
+          : 0,
     };
   }
 }
@@ -444,7 +460,7 @@ export function useLazyLoading() {
     createLazyComponent,
     preloadComponent,
     schedulePreload,
-    manager
+    manager,
   };
 }
 
@@ -456,10 +472,11 @@ export function useResourcePreloader() {
     preloadCSS: (href: string) => preloader.preloadCSS(href),
     preloadModule: (src: string) => preloader.preloadModule(src),
     preloadImage: (src: string, priority?: 'high' | 'low') => preloader.preloadImage(src, priority),
-    batchPreload: (resources: Array<{ type: 'css' | 'js' | 'image'; src: string; priority?: 'high' | 'low' }>) =>
-      preloader.batchPreload(resources),
+    batchPreload: (
+      resources: Array<{ type: 'css' | 'js' | 'image'; src: string; priority?: 'high' | 'low' }>
+    ) => preloader.batchPreload(resources),
     stats,
-    preloader
+    preloader,
   };
 }
 
@@ -477,7 +494,7 @@ export class RoutePreloader {
    */
   trackRouteVisit(route: string, stayTime: number): void {
     this.navigationHistory.push(route);
-    
+
     const existing = this.routeMetrics.get(route);
     if (existing) {
       existing.visits++;
@@ -499,7 +516,7 @@ export class RoutePreloader {
    */
   private predictAndPreload(): void {
     const predictions = this.predictNextRoutes();
-    
+
     for (const route of predictions) {
       if (!this.preloadedRoutes.has(route)) {
         this.preloadRoute(route);

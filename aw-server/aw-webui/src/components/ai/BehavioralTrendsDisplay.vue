@@ -8,9 +8,14 @@
         <h4>Trend Olan Kategoriler:</h4>
         <ul>
           <li v-for="trend in trendingCategories" :key="trend.category">
-            <strong>Kategori:</strong> {{ trend.category }} <br/>
-            <strong>Trend:</strong> {{ trend.trend }} <br/>
-            <strong>Günlük Eğim:</strong> {{ trend.slope_per_day }}
+            <strong>Kategori:</strong>
+            {{ trend.category }}
+            <br />
+            <strong>Trend:</strong>
+            {{ trend.trend }}
+            <br />
+            <strong>Günlük Eğim:</strong>
+            {{ trend.slope_per_day }}
           </li>
         </ul>
       </div>
@@ -22,8 +27,11 @@
         <h4>Mevsimsellik Desenleri:</h4>
         <ul>
           <li v-for="season in seasonality" :key="season.period">
-            <strong>Dönem:</strong> {{ season.period }} <br/>
-            <strong>Desen:</strong> {{ season.pattern }}
+            <strong>Dönem:</strong>
+            {{ season.period }}
+            <br />
+            <strong>Desen:</strong>
+            {{ season.pattern }}
           </li>
         </ul>
       </div>
@@ -45,7 +53,7 @@ import { getBehavioralTrends } from '~/util/awclient';
 
 interface TrendingCategory {
   category: string;
-  trend: "rising" | "falling" | "stable";
+  trend: 'rising' | 'falling' | 'stable';
   slope_per_day: number;
 }
 
@@ -69,21 +77,21 @@ export default defineComponent({
       try {
         // TODO: Replace with actual daily_totals data from aw-server/aw-webui
         const mockDailyTotals = [
-          { "date": "2024-06-01", "categories": { "coding": 20000, "browsing": 5000, "social": 1000 } },
-          { "date": "2024-06-02", "categories": { "coding": 21000, "browsing": 5500, "social": 1100 } },
-          { "date": "2024-06-03", "categories": { "coding": 22000, "browsing": 5200, "social": 900 } },
-          { "date": "2024-06-04", "categories": { "coding": 23000, "browsing": 6000, "social": 1200 } },
-          { "date": "2024-06-05", "categories": { "coding": 24000, "browsing": 6500, "social": 1300 } },
-          { "date": "2024-06-06", "categories": { "coding": 15000, "browsing": 7000, "social": 2000 } }, // Possible Friday dip
-          { "date": "2024-06-07", "categories": { "coding": 10000, "browsing": 8000, "social": 2500 } },
-          { "date": "2024-06-08", "categories": { "coding": 25000, "browsing": 5000, "social": 800 } },
-          { "date": "2024-06-09", "categories": { "coding": 26000, "browsing": 5300, "social": 900 } },
-          { "date": "2024-06-10", "categories": { "coding": 27000, "browsing": 5800, "social": 1000 } },
-          { "date": "2024-06-11", "categories": { "coding": 28000, "browsing": 6100, "social": 1100 } },
-          { "date": "2024-06-12", "categories": { "coding": 29000, "browsing": 6600, "social": 1200 } },
-          { "date": "2024-06-13", "categories": { "coding": 16000, "browsing": 7200, "social": 2100 } }, // Possible Friday dip
-          { "date": "2024-06-14", "categories": { "coding": 11000, "browsing": 8200, "social": 2600 } },
-          { "date": "2024-06-15", "categories": { "coding": 30000, "browsing": 5100, "social": 700 } },
+          { date: '2024-06-01', categories: { coding: 20000, browsing: 5000, social: 1000 } },
+          { date: '2024-06-02', categories: { coding: 21000, browsing: 5500, social: 1100 } },
+          { date: '2024-06-03', categories: { coding: 22000, browsing: 5200, social: 900 } },
+          { date: '2024-06-04', categories: { coding: 23000, browsing: 6000, social: 1200 } },
+          { date: '2024-06-05', categories: { coding: 24000, browsing: 6500, social: 1300 } },
+          { date: '2024-06-06', categories: { coding: 15000, browsing: 7000, social: 2000 } }, // Possible Friday dip
+          { date: '2024-06-07', categories: { coding: 10000, browsing: 8000, social: 2500 } },
+          { date: '2024-06-08', categories: { coding: 25000, browsing: 5000, social: 800 } },
+          { date: '2024-06-09', categories: { coding: 26000, browsing: 5300, social: 900 } },
+          { date: '2024-06-10', categories: { coding: 27000, browsing: 5800, social: 1000 } },
+          { date: '2024-06-11', categories: { coding: 28000, browsing: 6100, social: 1100 } },
+          { date: '2024-06-12', categories: { coding: 29000, browsing: 6600, social: 1200 } },
+          { date: '2024-06-13', categories: { coding: 16000, browsing: 7200, social: 2100 } }, // Possible Friday dip
+          { date: '2024-06-14', categories: { coding: 11000, browsing: 8200, social: 2600 } },
+          { date: '2024-06-15', categories: { coding: 30000, browsing: 5100, social: 700 } },
         ];
         const window = 14; // Son 14 gün için analiz
 
@@ -144,4 +152,4 @@ li {
 .error {
   color: red;
 }
-</style> 
+</style>

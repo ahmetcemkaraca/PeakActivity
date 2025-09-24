@@ -51,4 +51,4 @@ export class CryptoJSFallbackService extends BaseEncryptionService {
     const ivBytes = CryptoUtils.generateRandomBytes(16);
     return CryptoUtils.bytesToBase64(ivBytes);
   }
-} 
+}

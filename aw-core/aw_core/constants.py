@@ -10,14 +10,16 @@ from enum import Enum
 
 class AFKStatus(Enum):
     """AFK (Away From Keyboard) status constants."""
+
     AFK = "afk"
     NOT_AFK = "not-afk"
 
 
 class EventType(Enum):
     """Standard event types used in ActivityWatch."""
+
     AFK_STATUS = "afkstatus"
-    CURRENT_WINDOW = "currentwindow" 
+    CURRENT_WINDOW = "currentwindow"
     APP_USAGE = "app.editor.activity"
     WEB_USAGE = "web.tab.current"
     INPUT_ACTIVITY = "input.keyboard"
@@ -26,6 +28,7 @@ class EventType(Enum):
 
 class BucketType(Enum):
     """Bucket types for different data sources."""
+
     AFK_WATCHER = "afkstatus"
     WINDOW_WATCHER = "currentwindow"
     WEB_WATCHER = "web.tab.current"
@@ -35,6 +38,7 @@ class BucketType(Enum):
 
 class Platform(Enum):
     """Supported platforms."""
+
     WINDOWS = "win32"
     MACOS = "darwin"
     LINUX = "linux"
@@ -42,12 +46,14 @@ class Platform(Enum):
 
 class DatabaseState(Enum):
     """Database/storage state constants."""
+
     TESTING = "testing"
     PRODUCTION = "production"
 
 
 class LogLevel(Enum):
     """Logging level constants."""
+
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"
@@ -57,12 +63,14 @@ class LogLevel(Enum):
 
 class NetworkProtocol(Enum):
     """Network protocol constants."""
+
     HTTP = "http"
     HTTPS = "https"
 
 
 class ContentType(Enum):
     """HTTP content type constants."""
+
     JSON = "application/json"
     TEXT_PLAIN = "text/plain"
     TEXT_HTML = "text/html"
@@ -95,7 +103,9 @@ DEFAULT_EVENT_LIMIT = 100
 
 # Regular expressions
 BUCKET_ID_PATTERN = r"^[a-zA-Z0-9._-]+$"
-TIMEPERIOD_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
+TIMEPERIOD_PATTERN = (
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
+)
 
 # HTTP status codes
 HTTP_OK = 200
@@ -112,7 +122,7 @@ MAX_CACHE_SIZE = 1000
 
 # Firebase/Firestore constants
 FIRESTORE_COLLECTION_USERS = "users"
-FIRESTORE_COLLECTION_BUCKETS = "buckets" 
+FIRESTORE_COLLECTION_BUCKETS = "buckets"
 FIRESTORE_COLLECTION_EVENTS = "events"
 FIRESTORE_COLLECTION_ACTIVITIES = "activities"
 FIRESTORE_COLLECTION_GOALS = "goals"
@@ -128,5 +138,5 @@ PRIVACY_MODE_EXCLUDE_TITLE = "excluded"
 PRIVACY_MODE_BLUR_TITLE = "blurred"
 
 # Event type constants
-MANUAL_ACTIVITY_EVENT_TYPE = "manualactivity" 
+MANUAL_ACTIVITY_EVENT_TYPE = "manualactivity"
 MICROSURVEY_EVENT_TYPE = "microsurvey"

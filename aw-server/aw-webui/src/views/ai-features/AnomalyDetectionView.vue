@@ -7,22 +7,37 @@
         <div class="row g-3 align-items-center">
           <div class="col-md-4">
             <label for="userId" class="form-label">Kullanıcı ID:</label>
-            <input type="text" class="form-control" id="userId" v-model="userId" placeholder="Kullanıcı ID girin">
+            <input
+              type="text"
+              class="form-control"
+              id="userId"
+              v-model="userId"
+              placeholder="Kullanıcı ID girin"
+            />
           </div>
           <div class="col-md-4">
             <label for="timeRange" class="form-label">Zaman Aralığı:</label>
-            <input type="text" class="form-control" id="timeRange" v-model="timeRange" placeholder="Örn: last 7 days">
+            <input
+              type="text"
+              class="form-control"
+              id="timeRange"
+              v-model="timeRange"
+              placeholder="Örn: last 7 days"
+            />
           </div>
           <div class="col-md-auto">
             <button class="btn btn-primary mt-4" @click="fetchInsight" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span
+                v-if="loading"
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
               <span v-else>İçgörü Getir</span>
             </button>
           </div>
         </div>
-        <div v-if="error" class="alert alert-danger mt-3" role="alert">
-          Hata: {{ error }}
-        </div>
+        <div v-if="error" class="alert alert-danger mt-3" role="alert">Hata: {{ error }}</div>
       </div>
     </div>
 
@@ -32,7 +47,12 @@
       </div>
       <div class="card-body">
         <pre class="bg-light p-3 rounded mb-3">{{ JSON.stringify(insight, null, 2) }}</pre>
-        <LineChart v-if="chartData.datasets.length" :chartData="chartData" :chartOptions="chartOptions" chartType="scatter" />
+        <LineChart
+          v-if="chartData.datasets.length"
+          :chartData="chartData"
+          :chartOptions="chartOptions"
+          chartType="scatter"
+        />
       </div>
     </div>
   </div>
@@ -73,12 +93,14 @@ export default defineComponent({
       }
     };
 
-    const chartData = computed<ChartData<"line" | "scatter", (number | ScatterDataPoint)[]>>(() => {
+    const chartData = computed<ChartData<'line' | 'scatter', (number | ScatterDataPoint)[]>>(() => {
       if (!insight.value || !insight.value.anomalies) {
         return { labels: [], datasets: [] };
       }
 
-      const labels = insight.value.anomalies.map((a: any) => new Date(a.timestamp).toISOString().split('T')[0]);
+      const labels = insight.value.anomalies.map(
+        (a: any) => new Date(a.timestamp).toISOString().split('T')[0]
+      );
       const data = insight.value.anomalies.map((a: any) => a.value);
       const anomalyPoints = insight.value.anomalies.filter((a: any) => a.isAnomaly);
 
@@ -95,7 +117,10 @@ export default defineComponent({
           label: 'Anomali',
           backgroundColor: '#dc3545',
           borderColor: '#dc3545',
-          data: anomalyPoints.map((a: any) => ({ x: new Date(a.timestamp).toISOString().split('T')[0], y: a.value })),
+          data: anomalyPoints.map((a: any) => ({
+            x: new Date(a.timestamp).toISOString().split('T')[0],
+            y: a.value,
+          })),
           pointRadius: 5,
           pointHoverRadius: 7,
           showLine: false,
@@ -105,7 +130,7 @@ export default defineComponent({
       return { labels, datasets };
     });
 
-    const chartOptions = computed<ChartOptions<"line" | "scatter">>(() => ({
+    const chartOptions = computed<ChartOptions<'line' | 'scatter'>>(() => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
@@ -175,4 +200,4 @@ pre {
   white-space: pre-wrap; /* Uzun metinleri sar */
   word-wrap: break-word; /* Uzun kelimeleri böl */
 }
-</style> 
+</style>

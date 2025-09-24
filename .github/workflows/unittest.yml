@@ -7,67 +7,67 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
 
-    - name: Run Python Backend Unit Tests
-      run: poetry run pytest tests/unit/ -v --tb=short --cov=aw_server --cov-report=xml
-      working-directory: aw-server
+      - name: Run Python Backend Unit Tests
+        run: poetry run pytest tests/unit/ -v --tb=short --cov=aw_server --cov-report=xml
+        working-directory: aw-server
 
-    - name: Run Firebase Functions Unit Tests
-      run: npm test functions/test/unit/ # Assuming unit tests are in this directory
-      working-directory: functions
+      - name: Run Firebase Functions Unit Tests
+        run: npm test functions/test/unit/ # Assuming unit tests are in this directory
+        working-directory: functions
 
-    - name: Run Web UI Unit Tests
-      run: npm test --prefix aw-server/aw-webui
-      working-directory: aw-server
+      - name: Run Web UI Unit Tests
+        run: npm test --prefix aw-server/aw-webui
+        working-directory: aw-server
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: aw-server/coverage.xml # Adjust path if other coverage files are generated
-        flags: unit-tests
-        name: unit-tests-coverage
-        fail_ci_if_error: false
-        verbose: true
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: aw-server/coverage.xml # Adjust path if other coverage files are generated
+          flags: unit-tests
+          name: unit-tests-coverage
+          fail_ci_if_error: false
+          verbose: true
 
-    - name: Upload Test Results (Artifacts)
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: unit-test-results
-        path: |
-          aw-server/.coverage
-          aw-server/htmlcov/
-          aw-server/coverage.xml
-        retention-days: 7
+      - name: Upload Test Results (Artifacts)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            aw-server/.coverage
+            aw-server/htmlcov/
+            aw-server/coverage.xml
+          retention-days: 7

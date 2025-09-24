@@ -1,6 +1,6 @@
 /**
  * Firebase Functions Exception Handling Utilities
- * 
+ *
  * Bu modül, Firebase Functions'da tutarlı exception handling sağlar.
  * Spesifik error türleri tanımlar ve merkezi error handling mekanizmaları sunar.
  */
@@ -67,9 +67,9 @@ export class RateLimitError extends PeakActivityError {
 
 export class ExternalServiceError extends PeakActivityError {
   constructor(service: string, originalError?: any) {
-    super(`External service error: ${service}`, 'EXTERNAL_SERVICE_ERROR', 502, { 
-      service, 
-      originalError: originalError?.message || originalError 
+    super(`External service error: ${service}`, 'EXTERNAL_SERVICE_ERROR', 502, {
+      service,
+      originalError: originalError?.message || originalError,
     });
     this.name = 'ExternalServiceError';
   }
@@ -77,9 +77,9 @@ export class ExternalServiceError extends PeakActivityError {
 
 export class FirestoreError extends PeakActivityError {
   constructor(operation: string, originalError?: any) {
-    super(`Firestore operation failed: ${operation}`, 'FIRESTORE_ERROR', 500, { 
-      operation, 
-      originalError: originalError?.message || originalError 
+    super(`Firestore operation failed: ${operation}`, 'FIRESTORE_ERROR', 500, {
+      operation,
+      originalError: originalError?.message || originalError,
     });
     this.name = 'FirestoreError';
   }
@@ -90,7 +90,7 @@ export class FirestoreError extends PeakActivityError {
  */
 export function handleError(error: any, context?: string): never {
   const contextStr = context ? ` in ${context}` : '';
-  
+
   if (error instanceof PeakActivityError) {
     logger.error(`PeakActivity error${contextStr}:`, {
       name: error.name,
@@ -98,39 +98,35 @@ export function handleError(error: any, context?: string): never {
       code: error.code,
       statusCode: error.statusCode,
       details: error.details,
-      stack: error.stack
+      stack: error.stack,
     });
-    throw new https.HttpsError(
-      mapToFirebaseErrorCode(error.code),
-      error.message,
-      error.details
-    );
+    throw new https.HttpsError(mapToFirebaseErrorCode(error.code), error.message, error.details);
   }
-  
+
   // Firebase Admin SDK errors
   if (error.code && error.code.startsWith('firestore/')) {
     logger.error(`Firestore error${contextStr}:`, error);
-    throw new https.HttpsError('internal', 'Database operation failed', { 
-      code: error.code 
+    throw new https.HttpsError('internal', 'Database operation failed', {
+      code: error.code,
     });
   }
-  
+
   // Network/HTTP errors
   if (error.code && (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED')) {
     logger.error(`Network error${contextStr}:`, error);
-    throw new https.HttpsError('unavailable', 'External service unavailable', { 
-      code: error.code 
+    throw new https.HttpsError('unavailable', 'External service unavailable', {
+      code: error.code,
     });
   }
-  
+
   // Unknown errors
   logger.error(`Unexpected error${contextStr}:`, {
     message: error.message,
     stack: error.stack,
     name: error.name,
-    code: error.code
+    code: error.code,
   });
-  
+
   throw new https.HttpsError('internal', 'An unexpected error occurred');
 }
 
@@ -139,16 +135,16 @@ export function handleError(error: any, context?: string): never {
  */
 function mapToFirebaseErrorCode(code: string): https.FunctionsErrorCode {
   const mapping: Record<string, https.FunctionsErrorCode> = {
-    'VALIDATION_ERROR': 'invalid-argument',
-    'AUTH_REQUIRED': 'unauthenticated',
-    'INSUFFICIENT_PERMISSIONS': 'permission-denied',
-    'NOT_FOUND': 'not-found',
-    'CONFLICT': 'already-exists',
-    'RATE_LIMIT_EXCEEDED': 'resource-exhausted',
-    'EXTERNAL_SERVICE_ERROR': 'unavailable',
-    'FIRESTORE_ERROR': 'internal'
+    VALIDATION_ERROR: 'invalid-argument',
+    AUTH_REQUIRED: 'unauthenticated',
+    INSUFFICIENT_PERMISSIONS: 'permission-denied',
+    NOT_FOUND: 'not-found',
+    CONFLICT: 'already-exists',
+    RATE_LIMIT_EXCEEDED: 'resource-exhausted',
+    EXTERNAL_SERVICE_ERROR: 'unavailable',
+    FIRESTORE_ERROR: 'internal',
   };
-  
+
   return mapping[code] || 'internal';
 }
 
@@ -165,7 +161,10 @@ export function safeAsync<T extends any[], R>(
       return await fn(...args);
     } catch (error) {
       if (defaultValue !== undefined) {
-        logger.warn(`Function ${fn.name} failed${context ? ` in ${context}` : ''}, returning default value:`, error);
+        logger.warn(
+          `Function ${fn.name} failed${context ? ` in ${context}` : ''}, returning default value:`,
+          error
+        );
         return defaultValue;
       }
       handleError(error, context || fn.name);
@@ -186,7 +185,10 @@ export function safe<T extends any[], R>(
       return fn(...args);
     } catch (error) {
       if (defaultValue !== undefined) {
-        logger.warn(`Function ${fn.name} failed${context ? ` in ${context}` : ''}, returning default value:`, error);
+        logger.warn(
+          `Function ${fn.name} failed${context ? ` in ${context}` : ''}, returning default value:`,
+          error
+        );
         return defaultValue;
       }
       handleError(error, context || fn.name);
@@ -205,31 +207,36 @@ export function withRetry<T extends any[], R>(
 ) {
   return async (...args: T): Promise<R> => {
     let lastError: any;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        
+
         if (attempt === maxAttempts) {
           break;
         }
-        
+
         // Don't retry on authentication or validation errors
-        if (error instanceof AuthenticationError || 
-            error instanceof ValidationError ||
-            error instanceof AuthorizationError) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof ValidationError ||
+          error instanceof AuthorizationError
+        ) {
           break;
         }
-        
+
         const delay = baseDelay * Math.pow(2, attempt - 1);
-        logger.warn(`Attempt ${attempt}/${maxAttempts} failed${context ? ` in ${context}` : ''}, retrying in ${delay}ms:`, error);
-        
+        logger.warn(
+          `Attempt ${attempt}/${maxAttempts} failed${context ? ` in ${context}` : ''}, retrying in ${delay}ms:`,
+          error
+        );
+
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-    
+
     handleError(lastError, context);
   };
 }
@@ -245,11 +252,10 @@ export function validateRequired(value: any, fieldName: string): void {
 
 export function validateType(value: any, expectedType: string, fieldName: string): void {
   if (typeof value !== expectedType) {
-    throw new ValidationError(
-      `${fieldName} must be of type ${expectedType}`, 
-      fieldName, 
-      { actualType: typeof value, expectedType }
-    );
+    throw new ValidationError(`${fieldName} must be of type ${expectedType}`, fieldName, {
+      actualType: typeof value,
+      expectedType,
+    });
   }
 }
 

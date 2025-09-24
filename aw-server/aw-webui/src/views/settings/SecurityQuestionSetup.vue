@@ -4,22 +4,32 @@
     <p>{{ $t('settings.securityQuestions.description') }}</p>
 
     <div v-for="(qa, index) in securityQuestionsAndAnswers" :key="index" class="question-item">
-      <label :for="'question-' + index">{{ $t('settings.securityQuestions.selectQuestion') }}</label>
+      <label :for="'question-' + index">
+        {{ $t('settings.securityQuestions.selectQuestion') }}
+      </label>
       <select :id="'question-' + index" v-model="qa.questionId">
         <option value="">{{ $t('settings.securityQuestions.choose') }}</option>
         <option v-for="q in availableQuestions" :key="q.id" :value="q.id">{{ q.question }}</option>
       </select>
 
       <label :for="'answer-' + index">{{ $t('settings.securityQuestions.yourAnswer') }}</label>
-      <input :id="'answer-' + index" type="password" v-model="qa.answer" autocomplete="off">
+      <input :id="'answer-' + index" type="password" v-model="qa.answer" autocomplete="off" />
     </div>
 
-    <button @click="addQuestion" :disabled="securityQuestionsAndAnswers.length >= maxQuestions">{{ $t('settings.securityQuestions.addQuestion') }}</button>
+    <button @click="addQuestion" :disabled="securityQuestionsAndAnswers.length >= maxQuestions">
+      {{ $t('settings.securityQuestions.addQuestion') }}
+    </button>
     <button @click="saveSettings">{{ $t('settings.securityQuestions.saveButton') }}</button>
 
-    <div v-if="saveStatus === 'saving'" class="status-message saving">{{ $t('settings.saving') }}</div>
-    <div v-if="saveStatus === 'success'" class="status-message success">{{ $t('settings.saveSuccess') }}</div>
-    <div v-if="saveStatus === 'error'" class="status-message error">{{ $t('settings.saveError') }}</div>
+    <div v-if="saveStatus === 'saving'" class="status-message saving">
+      {{ $t('settings.saving') }}
+    </div>
+    <div v-if="saveStatus === 'success'" class="status-message success">
+      {{ $t('settings.saveSuccess') }}
+    </div>
+    <div v-if="saveStatus === 'error'" class="status-message error">
+      {{ $t('settings.saveError') }}
+    </div>
   </div>
 </template>
 
@@ -118,12 +128,16 @@ export default Vue.extend({
 
         const response = await this.$axios.post('/api/security-questions/answers', {
           userId: this.userId,
-          answers: answersToSave
+          answers: answersToSave,
         });
 
         if (response.data.success) {
           this.saveStatus = 'success';
-          this.securityQuestionsAndAnswers = this.securityQuestionsAndAnswers.map(qa => ({ ...qa, answer: '', questionId: qa.questionId }));
+          this.securityQuestionsAndAnswers = this.securityQuestionsAndAnswers.map(qa => ({
+            ...qa,
+            answer: '',
+            questionId: qa.questionId,
+          }));
         } else {
           this.saveStatus = 'error';
         }
@@ -174,7 +188,7 @@ p {
 }
 
 .question-item select,
-.question-item input[type="password"] {
+.question-item input[type='password'] {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
@@ -225,4 +239,4 @@ button:hover:not(:disabled) {
   background-color: #ffebee;
   color: #c62828;
 }
-</style> 
+</style>

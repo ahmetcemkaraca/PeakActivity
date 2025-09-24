@@ -56,7 +56,7 @@ export class CustomContextualRulesService {
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data()?.userId !== uid) {
-      throw new Error("Kural bulunamadı veya bu kuralı güncelleme yetkiniz yok.");
+      throw new Error('Kural bulunamadı veya bu kuralı güncelleme yetkiniz yok.');
     }
 
     await docRef.update({
@@ -78,9 +78,9 @@ export class CustomContextualRulesService {
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data()?.userId !== uid) {
-      throw new Error("Kural bulunamadı veya bu kuralı silme yetkiniz yok.");
+      throw new Error('Kural bulunamadı veya bu kuralı silme yetkiniz yok.');
     }
 
     await docRef.delete();
   }
-} 
+}

@@ -142,7 +142,10 @@ div.activity-container.aw-container
   background-color: var(--background-color);
   border: 1px solid var(--light-border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .card-title {

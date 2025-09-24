@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { Messaging } from 'firebase-admin/lib/messaging';
 import { NotificationService } from './notification-service';
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 
 export class AINotificationService {
   private messaging: Messaging;
@@ -22,7 +22,12 @@ export class AINotificationService {
    * @param data Ek veri (opsiyonel).
    * @returns Bildirim gönderme işleminin sonucu.
    */
-  async sendAIRecommendationNotification(userId: string, title: string, body: string, data?: { [key: string]: string }) {
+  async sendAIRecommendationNotification(
+    userId: string,
+    title: string,
+    body: string,
+    data?: { [key: string]: string }
+  ) {
     try {
       const userDoc = await this.db.collection('users').doc(userId).get();
       const fcmToken = userDoc.data()?.fcmToken;
@@ -59,4 +64,4 @@ export class AINotificationService {
       throw error;
     }
   }
-} 
+}

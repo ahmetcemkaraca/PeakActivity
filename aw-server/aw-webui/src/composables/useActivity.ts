@@ -1,6 +1,6 @@
 /**
  * Activity Data Composable
- * 
+ *
  * Bu composable Activity verilerini yönetmek için reactive state sağlar.
  * Vue 3 Composition API patterns kullanır.
  */
@@ -32,7 +32,10 @@ export interface ActivityState {
 }
 
 export interface ActivityActions {
-  fetchEvents: (bucketId: string, params?: { start?: Date; end?: Date; limit?: number }) => Promise<void>;
+  fetchEvents: (
+    bucketId: string,
+    params?: { start?: Date; end?: Date; limit?: number }
+  ) => Promise<void>;
   fetchBuckets: () => Promise<void>;
   createEvent: (bucketId: string, event: Omit<AWEvent, 'id'>) => Promise<void>;
   deleteEvent: (bucketId: string, eventId: string) => Promise<void>;
@@ -51,7 +54,7 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
   // Dependencies
   const { handleError, clearError } = useErrorHandler();
   const { isLoading, setLoading } = useLoadingState();
-  
+
   // Create API service
   const apiService = new APIService(getClient());
 
@@ -109,7 +112,7 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
     params?: { start?: Date; end?: Date; limit?: number }
   ): Promise<void> => {
     const cacheKey = `events_${bucketId}_${JSON.stringify(params)}`;
-    
+
     // Check cache first
     const cachedEvents = getCache<AWEvent[]>(cacheKey);
     if (cachedEvents) {
@@ -122,22 +125,25 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
       clearError();
 
       const fetchedEvents = await apiService.getEvents(bucketId, params);
-      
+
       // Transform and validate events
       const validEvents = fetchedEvents.filter(event => {
-        return event && typeof event === 'object' && 
-               'id' in event && 'timestamp' in event && 'duration' in event;
+        return (
+          event &&
+          typeof event === 'object' &&
+          'id' in event &&
+          'timestamp' in event &&
+          'duration' in event
+        );
       });
 
       events.value = validEvents;
       setCache(cacheKey, validEvents);
       lastFetch.value = new Date();
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Events yüklenirken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Events yüklenirken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'fetchEvents');
     } finally {
@@ -150,7 +156,7 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
    */
   const fetchBuckets = async (): Promise<void> => {
     const cacheKey = 'buckets_all';
-    
+
     // Check cache first
     const cachedBuckets = getCache<Record<string, AWBucket>>(cacheKey);
     if (cachedBuckets) {
@@ -166,12 +172,10 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
       buckets.value = fetchedBuckets;
       setCache(cacheKey, fetchedBuckets);
       lastFetch.value = new Date();
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Buckets yüklenirken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Buckets yüklenirken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'fetchBuckets');
     } finally {
@@ -188,21 +192,19 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
       clearError();
 
       const newEvent = await apiService.createEvent(bucketId, event);
-      
+
       // Add to local state
       events.value = [...events.value, newEvent];
-      
+
       // Clear cache for this bucket
-      const cacheKeys = Array.from(cache.keys()).filter(key => 
+      const cacheKeys = Array.from(cache.keys()).filter(key =>
         key.startsWith(`events_${bucketId}`)
       );
       cacheKeys.forEach(key => cache.delete(key));
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Event oluşturulurken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Event oluşturulurken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'createEvent');
     } finally {
@@ -219,21 +221,19 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
       clearError();
 
       await apiService.deleteEvent(bucketId, eventId);
-      
+
       // Remove from local state
       events.value = events.value.filter(event => event.id !== eventId);
-      
+
       // Clear cache for this bucket
-      const cacheKeys = Array.from(cache.keys()).filter(key => 
+      const cacheKeys = Array.from(cache.keys()).filter(key =>
         key.startsWith(`events_${bucketId}`)
       );
       cacheKeys.forEach(key => cache.delete(key));
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Event silinirken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Event silinirken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'deleteEvent');
     } finally {
@@ -256,10 +256,9 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
         buckets.value[bucketId] = fetchedBucket;
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Bucket yüklenirken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Bucket yüklenirken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'setBucket');
     }
@@ -270,7 +269,7 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
    */
   const query = async (params: QueryParams): Promise<QueryResult> => {
     const cacheKey = `query_${JSON.stringify(params)}`;
-    
+
     // Check cache first
     const cachedResult = getCache<QueryResult>(cacheKey);
     if (cachedResult) {
@@ -283,14 +282,12 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
 
       const result = await apiService.query(params);
       setCache(cacheKey, result);
-      
-      return result;
 
+      return result;
     } catch (err: unknown) {
-      const errorMessage = err instanceof APIError 
-        ? err.getUserMessage() 
-        : 'Sorgu çalıştırılırken hata oluştu';
-      
+      const errorMessage =
+        err instanceof APIError ? err.getUserMessage() : 'Sorgu çalıştırılırken hata oluştu';
+
       error.value = errorMessage;
       handleError(err, 'query');
       throw err;
@@ -305,11 +302,11 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
   const refresh = async (): Promise<void> => {
     // Clear all cache
     cache.clear();
-    
+
     // Refetch data
     await Promise.all([
       fetchBuckets(),
-      currentBucket.value ? fetchEvents(currentBucket.value.id) : Promise.resolve()
+      currentBucket.value ? fetchEvents(currentBucket.value.id) : Promise.resolve(),
     ]);
   };
 
@@ -348,11 +345,15 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
   });
 
   // Watch for bucket changes and auto-fetch events
-  watch(currentBucket, (newBucket) => {
-    if (newBucket && options.autoFetch !== false) {
-      fetchEvents(newBucket.id);
-    }
-  }, { immediate: false });
+  watch(
+    currentBucket,
+    newBucket => {
+      if (newBucket && options.autoFetch !== false) {
+        fetchEvents(newBucket.id);
+      }
+    },
+    { immediate: false }
+  );
 
   return {
     // State
@@ -364,7 +365,7 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
     isLoading,
     error,
     lastFetch,
-    
+
     // Actions
     fetchEvents,
     fetchBuckets,
@@ -373,6 +374,6 @@ export function useActivity(options: UseActivityOptions = {}): UseActivityReturn
     setBucket,
     query,
     refresh,
-    clear
+    clear,
   };
 }

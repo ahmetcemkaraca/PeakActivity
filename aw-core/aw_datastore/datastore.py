@@ -103,8 +103,8 @@ class Bucket:
             milliseconds = 1 + int(endtime.microsecond / 1000)
             second_offset = int(milliseconds / 1000)  # usually 0, rarely 1
             microseconds = (
-                (1000 * milliseconds) % 1000000
-            )  # will likely just be 1000 * milliseconds, if it overflows it would become zero
+                1000 * milliseconds
+            ) % 1000000  # will likely just be 1000 * milliseconds, if it overflows it would become zero
             endtime = endtime.replace(microsecond=microseconds) + timedelta(
                 seconds=second_offset
             )

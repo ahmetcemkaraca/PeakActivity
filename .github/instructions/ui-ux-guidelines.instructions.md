@@ -1,15 +1,17 @@
 ---
-applyTo: "**/*.ts,**/*.tsx,**/*.vue"
-description: "User interface and user experience development guidelines"
+applyTo: '**/*.ts,**/*.tsx,**/*.vue'
+description: 'User interface and user experience development guidelines'
 ---
 
 # UI/UX Geliştirme Kılavuzu
 
-Bu dosya, PeakActivity kullanıcı arayüzü ve deneyimi geliştirme standartlarını tanımlar.
+Bu dosya, PeakActivity kullanıcı arayüzü ve deneyimi geliştirme standartlarını
+tanımlar.
 
 ## Çok Dilli Uygulama (i18n) Standartları
 
 ### Vue.js i18n Implementation
+
 ```vue
 <template>
   <div class="welcome-section">
@@ -23,11 +25,14 @@ Bu dosya, PeakActivity kullanıcı arayüzü ve deneyimi geliştirme standartlar
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const welcomeMessage = computed(() => t('dashboard.welcome', { name: user.value.name }));
+const welcomeMessage = computed(() =>
+  t('dashboard.welcome', { name: user.value.name })
+);
 </script>
 ```
 
 ### Dil Dosyası Yapısı
+
 ```typescript
 // locales/tr.json
 {
@@ -58,7 +63,7 @@ const welcomeMessage = computed(() => t('dashboard.welcome', { name: user.value.
   },
   "actions": {
     "export": "Export",
-    "import": "Import", 
+    "import": "Import",
     "save": "Save",
     "cancel": "Cancel"
   },
@@ -71,6 +76,7 @@ const welcomeMessage = computed(() => t('dashboard.welcome', { name: user.value.
 ```
 
 ### ICU Message Format Kullanımı
+
 ```typescript
 // Pluralization support
 {
@@ -84,7 +90,7 @@ const welcomeMessage = computed(() => t('dashboard.welcome', { name: user.value.
 }
 
 // Vue component'te kullanım
-const unreadMessage = computed(() => 
+const unreadMessage = computed(() =>
   t('notifications.unread', unreadCount.value, { count: unreadCount.value })
 );
 ```
@@ -92,14 +98,11 @@ const unreadMessage = computed(() =>
 ## Component Architecture
 
 ### Base Component Pattern
+
 ```vue
 <!-- BaseButton.vue -->
 <template>
-  <button 
-    :class="computedClasses" 
-    :disabled="disabled"
-    @click="handleClick"
-  >
+  <button :class="computedClasses" :disabled="disabled" @click="handleClick">
     <Icon v-if="icon" :name="icon" />
     <span>{{ label }}</span>
   </button>
@@ -117,7 +120,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'medium',
-  disabled: false
+  disabled: false,
 });
 
 const emit = defineEmits<{
@@ -128,7 +131,7 @@ const computedClasses = computed(() => [
   'btn',
   `btn--${props.variant}`,
   `btn--${props.size}`,
-  { 'btn--disabled': props.disabled }
+  { 'btn--disabled': props.disabled },
 ]);
 
 const handleClick = (event: MouseEvent) => {
@@ -140,6 +143,7 @@ const handleClick = (event: MouseEvent) => {
 ```
 
 ### Activity Visualization Components
+
 ```vue
 <!-- ActivityChart.vue -->
 <template>
@@ -172,28 +176,30 @@ onMounted(() => {
 
 const initChart = () => {
   if (!chartRef.value) return;
-  
+
   chart.value = new Chart(chartRef.value, {
     type: 'line',
     data: {
       labels: props.data.map(d => formatTime(d.timestamp)),
-      datasets: [{
-        label: t('charts.activity.dataset'),
-        data: props.data.map(d => d.duration),
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
-      }]
+      datasets: [
+        {
+          label: t('charts.activity.dataset'),
+          data: props.data.map(d => d.duration),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1,
+        },
+      ],
     },
     options: {
       responsive: true,
       plugins: {
         legend: {
           labels: {
-            color: 'var(--text-color)'
-          }
-        }
-      }
-    }
+            color: 'var(--text-color)',
+          },
+        },
+      },
+    },
   });
 };
 </script>
@@ -202,6 +208,7 @@ const initChart = () => {
 ## Theme ve Styling Standards
 
 ### CSS Custom Properties
+
 ```css
 /* themes/light.css */
 :root {
@@ -229,6 +236,7 @@ const initChart = () => {
 ```
 
 ### Component Styling Pattern
+
 ```scss
 // ActivityCard.vue <style>
 .activity-card {
@@ -237,25 +245,25 @@ const initChart = () => {
   border-radius: 8px;
   padding: 1rem;
   box-shadow: var(--shadow);
-  
+
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
   }
-  
+
   &__title {
     color: var(--text-primary);
     font-weight: 600;
     margin: 0;
   }
-  
+
   &__duration {
     color: var(--text-secondary);
     font-size: 0.875rem;
   }
-  
+
   &--focused {
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.1);
@@ -266,13 +274,14 @@ const initChart = () => {
 ## Responsive Design Guidelines
 
 ### Breakpoint System
+
 ```scss
 // styles/mixins.scss
 $breakpoints: (
   'mobile': 480px,
   'tablet': 768px,
   'desktop': 1024px,
-  'wide': 1440px
+  'wide': 1440px,
 );
 
 @mixin respond-to($breakpoint) {
@@ -288,11 +297,11 @@ $breakpoints: (
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
-  
+
   @include respond-to('tablet') {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   @include respond-to('desktop') {
     grid-template-columns: 1fr 1fr 1fr;
   }
@@ -302,15 +311,20 @@ $breakpoints: (
 ## Accessibility (a11y) Standards
 
 ### Semantic HTML ve ARIA
+
 ```vue
 <template>
-  <section class="activity-dashboard" role="main" aria-label="Activity Dashboard">
+  <section
+    class="activity-dashboard"
+    role="main"
+    aria-label="Activity Dashboard"
+  >
     <h1 id="dashboard-title">{{ $t('dashboard.title') }}</h1>
-    
+
     <nav aria-label="Dashboard navigation">
       <ul role="list">
         <li v-for="item in navItems" :key="item.id">
-          <router-link 
+          <router-link
             :to="item.path"
             :aria-current="$route.path === item.path ? 'page' : undefined"
           >
@@ -319,12 +333,8 @@ $breakpoints: (
         </li>
       </ul>
     </nav>
-    
-    <div 
-      class="chart-container"
-      role="img"
-      :aria-labelledby="chartId"
-    >
+
+    <div class="chart-container" role="img" :aria-labelledby="chartId">
       <h2 :id="chartId">{{ $t('charts.activity.title') }}</h2>
       <ActivityChart :data="activityData" />
     </div>
@@ -333,6 +343,7 @@ $breakpoints: (
 ```
 
 ### Keyboard Navigation
+
 ```vue
 <script setup lang="ts">
 // Focus management
@@ -356,8 +367,9 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 const trapFocus = (event: KeyboardEvent) => {
   const firstElement = focusableElements.value[0];
-  const lastElement = focusableElements.value[focusableElements.value.length - 1];
-  
+  const lastElement =
+    focusableElements.value[focusableElements.value.length - 1];
+
   if (event.shiftKey && event.target === firstElement) {
     event.preventDefault();
     lastElement?.focus();
@@ -372,6 +384,7 @@ const trapFocus = (event: KeyboardEvent) => {
 ## State Management Patterns
 
 ### Pinia Store Pattern
+
 ```typescript
 // stores/activity.ts
 import { defineStore } from 'pinia';
@@ -384,15 +397,17 @@ export const useActivityStore = defineStore('activity', () => {
   const filter = ref<ActivityFilter>({
     dateRange: '7d',
     categories: [],
-    searchQuery: ''
+    searchQuery: '',
   });
 
   const filteredEvents = computed(() => {
     return events.value.filter(event => {
       if (filter.value.searchQuery) {
         const query = filter.value.searchQuery.toLowerCase();
-        return event.title?.toLowerCase().includes(query) ||
-               event.app?.toLowerCase().includes(query);
+        return (
+          event.title?.toLowerCase().includes(query) ||
+          event.app?.toLowerCase().includes(query)
+        );
       }
       return true;
     });
@@ -401,7 +416,7 @@ export const useActivityStore = defineStore('activity', () => {
   const fetchEvents = async (bucketId: string) => {
     loading.value = true;
     error.value = null;
-    
+
     try {
       const response = await activityApi.getEvents(bucketId, filter.value);
       events.value = response.data;
@@ -419,7 +434,7 @@ export const useActivityStore = defineStore('activity', () => {
     error,
     filter,
     filteredEvents,
-    fetchEvents
+    fetchEvents,
   };
 });
 ```
@@ -427,6 +442,7 @@ export const useActivityStore = defineStore('activity', () => {
 ## Performance Optimization
 
 ### Component Lazy Loading
+
 ```typescript
 // router/index.ts
 const Dashboard = () => import('@/views/Dashboard.vue');
@@ -438,27 +454,28 @@ export const routes = [
     path: '/',
     name: 'Dashboard',
     component: Dashboard,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/analytics',
-    name: 'Analytics', 
+    name: 'Analytics',
     component: Analytics,
-    meta: { requiresAuth: true }
-  }
+    meta: { requiresAuth: true },
+  },
 ];
 ```
 
 ### Virtual Scrolling for Large Lists
+
 ```vue
 <!-- VirtualActivityList.vue -->
 <template>
   <div ref="container" class="virtual-list" @scroll="handleScroll">
     <div :style="{ height: totalHeight + 'px' }" class="virtual-list__spacer">
-      <div 
-        :style="{ 
+      <div
+        :style="{
           transform: `translateY(${offsetY}px)`,
-          height: visibleHeight + 'px'
+          height: visibleHeight + 'px',
         }"
         class="virtual-list__content"
       >

@@ -1,19 +1,23 @@
 ---
-applyTo: "**"
-description: "Core development standards and project guidelines for PeakActivity"
+applyTo: '**'
+description:
+  'Core development standards and project guidelines for PeakActivity'
 ---
 
 # PeakActivity Geliştirme Standartları
 
-Bu dosya, PeakActivity projesi için temel geliştirme standartlarını ve kod inceleme politikalarını tanımlar.
+Bu dosya, PeakActivity projesi için temel geliştirme standartlarını ve kod
+inceleme politikalarını tanımlar.
 
 ## Kod İnceleme Politikası
 
-Tüm kodlar, birleştirilmeden önce akran değerlendirmesinden geçmelidir. Güvenlik, performans ve okunabilirlik için kontrol listeleri kullanılmalıdır.
+Tüm kodlar, birleştirilmeden önce akran değerlendirmesinden geçmelidir.
+Güvenlik, performans ve okunabilirlik için kontrol listeleri kullanılmalıdır.
 
 ### Kontrol Listesi
+
 - [ ] Güvenlik açıkları kontrol edildi
-- [ ] Performans impact değerlendirildi  
+- [ ] Performans impact değerlendirildi
 - [ ] Kod okunabilirliği standartlara uygun
 - [ ] Test coverage yeterli
 - [ ] Dokümantasyon güncellendi
@@ -24,11 +28,18 @@ Tüm önemli mimari kararlar ADR formatında belgelenmelidir:
 
 ```markdown
 # ADR-001: Firebase Firestore Kullanımı
+
 ## Bağlam
-Kullanıcı etkinliği için ölçeklenebilir, gerçek zamanlı veritabanına ihtiyaç var.
-## Karar  
+
+Kullanıcı etkinliği için ölçeklenebilir, gerçek zamanlı veritabanına ihtiyaç
+var.
+
+## Karar
+
 Firestore'u birincil veri deposu olarak benimseyin.
+
 ## Sonuçlar
+
 Gerçek zamanlı senkronizasyonu etkinleştirir, bulut maliyetlerini artırır.
 ```
 
@@ -55,6 +66,7 @@ OWASP Top 10 ve Google Cloud güvenlik yönergelerine uyum:
 Ana özelliklerin performans kıyaslamaları ve gerileme testleri:
 
 ### Metrikler
+
 - Response time < 200ms (API endpoints)
 - Memory usage < 100MB (client apps)
 - CPU usage < 5% (background processes)

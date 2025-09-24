@@ -24,12 +24,19 @@
       </b-form-group>
 
       <b-button type="submit" variant="primary" :disabled="loading">
-        <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span
+          v-if="loading"
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
         <span v-else>Gönder</span>
       </b-button>
     </b-form>
 
-    <b-alert v-if="successMessage" show variant="success" class="mt-3">{{ successMessage }}</b-alert>
+    <b-alert v-if="successMessage" show variant="success" class="mt-3">
+      {{ successMessage }}
+    </b-alert>
     <b-alert v-if="errorMessage" show variant="danger" class="mt-3">{{ errorMessage }}</b-alert>
   </div>
 </template>
@@ -64,7 +71,8 @@ export default Vue.extend({
           this.form.subject = '';
           this.form.message = '';
         } else {
-          this.errorMessage = response.data.message || 'Geri bildirim gönderilirken bir hata oluştu.';
+          this.errorMessage =
+            response.data.message || 'Geri bildirim gönderilirken bir hata oluştu.';
         }
       } catch (error: any) {
         console.error('Geri bildirim gönderilirken hata:', error);
@@ -84,4 +92,4 @@ export default Vue.extend({
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-</style> 
+</style>

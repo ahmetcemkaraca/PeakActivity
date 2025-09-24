@@ -3,41 +3,52 @@ import { GoalService } from '../services/goal-service';
 import * as admin from 'firebase-admin';
 
 // Hedef oluşturma
-export const createGoal = onCall(async (request) => {
+export const createGoal = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
 
-  const { title, description, type, targetDuration, targetDailyDuration, targetWeeklyDuration, targetCount, currentCount, targetCriteria } = request.data;
+  const {
+    title,
+    description,
+    type,
+    targetDuration,
+    targetDailyDuration,
+    targetWeeklyDuration,
+    targetCount,
+    currentCount,
+    targetCriteria,
+  } = request.data;
   const userId = request.auth.uid;
 
   if (!title || !type) {
-    throw new HttpsError(
-      'invalid-argument',
-      'Gerekli alanlar eksik: başlık, tür.'
-    );
+    throw new HttpsError('invalid-argument', 'Gerekli alanlar eksik: başlık, tür.');
   }
 
   try {
-    const newGoal = await GoalService.createGoal({ title, description, type, targetDuration, targetDailyDuration, targetWeeklyDuration, targetCount, currentCount, targetCriteria }, userId);
+    const newGoal = await GoalService.createGoal(
+      {
+        title,
+        description,
+        type,
+        targetDuration,
+        targetDailyDuration,
+        targetWeeklyDuration,
+        targetCount,
+        currentCount,
+        targetCriteria,
+      },
+      userId
+    );
     return { status: 'success', data: newGoal };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      error.message || 'An unknown error occurred.'
-    );
+    throw new HttpsError('internal', error.message || 'An unknown error occurred.');
   }
 });
 
-export const listGoals = onCall(async (request) => {
+export const listGoals = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
 
   const userId = request.auth.uid;
@@ -46,15 +57,12 @@ export const listGoals = onCall(async (request) => {
     const goals = await GoalService.getAllGoals(userId);
     return { status: 'success', data: goals };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      error.message || 'An unknown error occurred.'
-    );
+    throw new HttpsError('internal', error.message || 'An unknown error occurred.');
   }
 });
 
 // Hedef güncelleme
-export const updateGoal = onCall(async (request) => {
+export const updateGoal = onCall(async request => {
   try {
     if (!request.auth) {
       throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
@@ -70,12 +78,12 @@ export const updateGoal = onCall(async (request) => {
     await GoalService.updateGoal(goalId, updates, userId);
     return { success: true, message: 'Hedef başarıyla güncellendi' };
   } catch (error: any) {
-    throw new HttpsError('internal', "Hedef güncellenirken hata oluştu.", error.message);
+    throw new HttpsError('internal', 'Hedef güncellenirken hata oluştu.', error.message);
   }
 });
 
 // Hedef silme
-export const deleteGoal = onCall(async (request) => {
+export const deleteGoal = onCall(async request => {
   try {
     if (!request.auth) {
       throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
@@ -91,6 +99,6 @@ export const deleteGoal = onCall(async (request) => {
     await GoalService.deleteGoal(goalId, userId);
     return { success: true, message: 'Hedef başarıyla silindi' };
   } catch (error: any) {
-    throw new HttpsError('internal', "Hedef silinirken hata oluştu.", error.message);
+    throw new HttpsError('internal', 'Hedef silinirken hata oluştu.', error.message);
   }
-}); 
+});

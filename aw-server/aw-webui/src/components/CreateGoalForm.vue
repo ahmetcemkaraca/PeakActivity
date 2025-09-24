@@ -25,22 +25,44 @@
       <div v-if="goal.type === 'time_based'">
         <div class="form-group">
           <label for="targetDuration">Hedef Süre (Saniye):</label>
-          <input type="number" id="targetDuration" v-model.number="goal.targetDuration" min="0" required />
+          <input
+            type="number"
+            id="targetDuration"
+            v-model.number="goal.targetDuration"
+            min="0"
+            required
+          />
         </div>
         <div class="form-group">
           <label for="targetDailyDuration">Günlük Hedef Süre (Saniye):</label>
-          <input type="number" id="targetDailyDuration" v-model.number="goal.targetDailyDuration" min="0" />
+          <input
+            type="number"
+            id="targetDailyDuration"
+            v-model.number="goal.targetDailyDuration"
+            min="0"
+          />
         </div>
         <div class="form-group">
           <label for="targetWeeklyDuration">Haftalık Hedef Süre (Saniye):</label>
-          <input type="number" id="targetWeeklyDuration" v-model.number="goal.targetWeeklyDuration" min="0" />
+          <input
+            type="number"
+            id="targetWeeklyDuration"
+            v-model.number="goal.targetWeeklyDuration"
+            min="0"
+          />
         </div>
       </div>
 
       <div v-else-if="goal.type === 'count_based'">
         <div class="form-group">
           <label for="targetCount">Hedef Sayı:</label>
-          <input type="number" id="targetCount" v-model.number="goal.targetCount" min="0" required />
+          <input
+            type="number"
+            id="targetCount"
+            v-model.number="goal.targetCount"
+            min="0"
+            required
+          />
         </div>
       </div>
 
@@ -100,9 +122,18 @@ export default {
     },
     async createGoal() {
       // Inputları diziye dönüştür
-      this.goal.targetCriteria.appNames = this.appNamesInput.split(',').map(s => s.trim()).filter(s => s);
-      this.goal.targetCriteria.categories = this.categoriesInput.split(',').map(s => s.trim()).filter(s => s);
-      this.goal.targetCriteria.tags = this.tagsInput.split(',').map(s => s.trim()).filter(s => s);
+      this.goal.targetCriteria.appNames = this.appNamesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
+      this.goal.targetCriteria.categories = this.categoriesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
+      this.goal.targetCriteria.tags = this.tagsInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
 
       // Kullanıcı ID'sini auth store'dan veya başka bir yerden alın
       const authStore = useAuthStore(); // Örnek
@@ -168,8 +199,8 @@ label {
   font-weight: bold;
 }
 
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 textarea,
 select {
   width: 100%;
@@ -180,7 +211,7 @@ select {
 }
 
 button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 10px 15px;
   border: none;
@@ -192,4 +223,4 @@ button {
 button:hover {
   background-color: #45a049;
 }
-</style> 
+</style>

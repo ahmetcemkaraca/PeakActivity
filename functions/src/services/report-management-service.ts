@@ -1,6 +1,5 @@
-
-import * as functions from "firebase-functions";
-import { db } from "../firebaseAdmin";
+import * as functions from 'firebase-functions';
+import { db } from '../firebaseAdmin';
 
 interface ReportDocument {
   id: string;
@@ -40,7 +39,19 @@ export class ReportManagementService {
    * @param reportData The data for the new report/dashboard.
    * @returns The created report document.
    */
-  async createReport(userId: string, reportData: Omit<ReportDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version' | 'generated_data' | 'last_generated_at'>): Promise<ReportDocument> {
+  async createReport(
+    userId: string,
+    reportData: Omit<
+      ReportDocument,
+      | 'id'
+      | 'user_id'
+      | 'created_at'
+      | 'updated_at'
+      | 'version'
+      | 'generated_data'
+      | 'last_generated_at'
+    >
+  ): Promise<ReportDocument> {
     const newReportRef = db.collection(`users/${userId}/reports`).doc();
     const timestamp = Date.now();
     const report: ReportDocument = {
@@ -76,7 +87,13 @@ export class ReportManagementService {
    * @param updates The fields to update.
    * @returns The updated report document, or null if not found.
    */
-  async updateReport(userId: string, reportId: string, updates: Partial<Omit<ReportDocument, 'id' | 'user_id' | 'created_at' | 'generated_data' | 'last_generated_at'>>): Promise<ReportDocument | null> {
+  async updateReport(
+    userId: string,
+    reportId: string,
+    updates: Partial<
+      Omit<ReportDocument, 'id' | 'user_id' | 'created_at' | 'generated_data' | 'last_generated_at'>
+    >
+  ): Promise<ReportDocument | null> {
     const reportRef = db.collection(`users/${userId}/reports`).doc(reportId);
     const timestamp = Date.now();
     await reportRef.update({
@@ -145,7 +162,7 @@ export class ReportManagementService {
       metrics: aiMetrics,
       charts: {
         // AI tarafından oluşturulan veya analiz edilen grafik verileri
-      }
+      },
     };
 
     const timestamp = Date.now();
@@ -157,4 +174,4 @@ export class ReportManagementService {
 
     return (await reportRef.get()).data() as ReportDocument;
   }
-} 
+}

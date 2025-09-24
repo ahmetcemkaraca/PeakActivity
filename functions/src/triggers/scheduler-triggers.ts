@@ -13,10 +13,10 @@ interface UserProfile {
 
 /**
  * Zamanlanmış ajan oluşturma tetikleyicisi
- * 
+ *
  * Bu trigger her 24 saatte bir çalışır ve ücretli kullanıcılar için otomatik
  * ajan oluşturma işlemini tetikler. Ana görevleri:
- * 
+ *
  * 1. Tüm kullanıcıları tarar
  * 2. Ücretli kullanıcıları filtreler (free kullanıcıları atlar)
  * 3. Son ajan oluşturma zamanını kontrol eder (2 günlük interval)
@@ -24,7 +24,7 @@ interface UserProfile {
  * 5. Dinamik ajan yapılandırması oluşturur
  * 6. Ajan oluşturma endpoint'ini çağırır
  * 7. Son ajan oluşturma zamanını günceller
- * 
+ *
  * Tetiklenme zamanı: Her 24 saatte bir
  * Kullanım senaryoları:
  * - Otomatik periyodik verimlilik analizleri
@@ -32,7 +32,7 @@ interface UserProfile {
  * - Kullanıcı aktivite durumu takibi
  * - AI destekli içgörü oluşturma
  */
-export const scheduleAgentGeneration = onSchedule('every 24 hours', async (event) => {
+export const scheduleAgentGeneration = onSchedule('every 24 hours', async event => {
   functions.logger.info('Ajan oluşturma zamanlanmış fonksiyonu başladı.', event);
 
   const usersRef = db.collection('users');
@@ -53,12 +53,16 @@ export const scheduleAgentGeneration = onSchedule('every 24 hours', async (event
 
     if (userProfile.lastAgentGeneration) {
       const lastGenerationDate = userProfile.lastAgentGeneration.toDate();
-      const nextGenerationTime = new Date(lastGenerationDate.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+      const nextGenerationTime = new Date(
+        lastGenerationDate.getTime() + intervalDays * 24 * 60 * 60 * 1000
+      );
 
       if (now.toDate() >= nextGenerationTime) {
         generate = true;
       } else {
-        functions.logger.info(`Kullanıcı ${userId} için bir sonraki ajan oluşturma zamanı henüz gelmedi.`);
+        functions.logger.info(
+          `Kullanıcı ${userId} için bir sonraki ajan oluşturma zamanı henüz gelmedi.`
+        );
       }
     } else {
       // Daha önce ajan oluşturulmamışsa, hemen oluştur
@@ -68,7 +72,8 @@ export const scheduleAgentGeneration = onSchedule('every 24 hours', async (event
     if (generate) {
       // Kullanıcı etkinliğini kontrol et (son 24 saat içinde ActivityWatch verisi var mı?)
       const sevenDaysAgo = new Date(now.toDate().getTime() - 7 * 24 * 60 * 60 * 1000);
-      const activitiesSnapshot = await db.collection(`users/${userId}/activities`)
+      const activitiesSnapshot = await db
+        .collection(`users/${userId}/activities`)
         .where('timestamp', '>=', sevenDaysAgo)
         .limit(1)
         .get();
@@ -87,7 +92,9 @@ export const scheduleAgentGeneration = onSchedule('every 24 hours', async (event
         const geminiApiKey = functions.config().gemini?.api_key;
 
         if (!geminiApiKey) {
-          functions.logger.error('Gemini API key is not configured for scheduled agent generation.');
+          functions.logger.error(
+            'Gemini API key is not configured for scheduled agent generation.'
+          );
           continue; // Bu kullanıcı için atla
         }
 
@@ -110,16 +117,12 @@ tasks:
           topic: `Periyodik üretkenlik analizi ve içgörü oluştur: ${now.toDate().toISOString()}`,
         };
 
-        await axios.post(
-          `${awServerUrl}/api/0/agents/generate`,
-          agentConfig,
-          {
-            headers: {
-              'X-Gemini-Api-Key': geminiApiKey,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        await axios.post(`${awServerUrl}/api/0/agents/generate`, agentConfig, {
+          headers: {
+            'X-Gemini-Api-Key': geminiApiKey,
+            'Content-Type': 'application/json',
+          },
+        });
 
         // Ajan oluşturma başarıyla tetiklendikten sonra son oluşturma zamanını güncelle
         await usersRef.doc(userId).update({
@@ -128,8 +131,11 @@ tasks:
 
         functions.logger.info(`Kullanıcı ${userId} için ajan oluşturma başarıyla tetiklendi.`);
       } catch (error: any) {
-        functions.logger.error(`Kullanıcı ${userId} için ajan oluşturma sırasında hata:`, error.message);
+        functions.logger.error(
+          `Kullanıcı ${userId} için ajan oluşturma sırasında hata:`,
+          error.message
+        );
       }
     }
   }
-}); 
+});

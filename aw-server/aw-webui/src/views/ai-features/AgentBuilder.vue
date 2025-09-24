@@ -3,7 +3,9 @@
     <h1 class="text-2xl font-bold mb-4">Yapay Zeka Ajan Oluşturucu</h1>
 
     <p class="mb-4">
-      Bu araç, ActivityWatch verilerinizi kullanarak üretkenliğinizi artıracak akıllı ajanlar oluşturmanızı ve yönetmenizi sağlar. Ajan yapılandırmanızı girin ve bir konu belirterek ajanın görevini başlatın.
+      Bu araç, ActivityWatch verilerinizi kullanarak üretkenliğinizi artıracak akıllı ajanlar
+      oluşturmanızı ve yönetmenizi sağlar. Ajan yapılandırmanızı girin ve bir konu belirterek ajanın
+      görevini başlatın.
     </p>
 
     <div class="card bg-base-100 shadow-xl mb-6">
@@ -39,11 +41,7 @@
         </div>
 
         <div class="card-actions justify-end">
-          <button
-            @click="generateAgent"
-            :disabled="isLoading"
-            class="btn btn-primary"
-          >
+          <button @click="generateAgent" :disabled="isLoading" class="btn btn-primary">
             <span v-if="isLoading" class="loading loading-spinner"></span>
             <span v-else>Ajanı Oluştur ve Çalıştır</span>
           </button>
@@ -75,7 +73,8 @@ import axios from 'axios'; // axios eklendi
 const agentStore = useAgentStore();
 
 // Pinia store'dan durumları doğrudan kullan
-const { agentConfigYaml, topic, output, error, isLoading, configError, topicError } = toRefs(agentStore); // toRefs ile sarmalandı
+const { agentConfigYaml, topic, output, error, isLoading, configError, topicError } =
+  toRefs(agentStore); // toRefs ile sarmalandı
 
 // Firebase Callable Function'ı tanımlayın
 // const generateAgentCallable = httpsCallable(functions, 'generateAgent'); // Kaldırıldı
@@ -89,7 +88,7 @@ const generateAgent = async () => {
 
   // Giriş doğrulama
   if (!agentConfigYaml.value) {
-    configError.value = 'Ajan yapılandırma YAML\'ı boş olamaz.'; // Doğrudan kullan
+    configError.value = "Ajan yapılandırma YAML'ı boş olamaz."; // Doğrudan kullan
     return;
   }
   if (!topic.value) {
@@ -109,7 +108,7 @@ const generateAgent = async () => {
     });
     output.value = response.data;
   } catch (err: any) {
-    console.error("Ajan oluşturma hatası:", err);
+    console.error('Ajan oluşturma hatası:', err);
     error.value = err.message || 'Ajan oluşturma sırasında bir hata oluştu.';
     if (err.details) {
       error.value += ` Detaylar: ${JSON.stringify(err.details)}`;
@@ -133,4 +132,4 @@ pre {
   white-space: pre-wrap;
   word-break: break-all;
 }
-</style> 
+</style>

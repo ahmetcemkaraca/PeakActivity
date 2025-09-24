@@ -1,6 +1,6 @@
 /**
  * ActivityWatch Core Types
- * 
+ *
  * Bu dosya ActivityWatch sisteminin merkezi tip tanımlarını içerir.
  * Tüm 'any' kullanımları bu tip tanımlarla değiştirilmelidir.
  */
@@ -49,7 +49,7 @@ export interface AWBucket {
   metadata?: BucketMetadata;
 }
 
-export type BucketType = 
+export type BucketType =
   | 'currentwindow'
   | 'afkstatus'
   | 'web.tab.current'
@@ -153,18 +153,35 @@ export interface APIError {
 
 // Export utility type guards
 export function isAWEvent(obj: unknown): obj is AWEvent {
-  return typeof obj === 'object' && obj !== null && 
-    'id' in obj && 'timestamp' in obj && 'duration' in obj && 'data' in obj;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'timestamp' in obj &&
+    'duration' in obj &&
+    'data' in obj
+  );
 }
 
 export function isAWBucket(obj: unknown): obj is AWBucket {
-  return typeof obj === 'object' && obj !== null &&
-    'id' in obj && 'type' in obj && 'hostname' in obj && 'client' in obj;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'type' in obj &&
+    'hostname' in obj &&
+    'client' in obj
+  );
 }
 
 export function isCategory(obj: unknown): obj is Category {
-  return typeof obj === 'object' && obj !== null &&
-    'name' in obj && 'rule' in obj && Array.isArray((obj as Category).name);
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'name' in obj &&
+    'rule' in obj &&
+    Array.isArray((obj as Category).name)
+  );
 }
 
 // Helper types for safe access

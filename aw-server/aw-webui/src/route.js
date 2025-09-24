@@ -75,7 +75,7 @@ const router = new VueRouter({
     { path: '/timeline', component: Timeline, meta: { fullContainer: true } },
     { path: '/trends', component: Trends, meta: { fullContainer: true } },
     { path: '/trends/:host', component: Trends, meta: { fullContainer: true } },
-    { path: '/report', component: () => import('./views/Report.vue'), },
+    { path: '/report', component: () => import('./views/Report.vue') },
     { path: '/query', component: QueryExplorer },
     { path: '/alerts', component: Alerts },
     { path: '/timespiral', component: TimespiralView },
@@ -94,16 +94,35 @@ const router = new VueRouter({
     { path: '/ai-features/behavioral-trends', component: BehavioralTrendsView },
     { path: '/ai-features/focus-quality-score', component: FocusQualityScoreView },
     { path: '/ai-features/agent-builder', component: AgentBuilder },
-    { path: '/settings/ai-notification',
+    {
+      path: '/settings/ai-notification',
       component: () => import('./views/settings/AINotificationSettings.vue'),
     },
     { path: '/settings/privacy', component: () => import('./views/settings/PrivacySettings.vue') },
-    { path: '/settings/encryption', component: () => import('./views/settings/EncryptionSettings.vue') },
-    { path: '/settings/data-sharing', component: () => import('./views/settings/DataSharingControls.vue') },
-    { path: '/settings/security-questions', component: () => import('./views/settings/SecurityQuestionSetup.vue') },
-    { path: '/settings/two-factor-auth', component: () => import('./views/settings/TwoFactorSetup.vue') },
-    { path: '/settings/master-password', component: () => import('./views/settings/MasterPasswordSetup.vue') },
-    { path: '/settings/key-recovery', component: () => import('./views/settings/KeyRecoveryWizard.vue') },
+    {
+      path: '/settings/encryption',
+      component: () => import('./views/settings/EncryptionSettings.vue'),
+    },
+    {
+      path: '/settings/data-sharing',
+      component: () => import('./views/settings/DataSharingControls.vue'),
+    },
+    {
+      path: '/settings/security-questions',
+      component: () => import('./views/settings/SecurityQuestionSetup.vue'),
+    },
+    {
+      path: '/settings/two-factor-auth',
+      component: () => import('./views/settings/TwoFactorSetup.vue'),
+    },
+    {
+      path: '/settings/master-password',
+      component: () => import('./views/settings/MasterPasswordSetup.vue'),
+    },
+    {
+      path: '/settings/key-recovery',
+      component: () => import('./views/settings/KeyRecoveryWizard.vue'),
+    },
     {
       path: '/community-rules',
       name: 'community-rules',

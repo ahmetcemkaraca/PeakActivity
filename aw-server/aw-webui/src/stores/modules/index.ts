@@ -1,6 +1,6 @@
 /**
  * Store Modules Barrel Export
- * 
+ *
  * Bu dosya tüm store modüllerini merkezi bir noktadan export eder.
  * Feature-based store organization pattern'ini destekler.
  */
@@ -22,16 +22,16 @@ export { useViewsStore } from '../views';
 export { useAgentStore } from '../agent';
 
 // Type exports from core types
-export type { 
-  AWEvent, 
-  AWBucket, 
-  Category, 
-  UserSettings, 
-  View, 
-  ViewElement, 
-  QueryParams, 
-  QueryResult, 
-  APIResponse, 
-  APIError, 
-  ValidationError 
+export type {
+  AWEvent,
+  AWBucket,
+  Category,
+  UserSettings,
+  View,
+  ViewElement,
+  QueryParams,
+  QueryResult,
+  APIResponse,
+  APIError,
+  ValidationError,
 } from '../../types/core';

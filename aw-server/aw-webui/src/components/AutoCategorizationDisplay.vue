@@ -8,9 +8,14 @@
         <h4>Etiketlenen Olaylar:</h4>
         <ul>
           <li v-for="label in labels" :key="label.index">
-            <strong>Olay Numarası:</strong> {{ label.index }} <br/>
-            <strong>Kategori:</strong> {{ label.category }} <br/>
-            <strong>Güven:</strong> {{ (label.confidence * 100).toFixed(2) }}%
+            <strong>Olay Numarası:</strong>
+            {{ label.index }}
+            <br />
+            <strong>Kategori:</strong>
+            {{ label.category }}
+            <br />
+            <strong>Güven:</strong>
+            {{ (label.confidence * 100).toFixed(2) }}%
           </li>
         </ul>
       </div>
@@ -126,4 +131,4 @@ li {
 .error {
   color: red;
 }
-</style> 
+</style>

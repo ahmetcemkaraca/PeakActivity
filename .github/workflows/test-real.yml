@@ -4,7 +4,7 @@ name: PeakActivityMain Real End-to-End Tests
 # Only runs when manually triggered to prevent accidental charges
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch: # Manual trigger only
     inputs:
       confirm_costs:
         description: 'I understand this will make real API calls and may incur costs'
@@ -16,122 +16,122 @@ jobs:
   real-tests:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.confirm_costs == 'true' }}
-    
+
     strategy:
       matrix:
-        python-version: [3.11]  # Single version to minimize costs
-    
+        python-version: [3.11] # Single version to minimize costs
+
     steps:
-    - name: 🚨 Cost Warning
-      run: |
-        echo "⚠️  WARNING: This workflow will make real API calls!"
-        echo "💰 This may incur charges on your cloud provider accounts"
-        echo "✅ Cost confirmation: ${{ github.event.inputs.confirm_costs }}"
-        
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: 🚨 Cost Warning
+        run: |
+          echo "⚠️  WARNING: This workflow will make real API calls!"
+          echo "💰 This may incur charges on your cloud provider accounts"
+          echo "✅ Cost confirmation: ${{ github.event.inputs.confirm_costs }}"
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Set environment variables
-      run: |
-        # Set environment variables for real API calls (e.g., Firebase Admin SDK credentials)
-        # Example: echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> $GITHUB_ENV
-        # Example: echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> $GITHUB_ENV
-        # Add any other necessary secrets for your E2E tests
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Run Python Backend Real E2E Tests
-      run: poetry run pytest tests/e2e/ # Assuming E2E tests are in this directory
-      working-directory: aw-server
-      continue-on-error: false
+      - name: Set environment variables
+        run: |
+          # Set environment variables for real API calls (e.g., Firebase Admin SDK credentials)
+          # Example: echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> $GITHUB_ENV
+          # Example: echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> $GITHUB_ENV
+          # Add any other necessary secrets for your E2E tests
 
-    - name: Run Firebase Functions Real E2E Tests
-      run: npm test functions/test/e2e/ # Assuming E2E tests are in this directory
-      working-directory: functions
-      continue-on-error: false
+      - name: Run Python Backend Real E2E Tests
+        run: poetry run pytest tests/e2e/ # Assuming E2E tests are in this directory
+        working-directory: aw-server
+        continue-on-error: false
 
-    - name: Generate Real E2E Test Report
-      if: always()
-      run: |
-        echo "# 🔥 PeakActivityMain Real End-to-End Test Report" > real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        echo "⚠️  **WARNING: This report represents tests that made real API calls**" >> real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        echo "**Python Version:** ${{ matrix.python-version }}" >> real_e2e_report.md
-        echo "**Date:** $(date -u)" >> real_e2e_report.md
-        echo "**Triggered by:** ${{ github.actor }}" >> real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        
-        echo "## 🧪 Test Results" >> real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        echo "### Python Backend E2E Tests:" >> real_e2e_report.md
-        echo "- Environment verification" >> real_e2e_report.md
-        echo "- Real API call validation" >> real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        echo "### Firebase Functions E2E Tests:" >> real_e2e_report.md
-        echo "- Environment verification" >> real_e2e_report.md
-        echo "- Real API call validation" >> real_e2e_report.md
-        echo "" >> real_e2e_report.md
-        
-        echo "## 💰 Cost Considerations" >> real_e2e_report.md
-        echo "- These tests made actual API calls to cloud providers (e.g., Firebase, other third-party services)" >> real_e2e_report.md
-        echo "- Costs depend on your API pricing tiers" >> real_e2e_report.md
-        echo "- Tests are designed to be minimal to reduce costs, but actual usage may vary" >> real_e2e_report.md
-        echo "- Check your cloud provider dashboard for actual usage" >> real_e2e_report.md
-        
-        echo "## 📋 Next Steps" >> real_e2e_report.md
-        echo "- Review test results for any failures" >> real_e2e_report.md
-        echo "- Check API usage in your cloud provider dashboard" >> real_e2e_report.md
-        echo "- Use mock tests (e.g., unit/integration tests) for routine testing" >> real_e2e_report.md
+      - name: Run Firebase Functions Real E2E Tests
+        run: npm test functions/test/e2e/ # Assuming E2E tests are in this directory
+        working-directory: functions
+        continue-on-error: false
 
-    - name: Upload Real E2E Test Results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: real-e2e-test-results-python-${{ matrix.python-version }}
-        path: real_e2e_report.md
-        retention-days: 30
+      - name: Generate Real E2E Test Report
+        if: always()
+        run: |
+          echo "# 🔥 PeakActivityMain Real End-to-End Test Report" > real_e2e_report.md
+          echo "" >> real_e2e_report.md
+          echo "⚠️  **WARNING: This report represents tests that made real API calls**" >> real_e2e_report.md
+          echo "" >> real_e2e_report.md
+          echo "**Python Version:** ${{ matrix.python-version }}" >> real_e2e_report.md
+          echo "**Date:** $(date -u)" >> real_e2e_report.md
+          echo "**Triggered by:** ${{ github.actor }}" >> real_e2e_report.md
+          echo "" >> real_e2e_report.md
+
+          echo "## 🧪 Test Results" >> real_e2e_report.md
+          echo "" >> real_e2e_report.md
+          echo "### Python Backend E2E Tests:" >> real_e2e_report.md
+          echo "- Environment verification" >> real_e2e_report.md
+          echo "- Real API call validation" >> real_e2e_report.md
+          echo "" >> real_e2e_report.md
+          echo "### Firebase Functions E2E Tests:" >> real_e2e_report.md
+          echo "- Environment verification" >> real_e2e_report.md
+          echo "- Real API call validation" >> real_e2e_report.md
+          echo "" >> real_e2e_report.md
+
+          echo "## 💰 Cost Considerations" >> real_e2e_report.md
+          echo "- These tests made actual API calls to cloud providers (e.g., Firebase, other third-party services)" >> real_e2e_report.md
+          echo "- Costs depend on your API pricing tiers" >> real_e2e_report.md
+          echo "- Tests are designed to be minimal to reduce costs, but actual usage may vary" >> real_e2e_report.md
+          echo "- Check your cloud provider dashboard for actual usage" >> real_e2e_report.md
+
+          echo "## 📋 Next Steps" >> real_e2e_report.md
+          echo "- Review test results for any failures" >> real_e2e_report.md
+          echo "- Check API usage in your cloud provider dashboard" >> real_e2e_report.md
+          echo "- Use mock tests (e.g., unit/integration tests) for routine testing" >> real_e2e_report.md
+
+      - name: Upload Real E2E Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-e2e-test-results-python-${{ matrix.python-version }}
+          path: real_e2e_report.md
+          retention-days: 30
 
   # Safety job that runs when costs not confirmed
   safety-check:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.confirm_costs != 'true' }}
-    
+
     steps:
-    - name: 🛡️ Safety Check Failed
-      run: |
-        echo "🚨 Real E2E tests not executed due to safety checks:"
-        echo ""
-        echo "✅ Costs confirmed: ${{ github.event.inputs.confirm_costs }}"
-        echo ""
-        echo "To run real E2E tests:"
-        echo "1. Check 'I understand this will make real API calls and may incur costs'"
-        echo "2. Ensure all necessary API keys/credentials are set as repository secrets"
-        echo ""
-        echo "💡 For cost-free testing, use unit/integration tests instead:"
-        echo "   - Trigger other workflows that use mock tests"
-        
-        exit 1 
+      - name: 🛡️ Safety Check Failed
+        run: |
+          echo "🚨 Real E2E tests not executed due to safety checks:"
+          echo ""
+          echo "✅ Costs confirmed: ${{ github.event.inputs.confirm_costs }}"
+          echo ""
+          echo "To run real E2E tests:"
+          echo "1. Check 'I understand this will make real API calls and may incur costs'"
+          echo "2. Ensure all necessary API keys/credentials are set as repository secrets"
+          echo ""
+          echo "💡 For cost-free testing, use unit/integration tests instead:"
+          echo "   - Trigger other workflows that use mock tests"
+
+          exit 1

@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - trello.js types may be incomplete
 import { TrelloClient } from 'trello.js';
@@ -16,7 +16,10 @@ export class TrelloJiraService {
   private trelloEncryptionService: TrelloCredentialsEncryption;
   private jiraEncryptionService: JiraCredentialsEncryption;
 
-  constructor(trelloEncryptionService: TrelloCredentialsEncryption, jiraEncryptionService: JiraCredentialsEncryption) {
+  constructor(
+    trelloEncryptionService: TrelloCredentialsEncryption,
+    jiraEncryptionService: JiraCredentialsEncryption
+  ) {
     this.db = db;
     this.trelloClients = new Map();
     this.jiraClients = new Map();
@@ -29,7 +32,10 @@ export class TrelloJiraService {
       return this.trelloClients.get(userId);
     }
 
-    const encryptedTrelloCredentials = await this.trelloEncryptionService.getEncryptedCredentials(userId, "trello");
+    const encryptedTrelloCredentials = await this.trelloEncryptionService.getEncryptedCredentials(
+      userId,
+      'trello'
+    );
 
     if (!encryptedTrelloCredentials) {
       throw new Error('Trello kimlik bilgileri bulunamadı. Lütfen entegrasyonu yapılandırın.');
@@ -53,7 +59,10 @@ export class TrelloJiraService {
       return this.jiraClients.get(userId);
     }
 
-    const encryptedJiraCredentials = await this.jiraEncryptionService.getEncryptedCredentials(userId, "jira");
+    const encryptedJiraCredentials = await this.jiraEncryptionService.getEncryptedCredentials(
+      userId,
+      'jira'
+    );
 
     if (!encryptedJiraCredentials) {
       throw new Error('Jira kimlik bilgileri bulunamadı. Lütfen entegrasyonu yapılandırın.');
@@ -86,7 +95,12 @@ export class TrelloJiraService {
     try {
       const trelloClient: any = await this.getTrelloClient(userId);
       const card: any = await trelloClient.cards.getCard(taskId as any);
-      return { taskId: taskId, status: card?.dueComplete ? 'completed' : 'pending', name: card?.name, due: card?.due };
+      return {
+        taskId: taskId,
+        status: card?.dueComplete ? 'completed' : 'pending',
+        name: card?.name,
+        due: card?.due,
+      };
     } catch (error: any) {
       console.error(`Trello görev durumu getirilirken hata oluştu (${taskId}):`, error);
       throw new Error(`Trello görev durumu getirilemedi: ${error.message}`);
@@ -103,7 +117,12 @@ export class TrelloJiraService {
     try {
       const jiraClient: any = await this.getJiraClient(userId);
       const issue: any = await jiraClient.findIssue(issueId as any);
-      return { issueId: issueId, status: issue?.fields?.status?.name, summary: issue?.fields?.summary, dueDate: issue?.fields?.duedate };
+      return {
+        issueId: issueId,
+        status: issue?.fields?.status?.name,
+        summary: issue?.fields?.summary,
+        dueDate: issue?.fields?.duedate,
+      };
     } catch (error: any) {
       console.error(`Jira görev durumu getirilirken hata oluştu (${issueId}):`, error);
       throw new Error(`Jira görev durumu getirilemedi: ${error.message}`);
@@ -120,7 +139,10 @@ export class TrelloJiraService {
   async updateTrelloTaskStatus(userId: string, cardId: string, updates: any) {
     try {
       const trelloClient: any = await this.getTrelloClient(userId);
-      const updatedCard: any = await trelloClient.cards.updateCard({ id: cardId, ...updates } as any);
+      const updatedCard: any = await trelloClient.cards.updateCard({
+        id: cardId,
+        ...updates,
+      } as any);
       return { cardId: cardId, success: true, updatedCard };
     } catch (error: any) {
       console.error(`Trello görev durumu güncellenirken hata oluştu (${cardId}):`, error);
@@ -156,19 +178,31 @@ export class TrelloJiraService {
     try {
       const trelloClient: any = await this.getTrelloClient(userId);
       const board: any = await trelloClient.boards.getBoard(boardId as any);
-      const lists: any[] = await trelloClient.boards.getLists(boardId as any, { filter: 'all' } as any);
+      const lists: any[] = await trelloClient.boards.getLists(
+        boardId as any,
+        { filter: 'all' } as any
+      );
 
       let totalCards = 0;
       let completedCards = 0;
 
       // Kullanıcının Trello ayarlarından tamamlanmış liste adlarını al
-      const userConfigDoc = await this.db.collection('users').doc(userId).collection('integrations').doc('trello').get();
-      const completedListNames: string[] = userConfigDoc.data()?.completedListNames || ['done', 'tamamlandı', 'completed']; // Varsayılan değerler
+      const userConfigDoc = await this.db
+        .collection('users')
+        .doc(userId)
+        .collection('integrations')
+        .doc('trello')
+        .get();
+      const completedListNames: string[] = userConfigDoc.data()?.completedListNames || [
+        'done',
+        'tamamlandı',
+        'completed',
+      ]; // Varsayılan değerler
 
       for (const list of lists) {
         const cards: any[] = await trelloClient.lists.getCards(list.id as any);
         totalCards += cards.length;
-        
+
         if (completedListNames.includes(list.name.toLowerCase())) {
           completedCards += cards.length;
         }
@@ -176,7 +210,14 @@ export class TrelloJiraService {
 
       const progressPercentage = totalCards === 0 ? 0 : (completedCards / totalCards) * 100;
 
-      return { boardId: boardId, name: board?.name, totalCards, completedCards, progressPercentage, status: board?.closed ? 'closed' : 'open' };
+      return {
+        boardId: boardId,
+        name: board?.name,
+        totalCards,
+        completedCards,
+        progressPercentage,
+        status: board?.closed ? 'closed' : 'open',
+      };
     } catch (error: any) {
       console.error(`Trello proje ilerlemesi getirilirken hata oluştu (${boardId}):`, error);
       throw new Error(`Trello proje ilerlemesi getirilemedi: ${error.message}`);
@@ -204,8 +245,17 @@ export class TrelloJiraService {
       let completedIssues = 0;
 
       // Kullanıcının Jira ayarlarından tamamlanmış durum adlarını al
-      const userConfigDoc = await this.db.collection('users').doc(userId).collection('integrations').doc('jira').get();
-      const completedStatuses: string[] = userConfigDoc.data()?.completedStatuses || ['Done', 'Closed', 'Resolved']; // Varsayılan değerler
+      const userConfigDoc = await this.db
+        .collection('users')
+        .doc(userId)
+        .collection('integrations')
+        .doc('jira')
+        .get();
+      const completedStatuses: string[] = userConfigDoc.data()?.completedStatuses || [
+        'Done',
+        'Closed',
+        'Resolved',
+      ]; // Varsayılan değerler
 
       for (const issue of searchResults.issues) {
         if (completedStatuses.includes(issue.fields.status.name)) {
@@ -215,11 +265,16 @@ export class TrelloJiraService {
 
       const progressPercentage = totalIssues === 0 ? 0 : (completedIssues / totalIssues) * 100;
 
-      return { projectId: projectId, totalIssues, completedIssues, progressPercentage, status: 'open' };
-
+      return {
+        projectId: projectId,
+        totalIssues,
+        completedIssues,
+        progressPercentage,
+        status: 'open',
+      };
     } catch (error: any) {
       console.error(`Jira proje ilerlemesi getirilirken hata oluştu (${projectId}):`, error);
       throw new Error(`Jira proje ilerlemesi getirilemedi: ${error.message}`);
     }
   }
-} 
+}

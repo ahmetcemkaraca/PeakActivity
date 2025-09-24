@@ -2,9 +2,9 @@ name: Run tests and upload coverage (PeakActivityMain)
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -93,4 +93,4 @@ jobs:
           flags: webui-frontend
           name: webui-coverage
           fail_ci_if_error: false
-          verbose: true 
+          verbose: true

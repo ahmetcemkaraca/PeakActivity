@@ -1,7 +1,7 @@
-import * as admin from "firebase-admin";
-import { onActivityCreated } from "./triggers/firestore-triggers";
-import { scheduleAgentGeneration } from "./triggers/scheduler-triggers"; // Yeni eklenen import
-import * as functions from "firebase-functions"; // 'firebase-functions' paketini import et
+import * as admin from 'firebase-admin';
+import { onActivityCreated } from './triggers/firestore-triggers';
+import { scheduleAgentGeneration } from './triggers/scheduler-triggers'; // Yeni eklenen import
+import * as functions from 'firebase-functions'; // 'firebase-functions' paketini import et
 import express from 'express'; // Express'i import et
 import { Request, Response } from 'express';
 import { z } from 'zod';
@@ -31,7 +31,12 @@ import { generateAgent } from './api/agent-api'; // Yeni eklenen import
 // import { queryActivities } from "./api/activity-query-api";
 // import { CommunityRulesService } from './services/community-rules-service';
 // import { CalendarSyncService } from './services/calendar-sync-service';
-import { linearRegression, linearRegressionLine, mean, standardDeviation } from './services/utils/math-utils';
+import {
+  linearRegression,
+  linearRegressionLine,
+  mean,
+  standardDeviation,
+} from './services/utils/math-utils';
 // import { FocusQualityScoreService } from './services/focus-quality-score-service';
 // import { createProject, getProject, updateProject, getAllProjects, deleteProject } from './api/project-prediction-api';
 
@@ -63,7 +68,7 @@ app.use(errorHandler);
 export const api = functions.https.onRequest(app);
 
 // Firebase Secret olarak Google AI API Anahtarı tanımlanıyor
-const googleAIapiKey = defineSecret("GEMINI_API_KEY");
+const googleAIapiKey = defineSecret('GEMINI_API_KEY');
 
 // GenKit başlatılıyor
 const ai = genkit({
@@ -84,7 +89,7 @@ export const generatePoemFlow = ai.defineFlow(
   async (subject: string) => {
     const { text } = await ai.generate(`Compose a poem about ${subject}.`);
     return text;
-  },
+  }
 );
 
 // GenKit akışını bir Firebase Callable Cloud Function olarak dışa aktarma
@@ -95,9 +100,9 @@ export const callGenkitFlow = onCall(
     authPolicy: hasClaim('email_verified'), // Sadece e-postası doğrulanmış kullanıcıların erişmesine izin ver
     enforceAppCheck: true,
   },
-  async (request) => {
+  async request => {
     if (typeof request.data !== 'string') {
-        throw new HttpsError('invalid-argument', 'Konu bir string olmalıdır.');
+      throw new HttpsError('invalid-argument', 'Konu bir string olmalıdır.');
     }
     const subject = request.data;
     const result = await generatePoemFlow(subject);
@@ -132,12 +137,11 @@ export { ai as genkitInstance };
 // export const activityQueryApi = { queryActivities: queryActivities, };
 // export const projectApi = { createProject: createProject, getProject: getProject, updateProject: updateProject, getAllProjects: getAllProjects, deleteProject: deleteProject, };
 
-
 // Global settings for all functions in this file
 setGlobalOptions({
-  region: "us-central1", // Fonksiyonların dağıtılacağı bölge
+  region: 'us-central1', // Fonksiyonların dağıtılacağı bölge
   timeoutSeconds: 60, // Varsayılan zaman aşımı süresi
-  memory: "256MiB", // Varsayılan bellek boyutu
+  memory: '256MiB', // Varsayılan bellek boyutu
   concurrency: 50, // Bir instance tarafından aynı anda işlenebilecek istek sayısı
   minInstances: 0, // Soğuk başlangıçları azaltmak için minimum instance sayısı
 });
@@ -243,7 +247,7 @@ interface BehavioralTrendsInput {
 
 interface TrendingCategory {
   category: string;
-  trend: "rising" | "falling" | "stable";
+  trend: 'rising' | 'falling' | 'stable';
   slope_per_day: number;
 }
 
@@ -308,51 +312,105 @@ interface ContextualCategorizationOutput {
 }
 
 const CATEGORY_KEYWORDS: { [key: string]: string[] } = {
-  "coding": ["code", "github", "stack overflow", "bug", "develop", "programming", "ide", "visual studio code", "jira", "gitlab"],
-  "design": ["photoshop", "figma", "sketch", "illustrator", "design", "ui/ux", "blender"],
-  "research": ["researchgate", "wikipedia", "journal", "academic", "study", "analyze"],
-  "social": ["facebook", "instagram", "twitter", "linkedin", "reddit", "whatsapp", "slack"],
-  "gaming": ["steam", "epic games", "league of legends", "csgo", "game"],
-  "productivity": ["notion", "todoist", "trello", "asana", "excel", "word", "powerpoint"],
-  "communication": ["outlook", "gmail", "teams", "zoom", "google meet", "discord"],
-  "shopping": ["amazon", "ebay", "trendyol", "n11"]
+  coding: [
+    'code',
+    'github',
+    'stack overflow',
+    'bug',
+    'develop',
+    'programming',
+    'ide',
+    'visual studio code',
+    'jira',
+    'gitlab',
+  ],
+  design: ['photoshop', 'figma', 'sketch', 'illustrator', 'design', 'ui/ux', 'blender'],
+  research: ['researchgate', 'wikipedia', 'journal', 'academic', 'study', 'analyze'],
+  social: ['facebook', 'instagram', 'twitter', 'linkedin', 'reddit', 'whatsapp', 'slack'],
+  gaming: ['steam', 'epic games', 'league of legends', 'csgo', 'game'],
+  productivity: ['notion', 'todoist', 'trello', 'asana', 'excel', 'word', 'powerpoint'],
+  communication: ['outlook', 'gmail', 'teams', 'zoom', 'google meet', 'discord'],
+  shopping: ['amazon', 'ebay', 'trendyol', 'n11'],
 };
 
 const CLASSIFICATION_LABELS = [
-  "coding", "design", "research", "social", "news", "entertainment", "communication", "shopping"
+  'coding',
+  'design',
+  'research',
+  'social',
+  'news',
+  'entertainment',
+  'communication',
+  'shopping',
 ];
 
 // Simple mock for an LLM-based zero-shot classifier
-const mockZeroShotClassify = (text: string, labels: string[]): { category: string; confidence: number; rationale: string } => {
+const mockZeroShotClassify = (
+  text: string,
+  labels: string[]
+): { category: string; confidence: number; rationale: string } => {
   text = text.toLowerCase();
-  let bestCategory = "unknown";
+  let bestCategory = 'unknown';
   let maxScore = 0;
-  let rationale = "";
+  let rationale = '';
 
   for (const label of labels) {
     let score = 0;
-    if (label === "coding" && (text.includes("code") || text.includes("github") || text.includes("stack overflow") || text.includes("programming"))) {
+    if (
+      label === 'coding' &&
+      (text.includes('code') ||
+        text.includes('github') ||
+        text.includes('stack overflow') ||
+        text.includes('programming'))
+    ) {
       score += 1;
     }
-    if (label === "design" && (text.includes("design") || text.includes("photoshop") || text.includes("figma"))) {
+    if (
+      label === 'design' &&
+      (text.includes('design') || text.includes('photoshop') || text.includes('figma'))
+    ) {
       score += 1;
     }
-    if (label === "research" && (text.includes("research") || text.includes("journal") || text.includes("academic"))) {
+    if (
+      label === 'research' &&
+      (text.includes('research') || text.includes('journal') || text.includes('academic'))
+    ) {
       score += 1;
     }
-    if (label === "social" && (text.includes("facebook") || text.includes("instagram") || text.includes("twitter"))) {
+    if (
+      label === 'social' &&
+      (text.includes('facebook') || text.includes('instagram') || text.includes('twitter'))
+    ) {
       score += 1;
     }
-    if (label === "news" && (text.includes("haber") || text.includes("news") || text.includes("gündem"))) {
+    if (
+      label === 'news' &&
+      (text.includes('haber') || text.includes('news') || text.includes('gündem'))
+    ) {
       score += 1;
     }
-    if (label === "entertainment" && (text.includes("film") || text.includes("movie") || text.includes("oyun") || text.includes("game"))) {
+    if (
+      label === 'entertainment' &&
+      (text.includes('film') ||
+        text.includes('movie') ||
+        text.includes('oyun') ||
+        text.includes('game'))
+    ) {
       score += 1;
     }
-    if (label === "communication" && (text.includes("email") || text.includes("zoom") || text.includes("slack"))) {
+    if (
+      label === 'communication' &&
+      (text.includes('email') || text.includes('zoom') || text.includes('slack'))
+    ) {
       score += 1;
     }
-    if (label === "shopping" && (text.includes("alışveriş") || text.includes("shopping") || text.includes("amazon") || text.includes("trendyol"))) {
+    if (
+      label === 'shopping' &&
+      (text.includes('alışveriş') ||
+        text.includes('shopping') ||
+        text.includes('amazon') ||
+        text.includes('trendyol'))
+    ) {
       score += 1;
     }
 
@@ -367,7 +425,11 @@ const mockZeroShotClassify = (text: string, labels: string[]): { category: strin
   // Simulate confidence based on score
   const confidence = maxScore > 0 ? Math.min(1, maxScore / 3) : 0.1; // Max 3 keywords give 1.0 confidence, min 0.1 if no keywords
 
-  return { category: bestCategory, confidence: parseFloat(confidence.toFixed(2)), rationale: rationale.substring(0, 140) };
+  return {
+    category: bestCategory,
+    confidence: parseFloat(confidence.toFixed(2)),
+    rationale: rationale.substring(0, 140),
+  };
 };
 
 // Helper function for simple glob matching
@@ -377,7 +439,7 @@ const globToRegex = (glob: string) => {
 };
 
 // Zamanlanmış Fonksiyonlar
-export const syncGoogleCalendars = onSchedule('every 24 hours', async (event) => {
+export const syncGoogleCalendars = onSchedule('every 24 hours', async event => {
   console.log('Google Takvim senkronizasyonu başlatılıyor...');
   // calendarSyncService.syncAllUsersCalendars(); // Bu servis artık Express rotaları içinde kullanılıyor
   console.log('Google Takvim senkronizasyonu tamamlandı.');
@@ -386,20 +448,22 @@ export const syncGoogleCalendars = onSchedule('every 24 hours', async (event) =>
 // HTTP Fonksiyonları (API Endpoints)
 
 export const helloWorld = onRequest((request, response) => {
-  logger.info("Hello logs!", {structuredData: true});
-  response.send("Hello from Firebase!");
+  logger.info('Hello logs!', { structuredData: true });
+  response.send('Hello from Firebase!');
 });
 
 export const analyzeBehavioralTrends = onRequest(async (request: Request, response: Response) => {
-  if (request.method !== "POST") {
-    response.status(405).send("Method Not Allowed");
+  if (request.method !== 'POST') {
+    response.status(405).send('Method Not Allowed');
     return;
   }
 
   const { daily_totals, window } = request.body as BehavioralTrendsInput;
 
   if (!daily_totals || !Array.isArray(daily_totals) || daily_totals.length === 0) {
-    response.status(400).send("Invalid input: 'daily_totals' array is required and must not be empty.");
+    response
+      .status(400)
+      .send("Invalid input: 'daily_totals' array is required and must not be empty.");
     return;
   }
 
@@ -423,14 +487,12 @@ export const analyzeBehavioralTrends = onRequest(async (request: Request, respon
       // const regression = linearRegression(dataPoints); // Bu servis artık routes.ts içinde kullanılıyor
       // const line = linearRegressionLine(regression); // Bu servis artık routes.ts içinde kullanılıyor
       // const slope = line(1) - line(0); // Slope per day // Bu servis artık routes.ts içinde kullanılıyor
-
       // let trend: "rising" | "falling" | "stable" = "stable"; // Bu servis artık routes.ts içinde kullanılıyor
       // if (slope > 100) { // Bu servis artık routes.ts içinde kullanılıyor
       //   trend = "rising"; // Bu servis artık routes.ts içinde kullanılıyor
       // } else if (slope < -100) { // Bu servis artık routes.ts içinde kullanılıyor
       //   trend = "falling"; // Bu servis artık routes.ts içinde kullanılıyor
       // } // Bu servis artık routes.ts içinde kullanılıyor
-
       // trendingCategories.push({ // Bu servis artık routes.ts içinde kullanılıyor
       //   category, // Bu servis artık routes.ts içinde kullanılıyor
       //   trend, // Bu servis artık routes.ts içinde kullanılıyor
@@ -452,7 +514,8 @@ export const analyzeBehavioralTrends = onRequest(async (request: Request, respon
   // Seasonality Detection: Daha sağlam bir günlük/haftalık desen tespiti
   const seasonality: { period: string; pattern: string }[] = [];
 
-  if (daily_totals.length > 7) { // Yeterli veri varsa haftalık desenleri ara
+  if (daily_totals.length > 7) {
+    // Yeterli veri varsa haftalık desenleri ara
     const dailySums: { [key: number]: number[] } = {}; // Günün haftası (0=Pazar, 6=Cumartesi) bazında toplam süreler
     for (const day of daily_totals) {
       const date = new Date(day.date);
@@ -465,23 +528,34 @@ export const analyzeBehavioralTrends = onRequest(async (request: Request, respon
     }
 
     // Haftalık ortalama aktivite süresi
-    const weeklyTotalAverage = daily_totals.reduce((sum, d) => sum + Object.values(d.categories).reduce((s, v) => s + v, 0), 0) / daily_totals.length;
+    const weeklyTotalAverage =
+      daily_totals.reduce(
+        (sum, d) => sum + Object.values(d.categories).reduce((s, v) => s + v, 0),
+        0
+      ) / daily_totals.length;
 
     for (const dayOfWeek in dailySums) {
       const dayAverages = dailySums[dayOfWeek].length > 0 ? mean(dailySums[dayOfWeek]) : 0;
-      const dayStdDev = dailySums[dayOfWeek].length > 1 ? standardDeviation(dailySums[dayOfWeek]) : 0;
+      const dayStdDev =
+        dailySums[dayOfWeek].length > 1 ? standardDeviation(dailySums[dayOfWeek]) : 0;
 
       // Belirgin sapmaları tespit et
       const deviationFactor = 0.3; // %30 sapma eşiği
       if (dayAverages > weeklyTotalAverage * (1 + deviationFactor) && dayStdDev > 0) {
-        seasonality.push({ period: "weekly", pattern: `${getDayName(parseInt(dayOfWeek))} günleri ortalamanın üzerinde aktivite` });
+        seasonality.push({
+          period: 'weekly',
+          pattern: `${getDayName(parseInt(dayOfWeek))} günleri ortalamanın üzerinde aktivite`,
+        });
       } else if (dayAverages < weeklyTotalAverage * (1 - deviationFactor) && dayStdDev > 0) {
-        seasonality.push({ period: "weekly", pattern: `${getDayName(parseInt(dayOfWeek))} günleri ortalamanın altında aktivite` });
+        seasonality.push({
+          period: 'weekly',
+          pattern: `${getDayName(parseInt(dayOfWeek))} günleri ortalamanın altında aktivite`,
+        });
       }
     }
   }
 
-  const summary = "Davranışsal desenler ve trend analizi sonuçları."; // Türkçe özet
+  const summary = 'Davranışsal desenler ve trend analizi sonuçları.'; // Türkçe özet
 
   const output: BehavioralTrendsOutput = {
     trending_categories: [], // Bu servis artık routes.ts içinde kullanılıyor
@@ -493,8 +567,8 @@ export const analyzeBehavioralTrends = onRequest(async (request: Request, respon
 });
 
 export const contextualCategorization = onRequest(async (request: Request, response: Response) => {
-  if (request.method !== "POST") {
-    response.status(405).send("Method Not Allowed");
+  if (request.method !== 'POST') {
+    response.status(405).send('Method Not Allowed');
     return;
   }
 
@@ -511,8 +585,8 @@ export const contextualCategorization = onRequest(async (request: Request, respo
 });
 
 export const applyCommunityRules = onRequest(async (request: Request, response: Response) => {
-  if (request.method !== "POST") {
-    response.status(405).send("Method Not Allowed");
+  if (request.method !== 'POST') {
+    response.status(405).send('Method Not Allowed');
     return;
   }
 
@@ -538,7 +612,7 @@ export const applyCommunityRules = onRequest(async (request: Request, response: 
 
   for (const rule of community_rules) {
     const regex = globToRegex(rule.pattern);
-    const eventString = `${event.app || ""} ${event.title || ""} ${event.url || ""}`;
+    const eventString = `${event.app || ''} ${event.title || ''} ${event.url || ''}`;
 
     if (regex.test(eventString)) {
       matchedRule = rule;
@@ -550,7 +624,7 @@ export const applyCommunityRules = onRequest(async (request: Request, response: 
   const output: CommunityRuleOutput = {
     matched_rule: matchedRule,
     category: assignedCategory,
-    source: matchedRule ? "community" : "none",
+    source: matchedRule ? 'community' : 'none',
   };
 
   response.status(200).json(output);

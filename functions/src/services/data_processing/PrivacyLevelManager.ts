@@ -11,19 +11,23 @@ export class PrivacyLevelManager {
    */
   getTransmissionType(privacySetting: string, aiConsent: boolean): DataTransmissionType {
     switch (privacySetting.toLowerCase()) {
-      case "high":
+      case 'high':
         // Yüksek gizlilik: her zaman şifreli ve AI desteksiz.
         return DataTransmissionType.ENCRYPTED_AI_DISABLED;
-      case "medium":
+      case 'medium':
         // Orta gizlilik: AI onayı varsa şifreli ve AI destekli, yoksa şifreli ve AI desteksiz.
-        return aiConsent ? DataTransmissionType.ENCRYPTED_AI_ENABLED : DataTransmissionType.ENCRYPTED_AI_DISABLED;
-      case "low":
+        return aiConsent
+          ? DataTransmissionType.ENCRYPTED_AI_ENABLED
+          : DataTransmissionType.ENCRYPTED_AI_DISABLED;
+      case 'low':
         // Düşük gizlilik (veya geliştirme modu): AI onayı varsa ham veri gönder, yoksa şifreli ve AI destekli.
         // Not: Gerçek uygulamalarda ham veri gönderimi çok dikkatli ele alınmalıdır.
         return aiConsent ? DataTransmissionType.RAW : DataTransmissionType.ENCRYPTED_AI_ENABLED;
       default:
         // Varsayılan olarak yüksek gizlilik veya güvenli bir seçenek.
-        console.warn(`Bilinmeyen gizlilik ayarı: ${privacySetting}. Varsayılan olarak ENCRYPTED_AI_DISABLED kullanılıyor.`);
+        console.warn(
+          `Bilinmeyen gizlilik ayarı: ${privacySetting}. Varsayılan olarak ENCRYPTED_AI_DISABLED kullanılıyor.`
+        );
         return DataTransmissionType.ENCRYPTED_AI_DISABLED;
     }
   }
@@ -36,9 +40,15 @@ export class PrivacyLevelManager {
    * @param rawDataConsent Ham veri gönderimi için yeni onay durumu.
    * @returns İşlemin başarılı olup olmadığı.
    */
-  async updateDataSharingConsent(userId: string, aiConsent: boolean, rawDataConsent: boolean): Promise<boolean> {
-    console.log(`Kullanıcı ${userId} için veri paylaşım onayları güncellendi: AI=${aiConsent}, RAW=${rawDataConsent}`);
+  async updateDataSharingConsent(
+    userId: string,
+    aiConsent: boolean,
+    rawDataConsent: boolean
+  ): Promise<boolean> {
+    console.log(
+      `Kullanıcı ${userId} için veri paylaşım onayları güncellendi: AI=${aiConsent}, RAW=${rawDataConsent}`
+    );
     // Veritabanı veya durum yönetimi güncelleme mantığı buraya gelecek.
     return true;
   }
-} 
+}

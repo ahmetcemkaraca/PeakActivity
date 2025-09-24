@@ -2,86 +2,86 @@ name: PeakActivityMain Extended Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run nightly at 2 AM UTC
     - cron: '0 2 * * *'
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   test-backend-performance:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Run Python Backend Performance Tests
-      run: poetry run pytest tests/performance/ # Assuming you have performance tests under aw-server/tests/performance/
-      working-directory: aw-server
-      continue-on-error: true
+      - name: Run Python Backend Performance Tests
+        run: poetry run pytest tests/performance/ # Assuming you have performance tests under aw-server/tests/performance/
+        working-directory: aw-server
+        continue-on-error: true
 
-    - name: Generate Backend Performance Report
-      run: |
-        echo "## 📊 PeakActivityMain Backend Performance Test Results" > backend_performance_report.md
-        echo "" >> backend_performance_report.md
-        echo "_Performance results for the Python backend are logged in the CI output above._" >> backend_performance_report.md
+      - name: Generate Backend Performance Report
+        run: |
+          echo "## 📊 PeakActivityMain Backend Performance Test Results" > backend_performance_report.md
+          echo "" >> backend_performance_report.md
+          echo "_Performance results for the Python backend are logged in the CI output above._" >> backend_performance_report.md
 
-    - name: Upload Backend Performance Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-performance-report
-        path: aw-server/backend_performance_report.md
-        retention-days: 30
+      - name: Upload Backend Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-performance-report
+          path: aw-server/backend_performance_report.md
+          retention-days: 30
 
   test-webui-performance:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
 
-    - name: Run Web UI Performance Tests
-      run: npm run test:performance # Assuming you have a script for performance tests in package.json
-      working-directory: aw-server/aw-webui
-      continue-on-error: true
+      - name: Run Web UI Performance Tests
+        run: npm run test:performance # Assuming you have a script for performance tests in package.json
+        working-directory: aw-server/aw-webui
+        continue-on-error: true
 
-    - name: Generate Web UI Performance Report
-      run: |
-        echo "## 📊 PeakActivityMain Web UI Performance Test Results" > webui_performance_report.md
-        echo "" >> webui_performance_report.md
-        echo "_Performance results for the Web UI are logged in the CI output above._" >> webui_performance_report.md
+      - name: Generate Web UI Performance Report
+        run: |
+          echo "## 📊 PeakActivityMain Web UI Performance Test Results" > webui_performance_report.md
+          echo "" >> webui_performance_report.md
+          echo "_Performance results for the Web UI are logged in the CI output above._" >> webui_performance_report.md
 
-    - name: Upload Web UI Performance Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: webui-performance-report
-        path: aw-server/aw-webui/webui_performance_report.md
-        retention-days: 30 
+      - name: Upload Web UI Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: webui-performance-report
+          path: aw-server/aw-webui/webui_performance_report.md
+          retention-days: 30

@@ -14,11 +14,11 @@ export default defineComponent({
   name: 'BarChart',
   props: {
     chartData: {
-      type: Object as PropType<ChartData<"bar">>,
+      type: Object as PropType<ChartData<'bar'>>,
       required: true,
     },
     chartOptions: {
-      type: Object as PropType<ChartOptions<"bar">>,
+      type: Object as PropType<ChartOptions<'bar'>>,
       default: () => ({}),
     },
   },
@@ -33,8 +33,8 @@ export default defineComponent({
         }
         chartInstance = new Chart(chartCanvas.value, {
           type: 'bar',
-          data: props.chartData as ChartData<"bar">,
-          options: props.chartOptions as ChartOptions<"bar">,
+          data: props.chartData as ChartData<'bar'>,
+          options: props.chartOptions as ChartOptions<'bar'>,
         });
       }
     };
@@ -49,13 +49,21 @@ export default defineComponent({
       }
     });
 
-    watch(() => props.chartData, () => {
-      renderChart();
-    }, { deep: true });
+    watch(
+      () => props.chartData,
+      () => {
+        renderChart();
+      },
+      { deep: true }
+    );
 
-    watch(() => props.chartOptions, () => {
-      renderChart();
-    }, { deep: true });
+    watch(
+      () => props.chartOptions,
+      () => {
+        renderChart();
+      },
+      { deep: true }
+    );
 
     return {
       chartCanvas,
@@ -70,4 +78,4 @@ export default defineComponent({
   height: 400px;
   width: 100%;
 }
-</style> 
+</style>

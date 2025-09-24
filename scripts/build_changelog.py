@@ -155,7 +155,11 @@ class Commit:
     def format(self) -> str:
         commit_link = commit_linkify(self.id, self.org, self.repo) if self.id else ""
         # Use f-string instead of concatenation for better performance
-        return f"{self.msg_processed} ({commit_link})" if commit_link else self.msg_processed
+        return (
+            f"{self.msg_processed} ({commit_link})"
+            if commit_link
+            else self.msg_processed
+        )
 
 
 def run(cmd, cwd=".") -> str:

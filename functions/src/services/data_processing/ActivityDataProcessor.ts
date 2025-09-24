@@ -23,7 +23,11 @@ export class ActivityDataProcessor {
     data: string,
     type: DataTransmissionType,
     userKey?: string
-  ): Promise<{ processedData: string; transmissionType: DataTransmissionType; metadata?: EncryptionMetadata }> {
+  ): Promise<{
+    processedData: string;
+    transmissionType: DataTransmissionType;
+    metadata?: EncryptionMetadata;
+  }> {
     switch (type) {
       case DataTransmissionType.RAW:
         // Ham veri, ek işleme veya şifreleme yok.
@@ -31,31 +35,43 @@ export class ActivityDataProcessor {
 
       case DataTransmissionType.ENCRYPTED_AI_ENABLED:
         if (!userKey) {
-          throw new Error("ENCRYPTED_AI_ENABLED tipi için kullanıcı anahtarı gerekli.");
+          throw new Error('ENCRYPTED_AI_ENABLED tipi için kullanıcı anahtarı gerekli.');
         }
         // Veriyi şifrele ve AI analizi için uygun formatta bırak.
         const ivForAI = await this.encryptionService.generateIv();
         const encryptedDataForAI = await this.encryptionService.encrypt(data, userKey, ivForAI);
         const metadataForAI: EncryptionMetadata = {
-            algorithm: EncryptionTypes.AES256GCM, // Enum değerini kullan
-            iv: ivForAI,
-            version: "1.0",
+          algorithm: EncryptionTypes.AES256GCM, // Enum değerini kullan
+          iv: ivForAI,
+          version: '1.0',
         };
-        return { processedData: encryptedDataForAI, transmissionType: type, metadata: metadataForAI };
+        return {
+          processedData: encryptedDataForAI,
+          transmissionType: type,
+          metadata: metadataForAI,
+        };
 
       case DataTransmissionType.ENCRYPTED_AI_DISABLED:
         if (!userKey) {
-          throw new Error("ENCRYPTED_AI_DISABLED tipi için kullanıcı anahtarı gerekli.");
+          throw new Error('ENCRYPTED_AI_DISABLED tipi için kullanıcı anahtarı gerekli.');
         }
         // Veriyi şifrele, AI analizi yapılmayacak.
         const ivForDisabledAI = await this.encryptionService.generateIv();
-        const encryptedDataForDisabledAI = await this.encryptionService.encrypt(data, userKey, ivForDisabledAI);
+        const encryptedDataForDisabledAI = await this.encryptionService.encrypt(
+          data,
+          userKey,
+          ivForDisabledAI
+        );
         const metadataForDisabledAI: EncryptionMetadata = {
-            algorithm: EncryptionTypes.AES256GCM, // Enum değerini kullan
-            iv: ivForDisabledAI,
-            version: "1.0",
+          algorithm: EncryptionTypes.AES256GCM, // Enum değerini kullan
+          iv: ivForDisabledAI,
+          version: '1.0',
         };
-        return { processedData: encryptedDataForDisabledAI, transmissionType: type, metadata: metadataForDisabledAI };
+        return {
+          processedData: encryptedDataForDisabledAI,
+          transmissionType: type,
+          metadata: metadataForDisabledAI,
+        };
 
       default:
         throw new Error(`Desteklenmeyen veri gönderim tipi: ${type}`);
@@ -64,4 +80,4 @@ export class ActivityDataProcessor {
 
   // Buraya, AI analizi öncesi veya sonrası anonimleştirme, veri temizleme gibi
   // ek işleme mantıkları eklenebilir.
-} 
+}

@@ -6,13 +6,16 @@ from google.cloud import logging as cloud_logging
 from aw_core.log import setup_logging
 from aw_datastore.storages.memory import MemoryStorage
 from aw_datastore.storages.peewee import PeeweeStorage
-from aw_server.firebase_datastore.firestore import FirestoreStorage # Firestore depolama sınıfını içe aktar
+from aw_server.firebase_datastore.firestore import (
+    FirestoreStorage,
+)  # Firestore depolama sınıfını içe aktar
 
 from . import __version__
 from .config import config
 from .server import _start
 
 logger = logging.getLogger(__name__)
+
 
 def main():
     """Called from the executable and __main__.py"""
@@ -22,19 +25,20 @@ def main():
         client = cloud_logging.Client()
         handler = cloud_logging.handlers.CloudLoggingHandler(client)
         # Mevcut Flask ve diğer loglayıcıları Cloud Logging'e yönlendir
-        logging.getLogger().setLevel(logging.INFO) # Varsayılan log seviyesini ayarla
+        logging.getLogger().setLevel(logging.INFO)  # Varsayılan log seviyesini ayarla
         logging.getLogger().addHandler(handler)
         print("Cloud Logging başarıyla başlatıldı.")
     except Exception as e:
         print(f"Cloud Logging başlatılırken hata oluştu: {e}", file=sys.stderr)
         # Hata durumunda uygulama yine de çalışmaya devam etmeli
 
-
     # TODO: Gerçek kullanıcı kimliği doğrulama bağlamından alınmalı
     # Şimdilik, varsayılan bir kullanıcı kimliği kullanıyoruz veya yapılandırmadan alıyoruz
     # Bu kısım, kimlik doğrulama sistemi uygulandığında güncellenmelidir.
     user_id = os.environ.get("FIREBASE_USER_ID", "default_user_id")
-    anonymize_data = os.environ.get("ANONYMIZE_ACTIVITY_DATA", "False").lower() == "true"
+    anonymize_data = (
+        os.environ.get("ANONYMIZE_ACTIVITY_DATA", "False").lower() == "true"
+    )
 
     settings, storage_method = parse_settings(user_id, anonymize_data)
 
@@ -69,7 +73,7 @@ def main():
             storage_method=storage_method,
             cors_origins=settings.cors_origins,
             custom_static=settings.custom_static,
-            user_id=user_id, # user_id parametresi _start fonksiyonuna iletildi
+            user_id=user_id,  # user_id parametresi _start fonksiyonuna iletildi
         )
     except Exception as e:
         logger.exception(f"Uygulama başlatılırken kritik hata oluştu: {e}")
@@ -144,7 +148,9 @@ def parse_settings(user_id: str = "default_user", anonymize_data: bool = True):
     storage_methods = {
         "peewee": PeeweeStorage,
         "memory": MemoryStorage,
-        "firestore": lambda testing: FirestoreStorage(user_id=user_id, testing=testing, anonymize_data=anonymize_data), # Firestore depolama yöntemini ekle ve user_id ile başlat
+        "firestore": lambda testing: FirestoreStorage(
+            user_id=user_id, testing=testing, anonymize_data=anonymize_data
+        ),  # Firestore depolama yöntemini ekle ve user_id ile başlat
     }
     storage_method = storage_methods[settings.storage]
 

@@ -6,7 +6,9 @@
     <section class="setting-section">
       <h3>{{ $t('settings.encryption.masterPassword.title') }}</h3>
       <p>{{ $t('settings.encryption.masterPassword.description') }}</p>
-      <button @click="openMasterPasswordSetup">{{ $t('settings.encryption.masterPassword.setupButton') }}</button>
+      <button @click="openMasterPasswordSetup">
+        {{ $t('settings.encryption.masterPassword.setupButton') }}
+      </button>
       <div v-if="masterPasswordStatus">{{ masterPasswordStatus }}</div>
     </section>
 
@@ -20,13 +22,21 @@
     <section class="setting-section">
       <h3>{{ $t('settings.encryption.backupRecovery.title') }}</h3>
       <p>{{ $t('settings.encryption.backupRecovery.description') }}</p>
-      <button @click="openKeyRecoveryWizard">{{ $t('settings.encryption.backupRecovery.recoverButton') }}</button>
+      <button @click="openKeyRecoveryWizard">
+        {{ $t('settings.encryption.backupRecovery.recoverButton') }}
+      </button>
       <div v-if="backupRecoveryStatus">{{ backupRecoveryStatus }}</div>
     </section>
 
-    <div v-if="saveStatus === 'saving'" class="status-message saving">{{ $t('settings.saving') }}</div>
-    <div v-if="saveStatus === 'success'" class="status-message success">{{ $t('settings.saveSuccess') }}</div>
-    <div v-if="saveStatus === 'error'" class="status-message error">{{ $t('settings.saveError') }}</div>
+    <div v-if="saveStatus === 'saving'" class="status-message saving">
+      {{ $t('settings.saving') }}
+    </div>
+    <div v-if="saveStatus === 'success'" class="status-message success">
+      {{ $t('settings.saveSuccess') }}
+    </div>
+    <div v-if="saveStatus === 'error'" class="status-message error">
+      {{ $t('settings.saveError') }}
+    </div>
 
     <!-- Modallar veya Dialoglar burada eklenebilir -->
   </div>
@@ -64,7 +74,6 @@ export default Vue.extend({
       // Servisleri başlat (gerçek uygulamada API çağrıları olmalı)
       // const keyDerivationService = new KeyDerivationService();
       // const nodeEncryptionService = new NodeEncryptionService();
-
       // UserKeyManager ve SecureStorageService (Firestore tabanlı)
       // const userKeyManager = new UserKeyManager(keyDerivationService, {
       //   store: async (key: string, value: string) => {
@@ -85,11 +94,9 @@ export default Vue.extend({
       //     // await axios.post('/api/secure-storage/delete', { key, userId: this.userId });
       //   },
       // });
-
       // this.masterKeyService = new MasterKeyService(userKeyManager);
       // this.keyRotationService = new KeyRotationService(this.masterKeyService, {} as any, nodeEncryptionService); // KeyBackupService ve BaseEncryptionService bağımlılıkları mocklandı
       // this.keyRecoveryService = new KeyRecoveryService(); // Firestore bağımlılığı mocklandı veya API ile entegre edildi varsayılıyor
-
       // TODO: Başlangıç durumlarını kontrol et (ana parola ayarlı mı vb.)
     } catch (error) {
       console.error('Şifreleme ayarları başlatılırken hata oluştu:', error);
@@ -105,7 +112,10 @@ export default Vue.extend({
       try {
         // Kullanıcı kimliği ve parola bilgilerini uygun şekilde iletmelisiniz.
         // Bu örnekte sadece userId kullanıldı, gerçekte formdan parola alınmalı.
-        const response = await axios.post('/api/encryption/master-password-setup', { userId: this.userId, password: 'yeni_parola' }); // Geçici parola
+        const response = await axios.post('/api/encryption/master-password-setup', {
+          userId: this.userId,
+          password: 'yeni_parola',
+        }); // Geçici parola
         this.masterPasswordStatus = response.data.message;
       } catch (error) {
         console.error('Ana parola kurulumu başlatılırken hata oluştu:', error);
@@ -123,7 +133,11 @@ export default Vue.extend({
         //   this.keyRotationStatus = 'Anahtar rotasyonu başarısız oldu.';
         // }
         // Gerçekte API çağrısı ile yapılacak:
-        const response = await axios.post('/api/encryption/rotate-keys', { userId: this.userId, oldPassword: 'eski_parola', newPassword: 'yeni_parola' }); // Geçici parolalar
+        const response = await axios.post('/api/encryption/rotate-keys', {
+          userId: this.userId,
+          oldPassword: 'eski_parola',
+          newPassword: 'yeni_parola',
+        }); // Geçici parolalar
         this.keyRotationStatus = response.data.message;
       } catch (error) {
         console.error('Anahtar rotasyonunda hata oluştu:', error);
@@ -136,7 +150,11 @@ export default Vue.extend({
       console.log('Anahtar kurtarma sihirbazı açıldı.');
       // Gerçekte API çağrısı ile yapılacak:
       try {
-        const response = await axios.post('/api/encryption/key-recovery', { userId: this.userId, recoveryMethod: 'email', recoveryData: 'test@example.com' }); // Geçici veriler
+        const response = await axios.post('/api/encryption/key-recovery', {
+          userId: this.userId,
+          recoveryMethod: 'email',
+          recoveryData: 'test@example.com',
+        }); // Geçici veriler
         this.backupRecoveryStatus = response.data.message;
       } catch (error) {
         console.error('Anahtar kurtarma sihirbazı başlatılırken hata oluştu:', error);

@@ -1,6 +1,6 @@
 /**
  * API Service Layer
- * 
+ *
  * Bu dosya merkezi API servis katmanını sağlar.
  * Type-safe HTTP requests ve error handling ile.
  */
@@ -15,7 +15,7 @@ import type {
   APIResponse,
   APIError,
   UserSettings,
-  Category
+  Category,
 } from '~/types';
 import { safeAccess, isNotNull } from '~/utils/safe-access';
 
@@ -48,7 +48,7 @@ export class APIService {
         throw new APIError({
           message: `HTTP ${response.status}: ${response.statusText}`,
           code: 'HTTP_ERROR',
-          details: { status: response.status, statusText: response.statusText }
+          details: { status: response.status, statusText: response.statusText },
         });
       }
 
@@ -63,7 +63,7 @@ export class APIService {
         throw new APIError({
           message: 'Network error occurred',
           code: 'NETWORK_ERROR',
-          details: { originalError: error }
+          details: { originalError: error },
         });
       }
 
@@ -71,7 +71,7 @@ export class APIService {
       throw new APIError({
         message: 'An unexpected error occurred',
         code: 'UNKNOWN_ERROR',
-        details: { originalError: error }
+        details: { originalError: error },
       });
     }
   }
@@ -107,13 +107,13 @@ export class APIService {
     }
   ): Promise<AWEvent[]> {
     let endpoint = `/api/0/buckets/${bucketId}/events`;
-    
+
     if (params) {
       const searchParams = new URLSearchParams();
       if (params.start) searchParams.set('start', params.start.toISOString());
       if (params.end) searchParams.set('end', params.end.toISOString());
       if (params.limit) searchParams.set('limit', params.limit.toString());
-      
+
       const queryString = searchParams.toString();
       if (queryString) {
         endpoint += `?${queryString}`;
@@ -168,14 +168,17 @@ export class APIService {
   /**
    * AI Feature operations
    */
-  async getFocusQualityScore(events: AWEvent[], userTz: string): Promise<{
+  async getFocusQualityScore(
+    events: AWEvent[],
+    userTz: string
+  ): Promise<{
     score: number;
     factors: Record<string, number>;
     recommendations: string[];
   }> {
     return this.request('POST', '/api/0/ai/focus-quality-score', {
       events,
-      user_tz: userTz
+      user_tz: userTz,
     });
   }
 
@@ -188,7 +191,7 @@ export class APIService {
   }> {
     return this.request('POST', '/api/0/ai/behavioral-trends', {
       daily_totals: dailyTotals,
-      window
+      window,
     });
   }
 
@@ -199,7 +202,7 @@ export class APIService {
     baseline: Record<string, number>;
   }> {
     return this.request('POST', '/api/0/ai/anomaly-detection', {
-      daily_totals: dailyTotals
+      daily_totals: dailyTotals,
     });
   }
 
@@ -213,7 +216,7 @@ export class APIService {
   }> {
     return this.request('POST', '/api/0/ai/community-rules', {
       event,
-      community_rules: communityRules
+      community_rules: communityRules,
     });
   }
 
@@ -227,7 +230,7 @@ export class APIService {
   }> {
     return this.request('POST', '/api/0/ai/contextual-categorization', {
       context,
-      language
+      language,
     });
   }
 }
@@ -239,7 +242,7 @@ export function createAPIService(client: AWClient, baseURL?: string): APIService
   if (!client) {
     throw new APIError({
       message: 'AWClient is required to create API service',
-      code: 'INVALID_CLIENT'
+      code: 'INVALID_CLIENT',
     });
   }
 
@@ -299,7 +302,7 @@ export class APIError extends Error {
       message: this.message,
       code: this.code,
       details: this.details,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -315,7 +318,7 @@ export class ResponseTransformer {
     if (!raw || typeof raw !== 'object') return null;
 
     const obj = raw as Record<string, unknown>;
-    
+
     if (!isNotNull(obj.id) || !isNotNull(obj.timestamp) || !isNotNull(obj.duration)) {
       return null;
     }
@@ -324,7 +327,7 @@ export class ResponseTransformer {
       id: String(obj.id),
       timestamp: new Date(String(obj.timestamp)),
       duration: { seconds: Number(obj.duration) },
-      data: (obj.data as Record<string, unknown>) || {}
+      data: (obj.data as Record<string, unknown>) || {},
     };
   }
 
@@ -335,7 +338,7 @@ export class ResponseTransformer {
     if (!raw || typeof raw !== 'object') return null;
 
     const obj = raw as Record<string, unknown>;
-    
+
     if (!isNotNull(obj.id) || !isNotNull(obj.type) || !isNotNull(obj.hostname)) {
       return null;
     }
@@ -347,7 +350,7 @@ export class ResponseTransformer {
       client: String(obj.client || 'unknown'),
       created: new Date(String(obj.created)),
       last_updated: obj.last_updated ? new Date(String(obj.last_updated)) : undefined,
-      metadata: (obj.metadata as Record<string, unknown>) || {}
+      metadata: (obj.metadata as Record<string, unknown>) || {},
     };
   }
 
@@ -358,7 +361,7 @@ export class ResponseTransformer {
     if (!raw || typeof raw !== 'object') return null;
 
     const obj = raw as Record<string, unknown>;
-    
+
     if (!Array.isArray(obj.name) || !isNotNull(obj.rule)) {
       return null;
     }
@@ -367,7 +370,7 @@ export class ResponseTransformer {
       id: obj.id ? Number(obj.id) : undefined,
       name: obj.name as string[],
       rule: obj.rule as any, // TODO: Add proper rule validation
-      data: (obj.data as Record<string, unknown>) || {}
+      data: (obj.data as Record<string, unknown>) || {},
     };
   }
 }

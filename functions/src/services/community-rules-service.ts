@@ -43,13 +43,13 @@ export class CommunityRulesService {
     // 1. Iterate `community_rules` in order of popularity. (Assuming input is already sorted)
     for (const rule of communityRules) {
       const regex = this.globToRegex(rule.pattern);
-      
+
       // Check for app, title, or url match
       if (event.app && regex.test(event.app)) {
         return {
           matched_rule: rule,
           category: rule.category,
-          source: "community",
+          source: 'community',
         };
       }
 
@@ -57,7 +57,7 @@ export class CommunityRulesService {
         return {
           matched_rule: rule,
           category: rule.category,
-          source: "community",
+          source: 'community',
         };
       }
 
@@ -65,7 +65,7 @@ export class CommunityRulesService {
         return {
           matched_rule: rule,
           category: rule.category,
-          source: "community",
+          source: 'community',
         };
       }
     }
@@ -74,7 +74,7 @@ export class CommunityRulesService {
     return {
       matched_rule: null,
       category: null,
-      source: "none",
+      source: 'none',
     };
   }
-} 
+}

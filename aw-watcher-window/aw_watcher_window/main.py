@@ -22,10 +22,10 @@ Features:
 Example:
     Basic usage:
     $ python -m aw_watcher_window
-    
+
     With custom polling interval:
     $ python -m aw_watcher_window --poll-time 2.0
-    
+
     With title exclusion:
     $ python -m aw_watcher_window --exclude-title
 """
@@ -60,13 +60,13 @@ if log_level:
 
 def kill_process(pid):
     """Terminates a process by its process ID.
-    
+
     Attempts to gracefully terminate the process using SIGTERM signal.
     If the process is already dead, logs the information without raising an error.
-    
+
     Args:
         pid: The process ID of the process to terminate.
-        
+
     Note:
         Uses os.kill with SIGTERM signal for process termination.
         Handles ProcessLookupError when the process is already terminated.
@@ -80,19 +80,19 @@ def kill_process(pid):
 
 def try_compile_title_regex(title):
     """Compiles a title string into a case-insensitive regular expression pattern.
-    
+
     Attempts to create a regex pattern from the provided title string.
     If the pattern is invalid, logs an error and exits the program.
-    
+
     Args:
         title: String pattern to compile into a regular expression.
-        
+
     Returns:
         re.Pattern: Compiled regular expression pattern with IGNORECASE flag.
-        
+
     Raises:
         SystemExit: If the regex pattern is invalid.
-        
+
     Note:
         Uses re.IGNORECASE flag for case-insensitive matching.
         Invalid patterns cause immediate program termination with exit code 1.
@@ -106,13 +106,13 @@ def try_compile_title_regex(title):
 
 def main():
     """Main entry point for the ActivityWatch window watcher.
-    
+
     Initializes the window watcher, sets up logging, creates the ActivityWatch client,
     and starts the appropriate monitoring strategy based on the platform and arguments.
-    
+
     Raises:
         Exception: If DISPLAY environment variable is not set on Linux systems.
-        
+
     Note:
         - On Linux, requires DISPLAY environment variable to be set
         - On macOS, ensures permissions and optionally uses Swift-based monitoring
@@ -192,10 +192,10 @@ def heartbeat_loop(
     client, bucket_id, poll_time, strategy, exclude_title=False, exclude_titles=[]
 ):
     """Main monitoring loop that continuously captures and reports window information.
-    
+
     Runs an infinite loop that polls the current active window at regular intervals,
     applies filtering rules, and sends the data to ActivityWatch server as heartbeat events.
-    
+
     Args:
         client: ActivityWatch client instance for server communication.
         bucket_id: String identifier for the data storage bucket.
@@ -203,7 +203,7 @@ def heartbeat_loop(
         strategy: String specifying the window detection strategy to use.
         exclude_title: Boolean indicating whether to exclude all window titles.
         exclude_titles: List of compiled regex patterns for title exclusion.
-        
+
     Note:
         - Monitors parent process and exits if parent dies (orphan detection)
         - Handles both fatal and non-fatal exceptions gracefully
@@ -231,10 +231,11 @@ def heartbeat_loop(
             logger.error(f"Platform compatibility error: {e}")
             # Try to get window info with fallback method
             current_window = safe_execute(
-                get_current_window, None, 
+                get_current_window,
+                None,
                 default_value={"app": "unknown", "title": "unknown"},
                 exception_types=(Exception,),
-                context="window_info_fallback"
+                context="window_info_fallback",
             )
         except PermissionError as e:
             # Permission-related errors (e.g., accessibility permissions on macOS)

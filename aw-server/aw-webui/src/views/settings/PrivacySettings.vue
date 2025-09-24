@@ -4,25 +4,52 @@
     <p>{{ $t('settings.privacy.description') }}</p>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowAnonymousSystemData" v-model="settings.allowAnonymousSystemData" @change="saveSettings">
-      <label for="allowAnonymousSystemData">{{ $t('settings.privacy.allowAnonymousSystemData') }}</label>
+      <input
+        type="checkbox"
+        id="allowAnonymousSystemData"
+        v-model="settings.allowAnonymousSystemData"
+        @change="saveSettings"
+      />
+      <label for="allowAnonymousSystemData">
+        {{ $t('settings.privacy.allowAnonymousSystemData') }}
+      </label>
     </div>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowAnonymizedUsageData" v-model="settings.allowAnonymizedUsageData" @change="saveSettings">
-      <label for="allowAnonymizedUsageData">{{ $t('settings.privacy.allowAnonymizedUsageData') }}</label>
+      <input
+        type="checkbox"
+        id="allowAnonymizedUsageData"
+        v-model="settings.allowAnonymizedUsageData"
+        @change="saveSettings"
+      />
+      <label for="allowAnonymizedUsageData">
+        {{ $t('settings.privacy.allowAnonymizedUsageData') }}
+      </label>
     </div>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowSensitivePersonalData" v-model="settings.allowSensitivePersonalData" @change="saveSettings">
-      <label for="allowSensitivePersonalData">{{ $t('settings.privacy.allowSensitivePersonalData') }}</label>
+      <input
+        type="checkbox"
+        id="allowSensitivePersonalData"
+        v-model="settings.allowSensitivePersonalData"
+        @change="saveSettings"
+      />
+      <label for="allowSensitivePersonalData">
+        {{ $t('settings.privacy.allowSensitivePersonalData') }}
+      </label>
     </div>
 
     <p class="last-updated">{{ $t('settings.privacy.lastUpdated') }}: {{ lastUpdatedDisplay }}</p>
 
-    <div v-if="saveStatus === 'saving'" class="status-message saving">{{ $t('settings.privacy.saving') }}</div>
-    <div v-if="saveStatus === 'success'" class="status-message success">{{ $t('settings.privacy.saveSuccess') }}</div>
-    <div v-if="saveStatus === 'error'" class="status-message error">{{ $t('settings.privacy.saveError') }}</div>
+    <div v-if="saveStatus === 'saving'" class="status-message saving">
+      {{ $t('settings.privacy.saving') }}
+    </div>
+    <div v-if="saveStatus === 'success'" class="status-message success">
+      {{ $t('settings.privacy.saveSuccess') }}
+    </div>
+    <div v-if="saveStatus === 'error'" class="status-message error">
+      {{ $t('settings.privacy.saveError') }}
+    </div>
   </div>
 </template>
 
@@ -58,7 +85,7 @@ export default Vue.extend({
     // Gerçek uygulamada bu bir API çağrısı ile yapılmalıdır.
     try {
       this.userConsentManager = new UserConsentManager(); // Backend servisini doğrudan import etmek istemci tarafında doğru değil, API üzerinden çağrılmalı.
-                                                        // Bu bir yer tutucudur.
+      // Bu bir yer tutucudur.
       await this.loadSettings();
     } catch (error) {
       console.error('UserConsentManager başlatılırken hata oluştu:', error);
@@ -121,7 +148,7 @@ h2 {
   margin-bottom: 15px;
 }
 
-.setting-item input[type="checkbox"] {
+.setting-item input[type='checkbox'] {
   margin-right: 10px;
   width: 20px;
   height: 20px;
@@ -161,4 +188,4 @@ h2 {
   background-color: #ffebee;
   color: #c62828;
 }
-</style> 
+</style>

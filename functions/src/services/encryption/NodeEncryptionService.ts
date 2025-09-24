@@ -1,5 +1,5 @@
-import { BaseEncryptionService } from "./BaseEncryptionService";
-import { CryptoUtils } from "./CryptoUtils";
+import { BaseEncryptionService } from './BaseEncryptionService';
+import { CryptoUtils } from './CryptoUtils';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
 export class NodeEncryptionService extends BaseEncryptionService {
@@ -10,17 +10,18 @@ export class NodeEncryptionService extends BaseEncryptionService {
     const ivBuffer = CryptoUtils.base64ToBytes(iv);
 
     if (keyBuffer.length !== 32) {
-      throw new Error("Anahtar 32 bayt olmalıdır (AES-256).");
+      throw new Error('Anahtar 32 bayt olmalıdır (AES-256).');
     }
-    if (ivBuffer.length !== 16) { // AES-GCM için 16 bayt IV (Nonce)
-      throw new Error("IV 16 bayt olmalıdır.");
+    if (ivBuffer.length !== 16) {
+      // AES-GCM için 16 bayt IV (Nonce)
+      throw new Error('IV 16 bayt olmalıdır.');
     }
 
     const cipher = createCipheriv(this.ALGORITHM, keyBuffer, ivBuffer);
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
     const tag = cipher.getAuthTag();
-    
+
     // Şifreli veri, IV ve auth tag'ı birleştirip Base64 olarak döndür.
     return `${iv},${encrypted},${CryptoUtils.bytesToBase64(tag)}`;
   }
@@ -28,7 +29,7 @@ export class NodeEncryptionService extends BaseEncryptionService {
   async decrypt(encryptedDataWithMeta: string, key: string): Promise<string> {
     const parts = encryptedDataWithMeta.split(',');
     if (parts.length !== 3) {
-      throw new Error("Geçersiz şifreli veri formatı.");
+      throw new Error('Geçersiz şifreli veri formatı.');
     }
 
     const iv = parts[0];
@@ -40,10 +41,10 @@ export class NodeEncryptionService extends BaseEncryptionService {
     const tagBuffer = CryptoUtils.base64ToBytes(tag);
 
     if (keyBuffer.length !== 32) {
-      throw new Error("Anahtar 32 bayt olmalıdır (AES-256).");
+      throw new Error('Anahtar 32 bayt olmalıdır (AES-256).');
     }
     if (ivBuffer.length !== 16) {
-      throw new Error("IV 16 bayt olmalıdır.");
+      throw new Error('IV 16 bayt olmalıdır.');
     }
 
     const decipher = createDecipheriv(this.ALGORITHM, keyBuffer, ivBuffer);
@@ -58,4 +59,4 @@ export class NodeEncryptionService extends BaseEncryptionService {
   async generateIv(): Promise<string> {
     return CryptoUtils.bytesToBase64(randomBytes(16)); // AES-GCM için 16 bayt IV
   }
-} 
+}

@@ -1,4 +1,4 @@
-@import "globals";
+@import 'globals';
 
 body,
 html,
@@ -8,10 +8,18 @@ button {
   font-family: 'Inter', sans-serif; /* Modern bir yazı tipi */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background-color 0.3s ease, color 0.3s ease; /* Tema geçişleri */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease; /* Tema geçişleri */
 }
 
-h1, h2, h3, h4, h5, h6, nav {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+nav {
   font-family: 'Varela Round', sans-serif;
   color: $textColor; /* Başlıklar için de tema rengini kullan */
   transition: color 0.3s ease; /* Tema geçişleri */
@@ -38,7 +46,10 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
   padding: 20px;
   margin-bottom: 20px; /* Bileşenler arasında boşluk */
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Tema geçişleri */
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease; /* Tema geçişleri */
 }
 
 /* Yeni genel stil iyileştirmeleri */
@@ -48,14 +59,20 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 1rem;
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Tema geçişleri */
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease; /* Tema geçişleri */
 }
 
 .btn {
   border-radius: 5px; /* Düğmeler için yuvarlak köşeler */
   padding: 0.5rem 1rem;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Tema geçişleri */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease; /* Tema geçişleri */
 }
 
 // Dark mode specific styles
@@ -66,7 +83,9 @@ body {
   }
   .aw-navbar {
     background-color: var(--background-color) !important;
-    .navbar-brand, .nav-link, .dropdown-item {
+    .navbar-brand,
+    .nav-link,
+    .dropdown-item {
       color: var(--text-color) !important;
     }
   }
@@ -89,7 +108,8 @@ body {
     font-size: 14px; // Daha küçük ekranlar için yazı tipi boyutunu küçült
   }
 
-  .aw-container, .card {
+  .aw-container,
+  .card {
     margin: 10px; // Mobil cihazlarda kenar boşluklarını ayarla
     padding: 15px; // Daha küçük iç boşluklar
   }
@@ -99,14 +119,17 @@ body {
     margin-bottom: 10px; // Düğmeler arasına boşluk ekle
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-size: 1.5rem; // Başlık boyutlarını ayarla
   }
 }
 
 // Daha küçük mobil cihazlar için ek ayarlar
 @media (max-width: 480px) {
-  .aw-container, .card {
+  .aw-container,
+  .card {
     margin: 5px; // Çok daha küçük ekranlar için kenar boşluklarını daha da küçült
     padding: 10px; // Çok daha küçük ekranlar için iç boşlukları küçült
   }

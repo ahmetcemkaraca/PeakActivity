@@ -1,6 +1,6 @@
 /**
  * Validation Utilities for Firebase Functions
- * 
+ *
  * Bu dosya Firebase Functions için runtime validation sağlar.
  * Zod schemas ile birlikte tip güvenli validation sistemi.
  */
@@ -11,20 +11,13 @@ import { https } from 'firebase-functions/v1';
 /**
  * Generic request validator using Zod schemas
  */
-export function validateRequest<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown
-): T {
+export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    throw new https.HttpsError(
-      'invalid-argument',
-      'Invalid request data',
-      {
-        errors: result.error.errors,
-        received: data
-      }
-    );
+    throw new https.HttpsError('invalid-argument', 'Invalid request data', {
+      errors: result.error.errors,
+      received: data,
+    });
   }
   return result.data;
 }
@@ -44,10 +37,7 @@ export function validateAuth(context: { auth?: { uid: string; email?: string } }
   }
 
   if (!context.auth.uid) {
-    throw new https.HttpsError(
-      'permission-denied',
-      'Invalid user authentication data'
-    );
+    throw new https.HttpsError('permission-denied', 'Invalid user authentication data');
   }
 
   return context.auth;
@@ -56,16 +46,12 @@ export function validateAuth(context: { auth?: { uid: string; email?: string } }
 /**
  * Validate required fields
  */
-export function validateRequired<T>(
-  value: T | null | undefined,
-  fieldName: string
-): T {
+export function validateRequired<T>(value: T | null | undefined, fieldName: string): T {
   if (value === undefined || value === null || value === '') {
-    throw new https.HttpsError(
-      'invalid-argument',
-      `Field '${fieldName}' is required`,
-      { field: fieldName, value }
-    );
+    throw new https.HttpsError('invalid-argument', `Field '${fieldName}' is required`, {
+      field: fieldName,
+      value,
+    });
   }
   return value;
 }
@@ -73,11 +59,7 @@ export function validateRequired<T>(
 /**
  * Validate field type
  */
-export function validateType<T>(
-  value: unknown,
-  expectedType: string,
-  fieldName: string
-): T {
+export function validateType<T>(value: unknown, expectedType: string, fieldName: string): T {
   const actualType = typeof value;
   if (actualType !== expectedType) {
     throw new https.HttpsError(
@@ -92,10 +74,7 @@ export function validateType<T>(
 /**
  * Validate email format
  */
-export function validateEmail(
-  email: string,
-  fieldName: string = 'email'
-): string {
+export function validateEmail(email: string, fieldName: string = 'email'): string {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw new https.HttpsError(
@@ -185,10 +164,7 @@ export function validateEnum<T extends string>(
 /**
  * Validate date format (ISO string)
  */
-export function validateISODate(
-  value: string,
-  fieldName: string
-): Date {
+export function validateISODate(value: string, fieldName: string): Date {
   const date = new Date(value);
   if (isNaN(date.getTime())) {
     throw new https.HttpsError(
@@ -203,19 +179,15 @@ export function validateISODate(
 /**
  * Validate URL format
  */
-export function validateURL(
-  value: string,
-  fieldName: string
-): string {
+export function validateURL(value: string, fieldName: string): string {
   try {
     new URL(value);
     return value;
   } catch {
-    throw new https.HttpsError(
-      'invalid-argument',
-      `Field '${fieldName}' must be a valid URL`,
-      { field: fieldName, value }
-    );
+    throw new https.HttpsError('invalid-argument', `Field '${fieldName}' must be a valid URL`, {
+      field: fieldName,
+      value,
+    });
   }
 }
 
@@ -230,7 +202,7 @@ export function validateObjectKeys<T extends Record<string, unknown>>(
 ): T {
   const objKeys = Object.keys(obj);
   const allowedKeys = [...requiredKeys, ...optionalKeys].map(String);
-  
+
   // Check for required keys
   for (const key of requiredKeys) {
     if (!(String(key) in obj)) {
@@ -241,7 +213,7 @@ export function validateObjectKeys<T extends Record<string, unknown>>(
       );
     }
   }
-  
+
   // Check for unexpected keys
   for (const key of objKeys) {
     if (!allowedKeys.includes(key)) {
@@ -252,7 +224,7 @@ export function validateObjectKeys<T extends Record<string, unknown>>(
       );
     }
   }
-  
+
   return obj;
 }
 
@@ -295,11 +267,7 @@ export function validateMimeType(
 /**
  * Validate pagination parameters
  */
-export function validatePagination(params: {
-  page?: number;
-  limit?: number;
-  offset?: number;
-}): {
+export function validatePagination(params: { page?: number; limit?: number; offset?: number }): {
   page: number;
   limit: number;
   offset: number;
@@ -307,17 +275,14 @@ export function validatePagination(params: {
   const page = Math.max(1, params.page || 1);
   const limit = Math.min(100, Math.max(1, params.limit || 20));
   const offset = Math.max(0, params.offset || (page - 1) * limit);
-  
+
   return { page, limit, offset };
 }
 
 /**
  * Validate timezone
  */
-export function validateTimezone(
-  timezone: string,
-  fieldName: string = 'timezone'
-): string {
+export function validateTimezone(timezone: string, fieldName: string = 'timezone'): string {
   try {
     Intl.DateTimeFormat(undefined, { timeZone: timezone });
     return timezone;
@@ -333,10 +298,7 @@ export function validateTimezone(
 /**
  * Validate hex color
  */
-export function validateHexColor(
-  color: string,
-  fieldName: string = 'color'
-): string {
+export function validateHexColor(color: string, fieldName: string = 'color'): string {
   const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
   if (!hexColorRegex.test(color)) {
     throw new https.HttpsError(
@@ -362,7 +324,7 @@ function formatBytes(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   if (bytes === 0) return '0 Bytes';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
 /**
@@ -378,23 +340,23 @@ export function sanitizeString(
   } = {}
 ): string {
   let result = input;
-  
+
   if (options.trim !== false) {
     result = result.trim();
   }
-  
+
   if (options.toLowerCase) {
     result = result.toLowerCase();
   }
-  
+
   if (options.allowedChars) {
     result = result.replace(options.allowedChars, '');
   }
-  
+
   if (options.maxLength) {
     result = result.substring(0, options.maxLength);
   }
-  
+
   return result;
 }
 
@@ -418,18 +380,16 @@ export function validateAndSanitizeInput(
 ): unknown {
   // Check if required
   if (rules.required && (input === null || input === undefined || input === '')) {
-    throw new https.HttpsError(
-      'invalid-argument',
-      `Field '${fieldName}' is required`,
-      { field: fieldName }
-    );
+    throw new https.HttpsError('invalid-argument', `Field '${fieldName}' is required`, {
+      field: fieldName,
+    });
   }
-  
+
   // Return early if optional and empty
   if (!rules.required && (input === null || input === undefined || input === '')) {
     return input;
   }
-  
+
   // Type validation and conversion
   switch (rules.type) {
     case 'string':
@@ -448,34 +408,32 @@ export function validateAndSanitizeInput(
         validateEnum(str, rules.enum, fieldName);
       }
       return rules.sanitize ? sanitizeString(str) : str;
-      
+
     case 'number':
       const num = validateType<number>(input, 'number', fieldName);
       if (rules.min !== undefined || rules.max !== undefined) {
         validateNumberRange(num, rules.min || -Infinity, rules.max || Infinity, fieldName);
       }
       return num;
-      
+
     case 'boolean':
       return validateType<boolean>(input, 'boolean', fieldName);
-      
+
     case 'email':
       const email = validateType<string>(input, 'string', fieldName);
       return validateEmail(email, fieldName);
-      
+
     case 'url':
       const url = validateType<string>(input, 'string', fieldName);
       return validateURL(url, fieldName);
-      
+
     case 'date':
       const dateStr = validateType<string>(input, 'string', fieldName);
       return validateISODate(dateStr, fieldName);
-      
+
     default:
-      throw new https.HttpsError(
-        'internal',
-        `Unknown validation type: ${rules.type}`,
-        { type: rules.type }
-      );
+      throw new https.HttpsError('internal', `Unknown validation type: ${rules.type}`, {
+        type: rules.type,
+      });
   }
 }

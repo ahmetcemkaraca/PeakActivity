@@ -42,7 +42,7 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Ana parola başarıyla ayarlandı."
+                    example: 'Ana parola başarıyla ayarlandı.'
                   data:
                     type: object
                     nullable: true
@@ -89,7 +89,7 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Anahtarlar başarıyla döndürüldü."
+                    example: 'Anahtarlar başarıyla döndürüldü.'
                   data:
                     type: object
                     nullable: true
@@ -134,11 +134,11 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Anahtar başarıyla kurtarıldı."
+                    example: 'Anahtar başarıyla kurtarıldı.'
                   data:
                     type: object
                     nullable: true
         '400':
           description: Invalid arguments or recovery data.
         '500':
-          description: Internal server error. 
+          description: Internal server error.

@@ -1,6 +1,6 @@
 /**
  * Safe Access Utilities
- * 
+ *
  * Bu dosya null/undefined güvenli erişim yardımcıları içerir.
  * Tüm optional chaining ve null check'leri burada merkezi olarak yönetilir.
  */
@@ -9,7 +9,7 @@
  * Safely access object property
  */
 export function safeAccess<T, K extends keyof T>(
-  obj: T | null | undefined, 
+  obj: T | null | undefined,
   key: K
 ): T[K] | undefined {
   return obj?.[key];
@@ -18,22 +18,18 @@ export function safeAccess<T, K extends keyof T>(
 /**
  * Safely access nested object properties using dot notation
  */
-export function safeDeepAccess<T>(
-  obj: unknown,
-  path: string,
-  defaultValue?: T
-): T | undefined {
+export function safeDeepAccess<T>(obj: unknown, path: string, defaultValue?: T): T | undefined {
   if (!obj || typeof obj !== 'object') {
     return defaultValue;
   }
 
   try {
     const result = path.split('.').reduce((current: unknown, key: string): unknown => {
-      return current && typeof current === 'object' && current !== null && key in current 
-        ? (current as Record<string, unknown>)[key] 
+      return current && typeof current === 'object' && current !== null && key in current
+        ? (current as Record<string, unknown>)[key]
         : undefined;
     }, obj);
-    
+
     return (result as T) ?? defaultValue;
   } catch {
     return defaultValue;
@@ -57,10 +53,7 @@ export function isNotEmpty<T>(value: T | null | undefined | ''): value is T {
 /**
  * Safely get array element at index
  */
-export function safeArrayAccess<T>(
-  array: T[] | null | undefined,
-  index: number
-): T | undefined {
+export function safeArrayAccess<T>(array: T[] | null | undefined, index: number): T | undefined {
   if (!Array.isArray(array) || index < 0 || index >= array.length) {
     return undefined;
   }
@@ -87,10 +80,7 @@ export function safeLast<T>(array: T[] | null | undefined): T | undefined {
 /**
  * Safely parse JSON string
  */
-export function safeJsonParse<T>(
-  json: string | null | undefined,
-  defaultValue?: T
-): T | undefined {
+export function safeJsonParse<T>(json: string | null | undefined, defaultValue?: T): T | undefined {
   if (typeof json !== 'string') {
     return defaultValue;
   }
@@ -105,10 +95,7 @@ export function safeJsonParse<T>(
 /**
  * Safely stringify JSON
  */
-export function safeJsonStringify(
-  obj: unknown,
-  defaultValue: string = '{}'
-): string {
+export function safeJsonStringify(obj: unknown, defaultValue: string = '{}'): string {
   try {
     return JSON.stringify(obj);
   } catch {
@@ -119,39 +106,33 @@ export function safeJsonStringify(
 /**
  * Safely convert to number
  */
-export function safeNumber(
-  value: unknown,
-  defaultValue?: number
-): number | undefined {
+export function safeNumber(value: unknown, defaultValue?: number): number | undefined {
   if (typeof value === 'number' && !isNaN(value)) {
     return value;
   }
-  
+
   if (typeof value === 'string') {
     const parsed = Number(value);
     if (!isNaN(parsed)) {
       return parsed;
     }
   }
-  
+
   return defaultValue;
 }
 
 /**
  * Safely convert to string
  */
-export function safeString(
-  value: unknown,
-  defaultValue?: string
-): string | undefined {
+export function safeString(value: unknown, defaultValue?: string): string | undefined {
   if (typeof value === 'string') {
     return value;
   }
-  
+
   if (value === null || value === undefined) {
     return defaultValue;
   }
-  
+
   try {
     return String(value);
   } catch {
@@ -162,34 +143,28 @@ export function safeString(
 /**
  * Safely convert to boolean
  */
-export function safeBoolean(
-  value: unknown,
-  defaultValue?: boolean
-): boolean | undefined {
+export function safeBoolean(value: unknown, defaultValue?: boolean): boolean | undefined {
   if (typeof value === 'boolean') {
     return value;
   }
-  
+
   if (typeof value === 'string') {
     const lower = value.toLowerCase();
     if (lower === 'true' || lower === '1') return true;
     if (lower === 'false' || lower === '0') return false;
   }
-  
+
   if (typeof value === 'number') {
     return Boolean(value);
   }
-  
+
   return defaultValue;
 }
 
 /**
  * Safely execute a function and return result or default value
  */
-export function safeTry<T>(
-  fn: () => T,
-  defaultValue?: T
-): T | undefined {
+export function safeTry<T>(fn: () => T, defaultValue?: T): T | undefined {
   try {
     return fn();
   } catch {
@@ -210,7 +185,7 @@ export async function safeAsyncTry<T>(
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Timeout')), timeoutMs);
       });
-      
+
       return await Promise.race([fn(), timeoutPromise]);
     } else {
       return await fn();
@@ -247,7 +222,7 @@ export function safeMap<T, U>(
   if (!Array.isArray(array)) {
     return [];
   }
-  
+
   try {
     return array.map(mapper);
   } catch {
@@ -266,7 +241,7 @@ export function safeReduce<T, U>(
   if (!Array.isArray(array)) {
     return initialValue;
   }
-  
+
   try {
     return array.reduce(reducer, initialValue);
   } catch {
@@ -284,11 +259,11 @@ export function safeMerge<T extends object>(
   if (!target || typeof target !== 'object') {
     return (source as T) || ({} as T);
   }
-  
+
   if (!source || typeof source !== 'object') {
     return target;
   }
-  
+
   try {
     return { ...target, ...source };
   } catch {

@@ -2,74 +2,74 @@ name: PeakActivityMain AI Feature Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run AI feature tests daily at 6 AM UTC
     - cron: '0 6 * * *'
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   ai-feature-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Run Python Backend AI Feature Tests
-      run: poetry run pytest tests/ai/ # Assuming AI-related tests are in this directory
-      working-directory: aw-server
-      continue-on-error: true
+      - name: Run Python Backend AI Feature Tests
+        run: poetry run pytest tests/ai/ # Assuming AI-related tests are in this directory
+        working-directory: aw-server
+        continue-on-error: true
 
-    - name: Run Firebase Functions AI Feature Tests
-      run: npm test functions/test/ai/ # Assuming AI-related tests are in this directory
-      working-directory: functions
-      continue-on-error: true
+      - name: Run Firebase Functions AI Feature Tests
+        run: npm test functions/test/ai/ # Assuming AI-related tests are in this directory
+        working-directory: functions
+        continue-on-error: true
 
-    - name: Generate AI Feature Test Report
-      if: always()
-      run: |
-        echo "# 🤖 PeakActivityMain AI Feature Test Report" > ai_feature_report.md
-        echo "" >> ai_feature_report.md
-        echo "**Date:** $(date -u)" >> ai_feature_report.md
-        echo "**Trigger:** ${{ github.event_name }}" >> ai_feature_report.md
-        echo "" >> ai_feature_report.md
-        echo "## Test Categories Covered:" >> ai_feature_report.md
-        echo "- ✅ Python Backend AI Feature Tests" >> ai_feature_report.md
-        echo "- ✅ Firebase Functions AI Feature Tests" >> ai_feature_report.md
-        echo "" >> ai_feature_report.md
+      - name: Generate AI Feature Test Report
+        if: always()
+        run: |
+          echo "# 🤖 PeakActivityMain AI Feature Test Report" > ai_feature_report.md
+          echo "" >> ai_feature_report.md
+          echo "**Date:** $(date -u)" >> ai_feature_report.md
+          echo "**Trigger:** ${{ github.event_name }}" >> ai_feature_report.md
+          echo "" >> ai_feature_report.md
+          echo "## Test Categories Covered:" >> ai_feature_report.md
+          echo "- ✅ Python Backend AI Feature Tests" >> ai_feature_report.md
+          echo "- ✅ Firebase Functions AI Feature Tests" >> ai_feature_report.md
+          echo "" >> ai_feature_report.md
 
-    - name: Upload AI Feature Test Results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ai-feature-test-results
-        path: ai_feature_report.md
-        retention-days: 14 
+      - name: Upload AI Feature Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-feature-test-results
+          path: ai_feature_report.md
+          retention-days: 14

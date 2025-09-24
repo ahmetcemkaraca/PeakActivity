@@ -40,7 +40,7 @@ div.aw-container
 </template>
 
 <style scoped lang="scss">
-@import "../style/globals";
+@import '../style/globals';
 
 .btn-group {
   input[type='radio']:checked + label {

@@ -18,14 +18,17 @@ export class ClientSideEncryption {
    * @param userKey Kullanıcının master anahtarı (Base64 string).
    * @returns Şifrelenmiş veri ve metadata içeren bir obje.
    */
-  async encryptActivityData(data: string, userKey: string): Promise<{ encryptedData: string; metadata: EncryptionMetadata }> {
+  async encryptActivityData(
+    data: string,
+    userKey: string
+  ): Promise<{ encryptedData: string; metadata: EncryptionMetadata }> {
     const iv = await this.webCryptoService.generateIv();
     const encryptedData = await this.webCryptoService.encrypt(data, userKey, iv);
 
     const metadata: EncryptionMetadata = {
       algorithm: EncryptionTypes.AES256GCM, // Düzeltme: Enum değerini kullan
       iv: iv,
-      version: "1.0", // İlk versiyon
+      version: '1.0', // İlk versiyon
     };
 
     return { encryptedData, metadata };
@@ -38,11 +41,16 @@ export class ClientSideEncryption {
    * @param userKey Kullanıcının master anahtarı (Base64 string).
    * @returns Çözülmüş ham veri (string).
    */
-  async decryptActivityData(encryptedData: string, metadata: EncryptionMetadata, userKey: string): Promise<string> {
+  async decryptActivityData(
+    encryptedData: string,
+    metadata: EncryptionMetadata,
+    userKey: string
+  ): Promise<string> {
     // Metadata'daki algoritmaya göre doğru servisi seçmek için burada bir kontrol yapılabilir.
-    if (metadata.algorithm !== EncryptionTypes.AES256GCM) { // Düzeltme: Enum değerini kullan
+    if (metadata.algorithm !== EncryptionTypes.AES256GCM) {
+      // Düzeltme: Enum değerini kullan
       throw new Error(`Desteklenmeyen şifreleme algoritması: ${metadata.algorithm}`);
     }
     return this.webCryptoService.decrypt(encryptedData, userKey, metadata.iv);
   }
-} 
+}

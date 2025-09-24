@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 import { MLDataPreparationService } from './ml-data-preparation-service';
 import * as tf from '@tensorflow/tfjs';
 
@@ -23,7 +23,13 @@ export class TaskCompletionPredictionService {
       this.model.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
 
       // Basit dummy veri ile model eğitimi
-      const xs = tf.tensor2d([[100, 5], [200, 10], [50, 2], [300, 15], [150, 7]]);
+      const xs = tf.tensor2d([
+        [100, 5],
+        [200, 10],
+        [50, 2],
+        [300, 15],
+        [150, 7],
+      ]);
       const ys = tf.tensor2d([[1], [2], [0.5], [3], [1.5]]); // Tahmini saatler
 
       console.log('ML modeli eğitiliyor...');
@@ -51,16 +57,29 @@ export class TaskCompletionPredictionService {
       const endDate = new Date().toISOString();
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-      const preparedData = await this.mlDataPreparationService.prepareDataForML(userId, startDate, endDate);
-      console.log(`ML modeli için hazırlanan veri boyutu: Aktivite: ${preparedData.activities.length}, Projeler: ${preparedData.projects.length}, Görevler: ${preparedData.tasks.length}`);
+      const preparedData = await this.mlDataPreparationService.prepareDataForML(
+        userId,
+        startDate,
+        endDate
+      );
+      console.log(
+        `ML modeli için hazırlanan veri boyutu: Aktivite: ${preparedData.activities.length}, Projeler: ${preparedData.projects.length}, Görevler: ${preparedData.tasks.length}`
+      );
 
       const relevantActivities = preparedData.activities.filter(activity =>
-        preparedData.projects.some(p => p.id === projectId && (p.title.includes(activity.app) || p.title.includes(activity.title)))
+        preparedData.projects.some(
+          p =>
+            p.id === projectId &&
+            (p.title.includes(activity.app) || p.title.includes(activity.title))
+        )
       );
 
       // Model girdisi için özellikleri hazırla
       // Örnek: relevantActivities'deki toplam süreyi ve aktivite sayısını kullan
-      const totalDurationSec = relevantActivities.reduce((sum, activity) => sum + (activity.duration_sec || 0), 0);
+      const totalDurationSec = relevantActivities.reduce(
+        (sum, activity) => sum + (activity.duration_sec || 0),
+        0
+      );
       const activityCount = relevantActivities.length;
 
       let predictedCompletionHours = 0;
@@ -73,12 +92,11 @@ export class TaskCompletionPredictionService {
       return {
         predictedCompletionHours: predictedCompletionHours,
         confidence: 0.85, // ML modeline dayalı daha yüksek güven skoru
-        details: "Bu tahmin, eğitilmiş bir ML modeline dayanmaktadır."
+        details: 'Bu tahmin, eğitilmiş bir ML modeline dayanmaktadır.',
       };
-
     } catch (error) {
       console.error(`Görev tamamlama tahmini yapılırken hata oluştu:`, error);
       throw error;
     }
   }
-} 
+}

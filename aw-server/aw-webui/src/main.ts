@@ -1,6 +1,6 @@
 /**
  * Main Application Entry Point
- * 
+ *
  * Vue 3 application bootstrap with complete store and routing setup.
  * Error handling, performance monitoring ve modular architecture.
  */
@@ -28,7 +28,7 @@ Vue.config.errorHandler = (err: Error, vm: any, info: string) => {
   errorManager.captureError(err, {
     type: 'system',
     component: vm?.$options.name || 'unknown',
-    action: info
+    action: info,
   });
 };
 
@@ -48,7 +48,7 @@ if (process.env.NODE_ENV === 'development') {
 const app = new Vue({
   router,
   pinia,
-  render: h => h(App)
+  render: h => h(App),
 });
 
 // Mount application
@@ -62,11 +62,12 @@ if (process.env.NODE_ENV === 'development') {
 // Service worker registration (for future PWA features)
 if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(registration => {
         console.log('SW registered: ', registration);
       })
-      .catch((registrationError) => {
+      .catch(registrationError => {
         console.log('SW registration failed: ', registrationError);
       });
   });

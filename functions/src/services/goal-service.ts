@@ -1,12 +1,12 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 import { logger } from 'firebase-functions';
-import { 
-  FirestoreError, 
-  ValidationError, 
-  NotFoundError, 
-  handleError, 
+import {
+  FirestoreError,
+  ValidationError,
+  NotFoundError,
+  handleError,
   validateRequired,
-  validateType 
+  validateType,
 } from '../utils/errorHandler';
 
 export interface Goal {
@@ -40,14 +40,19 @@ export class GoalService {
   /**
    * Yeni bir hedef oluşturur
    */
-  static async createGoal(goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'>, userId: string): Promise<Goal> {
+  static async createGoal(
+    goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'>,
+    userId: string
+  ): Promise<Goal> {
     try {
       validateRequired(userId, 'userId');
       validateRequired(goalData, 'goalData');
       validateRequired(goalData.title, 'goalData.title');
       validateType(goalData.title, 'string', 'goalData.title');
-      
-      if (!['time_based', 'count_based', 'habit_based', 'milestone_based'].includes(goalData.type)) {
+
+      if (
+        !['time_based', 'count_based', 'habit_based', 'milestone_based'].includes(goalData.type)
+      ) {
         throw new ValidationError('Invalid goal type', 'goalData.type', goalData.type);
       }
 
@@ -92,12 +97,17 @@ export class GoalService {
 
       logger.info(`Retrieving goal ${goalId} for user ${userId}`);
 
-      const goalDoc = await db.collection('users').doc(userId).collection('goals').doc(goalId).get();
+      const goalDoc = await db
+        .collection('users')
+        .doc(userId)
+        .collection('goals')
+        .doc(goalId)
+        .get();
       if (!goalDoc.exists) {
         logger.warn(`Goal ${goalId} not found for user ${userId}`);
         return null;
       }
-      
+
       const goal = goalDoc.data() as Goal;
       logger.info(`Goal ${goalId} retrieved successfully`);
       return goal;
@@ -154,7 +164,9 @@ export class GoalService {
    */
   static async checkGoalProgress(userId: string, activityData: any): Promise<string[]> {
     try {
-      console.log(`Checking goal progress for user ${userId} with activity: ${JSON.stringify(activityData)}`);
+      console.log(
+        `Checking goal progress for user ${userId} with activity: ${JSON.stringify(activityData)}`
+      );
 
       const updatedGoalIds: string[] = [];
       const goalsSnapshot = await db.collection('users').doc(userId).collection('goals').get();
@@ -162,11 +174,15 @@ export class GoalService {
 
       for (const goal of goals) {
         // Hedefin kriterleriyle aktiviteyi eşleştir
-        const isMatch = (
-          (!goal.targetCriteria.appNames || goal.targetCriteria.appNames.includes(activityData.app)) &&
-          (!goal.targetCriteria.categories || goal.targetCriteria.categories.includes(activityData.category)) &&
-          (!goal.targetCriteria.tags || goal.targetCriteria.tags.some((tag: string) => activityData.tags && activityData.tags.includes(tag)))
-        );
+        const isMatch =
+          (!goal.targetCriteria.appNames ||
+            goal.targetCriteria.appNames.includes(activityData.app)) &&
+          (!goal.targetCriteria.categories ||
+            goal.targetCriteria.categories.includes(activityData.category)) &&
+          (!goal.targetCriteria.tags ||
+            goal.targetCriteria.tags.some(
+              (tag: string) => activityData.tags && activityData.tags.includes(tag)
+            ));
 
         if (isMatch) {
           let updated = false;
@@ -174,10 +190,12 @@ export class GoalService {
 
           // İlerleme metriklerini güncelle
           if (activityData.duration_sec) {
-            goal.progress.currentDuration = (goal.progress.currentDuration || 0) + activityData.duration_sec;
+            goal.progress.currentDuration =
+              (goal.progress.currentDuration || 0) + activityData.duration_sec;
             updated = true;
           }
-          if (activityData.count) { // Eğer aktivite bir sayı içeriyorsa (örn. tamamlanan görev sayısı)
+          if (activityData.count) {
+            // Eğer aktivite bir sayı içeriyorsa (örn. tamamlanan görev sayısı)
             goal.currentCount = (goal.currentCount || 0) + activityData.count;
             updated = true;
           }
@@ -198,9 +216,11 @@ export class GoalService {
             goal.progress.currentStreak = 1;
             updated = true;
           }
-          goal.progress.longestStreak = Math.max(goal.progress.longestStreak || 0, goal.progress.currentStreak);
+          goal.progress.longestStreak = Math.max(
+            goal.progress.longestStreak || 0,
+            goal.progress.currentStreak
+          );
           goal.progress.lastUpdated = currentTimestamp;
-
 
           // Hedef türüne göre ek kontroller ve tamamlanma mantığı (basit örnekler)
           switch (goal.type) {
@@ -219,12 +239,17 @@ export class GoalService {
           }
 
           if (updated) {
-            await db.collection('users').doc(userId).collection('goals').doc(goal.id).update({
-              progress: goal.progress,
-              currentCount: goal.currentCount,
-              updatedAt: currentTimestamp,
-              version: (goal.version || 0) + 1,
-            });
+            await db
+              .collection('users')
+              .doc(userId)
+              .collection('goals')
+              .doc(goal.id)
+              .update({
+                progress: goal.progress,
+                currentCount: goal.currentCount,
+                updatedAt: currentTimestamp,
+                version: (goal.version || 0) + 1,
+              });
             updatedGoalIds.push(goal.id);
             console.log(`Goal ${goal.id} progress updated for user ${userId}.`);
           }
@@ -236,4 +261,4 @@ export class GoalService {
       throw new Error(`Hedef ilerlemesi kontrol edilirken hata oluştu: ${error.message}`);
     }
   }
-} 
+}

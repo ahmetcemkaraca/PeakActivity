@@ -4,28 +4,55 @@
     <p>{{ $t('settings.dataSharing.description') }}</p>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowAnonymousSystemData" v-model="settings.allowAnonymousSystemData" @change="saveSettings">
-      <label for="allowAnonymousSystemData">{{ $t('settings.dataSharing.allowAnonymousSystemData') }}</label>
+      <input
+        type="checkbox"
+        id="allowAnonymousSystemData"
+        v-model="settings.allowAnonymousSystemData"
+        @change="saveSettings"
+      />
+      <label for="allowAnonymousSystemData">
+        {{ $t('settings.dataSharing.allowAnonymousSystemData') }}
+      </label>
       <p class="hint">{{ $t('settings.dataSharing.allowAnonymousSystemDataHint') }}</p>
     </div>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowAnonymizedUsageData" v-model="settings.allowAnonymizedUsageData" @change="saveSettings">
-      <label for="allowAnonymizedUsageData">{{ $t('settings.dataSharing.allowAnonymizedUsageData') }}</label>
+      <input
+        type="checkbox"
+        id="allowAnonymizedUsageData"
+        v-model="settings.allowAnonymizedUsageData"
+        @change="saveSettings"
+      />
+      <label for="allowAnonymizedUsageData">
+        {{ $t('settings.dataSharing.allowAnonymizedUsageData') }}
+      </label>
       <p class="hint">{{ $t('settings.dataSharing.allowAnonymizedUsageDataHint') }}</p>
     </div>
 
     <div class="setting-item">
-      <input type="checkbox" id="allowSensitivePersonalData" v-model="settings.allowSensitivePersonalData" @change="saveSettings">
-      <label for="allowSensitivePersonalData">{{ $t('settings.dataSharing.allowSensitivePersonalData') }}</label>
+      <input
+        type="checkbox"
+        id="allowSensitivePersonalData"
+        v-model="settings.allowSensitivePersonalData"
+        @change="saveSettings"
+      />
+      <label for="allowSensitivePersonalData">
+        {{ $t('settings.dataSharing.allowSensitivePersonalData') }}
+      </label>
       <p class="hint">{{ $t('settings.dataSharing.allowSensitivePersonalDataHint') }}</p>
     </div>
 
     <p class="last-updated">{{ $t('settings.lastUpdated') }}: {{ lastUpdatedDisplay }}</p>
 
-    <div v-if="saveStatus === 'saving'" class="status-message saving">{{ $t('settings.saving') }}</div>
-    <div v-if="saveStatus === 'success'" class="status-message success">{{ $t('settings.saveSuccess') }}</div>
-    <div v-if="saveStatus === 'error'" class="status-message error">{{ $t('settings.saveError') }}</div>
+    <div v-if="saveStatus === 'saving'" class="status-message saving">
+      {{ $t('settings.saving') }}
+    </div>
+    <div v-if="saveStatus === 'success'" class="status-message success">
+      {{ $t('settings.saveSuccess') }}
+    </div>
+    <div v-if="saveStatus === 'error'" class="status-message error">
+      {{ $t('settings.saveError') }}
+    </div>
   </div>
 </template>
 
@@ -86,7 +113,7 @@ export default Vue.extend({
         this.settings.lastUpdated = new Date().toISOString();
         const response = await this.$axios.post('/api/user-consent', {
           userId: this.userId,
-          consent: this.settings
+          consent: this.settings,
         });
         if (response.data.success) {
           this.saveStatus = 'success';
@@ -131,7 +158,7 @@ p {
   align-items: flex-start; /* Elemanları sola hizala */
 }
 
-.setting-item input[type="checkbox"] {
+.setting-item input[type='checkbox'] {
   margin-right: 10px;
   width: 20px;
   height: 20px;
@@ -180,4 +207,4 @@ p {
   background-color: #ffebee;
   color: #c62828;
 }
-</style> 
+</style>

@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets
 from datetime import datetime
 import requests, json
 
+
 class ManualActivityDialog(QtWidgets.QDialog):
     def __init__(self, parent=None, server_url="http://127.0.0.1:5600/api/0"):
         super().__init__(parent)
@@ -21,7 +22,9 @@ class ManualActivityDialog(QtWidgets.QDialog):
         layout.addRow("Category", self.category_edit)
         layout.addRow("Description", self.description_edit)
 
-        btn_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        btn_box = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
         btn_box.accepted.connect(self.submit)
         btn_box.rejected.connect(self.reject)
         layout.addRow(btn_box)
@@ -39,7 +42,11 @@ class ManualActivityDialog(QtWidgets.QDialog):
         # Remove None entries
         payload["data"] = {k: v for k, v in payload["data"].items() if v}
         try:
-            requests.post(f"{self.server_url}/manualactivity", data=json.dumps(payload), headers={"Content-Type": "application/json"})
+            requests.post(
+                f"{self.server_url}/manualactivity",
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
         except Exception as e:
             QtWidgets.QMessageBox.warning(self, "Error", str(e))
-        self.accept() 
+        self.accept()

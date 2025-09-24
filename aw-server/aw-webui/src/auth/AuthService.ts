@@ -1,7 +1,11 @@
-
-import { auth } from "../firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
+import { auth } from '../firebase';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
 export class AuthService {
   private authInstance;
@@ -18,10 +22,14 @@ export class AuthService {
    */
   async register(email: string, password: string): Promise<User> {
     try {
-      const userCredential = await createUserWithEmailAndPassword(this.authInstance, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        this.authInstance,
+        email,
+        password
+      );
       return userCredential.user;
     } catch (error: any) {
-      console.error("Kayıt hatası:", error);
+      console.error('Kayıt hatası:', error);
       throw error;
     }
   }
@@ -37,7 +45,7 @@ export class AuthService {
       const userCredential = await signInWithEmailAndPassword(this.authInstance, email, password);
       return userCredential.user;
     } catch (error: any) {
-      console.error("Giriş hatası:", error);
+      console.error('Giriş hatası:', error);
       throw error;
     }
   }
@@ -49,7 +57,7 @@ export class AuthService {
     try {
       await signOut(this.authInstance);
     } catch (error: any) {
-      console.error("Çıkış hatası:", error);
+      console.error('Çıkış hatası:', error);
       throw error;
     }
   }
@@ -62,4 +70,4 @@ export class AuthService {
   onAuthChange(callback: (user: User | null) => void): () => void {
     return onAuthStateChanged(this.authInstance, callback);
   }
-} 
+}

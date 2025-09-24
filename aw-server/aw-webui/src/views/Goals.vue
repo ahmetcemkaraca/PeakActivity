@@ -209,7 +209,7 @@ export default defineComponent({
         // Hedeflerin doğrudan data.data içinde döndüğünü varsayıyorum
         goals.value = (result.data as { data: Goal[] }).data;
       } catch (e: any) {
-        console.error("Hedefler alınırken hata oluştu:", e);
+        console.error('Hedefler alınırken hata oluştu:', e);
         loadGoalsError.value = e.message;
       } finally {
         loadingGoals.value = false;
@@ -218,7 +218,7 @@ export default defineComponent({
 
     const addGoal = async () => {
       if (!authStore.user) {
-        addGoalError.value = "Hedef eklemek için giriş yapmalısınız.";
+        addGoalError.value = 'Hedef eklemek için giriş yapmalısınız.';
         return;
       }
 
@@ -231,29 +231,44 @@ export default defineComponent({
         try {
           parsedCriteria = JSON.parse(newGoal.value.targetCriteria as string);
         } catch (e) {
-          throw new Error("Hedef Kriterleri geçerli bir JSON olmalıdır.");
+          throw new Error('Hedef Kriterleri geçerli bir JSON olmalıdır.');
         }
 
-        const goalDataToSend: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'> = {
+        const goalDataToSend: Omit<
+          Goal,
+          'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'
+        > = {
           title: newGoal.value.title || '',
           description: newGoal.value.description,
           type: newGoal.value.type as Goal['type'],
           targetCriteria: parsedCriteria,
           // Süre bazlı hedefler için saatleri saniyeye çevir
-          targetDuration: newGoal.value.type === 'time_based' && newGoal.value.targetDuration !== undefined ? newGoal.value.targetDuration * 3600 : undefined,
-          targetDailyDuration: newGoal.value.type === 'time_based' && newGoal.value.targetDailyDuration !== undefined ? newGoal.value.targetDailyDuration * 3600 : undefined,
-          targetWeeklyDuration: newGoal.value.type === 'time_based' && newGoal.value.targetWeeklyDuration !== undefined ? newGoal.value.targetWeeklyDuration * 3600 : undefined,
-          targetCount: newGoal.value.type === 'count_based' && newGoal.value.targetCount !== undefined ? newGoal.value.targetCount : undefined,
+          targetDuration:
+            newGoal.value.type === 'time_based' && newGoal.value.targetDuration !== undefined
+              ? newGoal.value.targetDuration * 3600
+              : undefined,
+          targetDailyDuration:
+            newGoal.value.type === 'time_based' && newGoal.value.targetDailyDuration !== undefined
+              ? newGoal.value.targetDailyDuration * 3600
+              : undefined,
+          targetWeeklyDuration:
+            newGoal.value.type === 'time_based' && newGoal.value.targetWeeklyDuration !== undefined
+              ? newGoal.value.targetWeeklyDuration * 3600
+              : undefined,
+          targetCount:
+            newGoal.value.type === 'count_based' && newGoal.value.targetCount !== undefined
+              ? newGoal.value.targetCount
+              : undefined,
         } as Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'>; // Tip dönüşümü eklendi
 
         const result = await createGoalCallable({ userId: authStore.user.uid, ...goalDataToSend });
-        console.log("Hedef başarıyla eklendi:", result.data);
+        console.log('Hedef başarıyla eklendi:', result.data);
         addGoalSuccess.value = true;
         resetNewGoalForm();
         fetchGoals();
       } catch (e: any) {
-        console.error("Hedef eklenirken hata oluştu:", e);
-        addGoalError.value = e.message || "Hedef eklenirken bir hata oluştu.";
+        console.error('Hedef eklenirken hata oluştu:', e);
+        addGoalError.value = e.message || 'Hedef eklenirken bir hata oluştu.';
       } finally {
         addingGoal.value = false;
       }
@@ -264,11 +279,20 @@ export default defineComponent({
       // Düzenleme için kriter JSON string'e çevriliyor
       editingGoal.value = {
         ...goal,
-        targetCriteria: JSON.stringify(goal.targetCriteria, null, 2), 
+        targetCriteria: JSON.stringify(goal.targetCriteria, null, 2),
         // Süre bazlı hedefler için saniyeleri saate çevir
-        targetDuration: goal.type === 'time_based' && goal.targetDuration !== undefined ? goal.targetDuration / 3600 : undefined,
-        targetDailyDuration: goal.type === 'time_based' && goal.targetDailyDuration !== undefined ? goal.targetDailyDuration / 3600 : undefined,
-        targetWeeklyDuration: goal.type === 'time_based' && goal.targetWeeklyDuration !== undefined ? goal.targetWeeklyDuration / 3600 : undefined,
+        targetDuration:
+          goal.type === 'time_based' && goal.targetDuration !== undefined
+            ? goal.targetDuration / 3600
+            : undefined,
+        targetDailyDuration:
+          goal.type === 'time_based' && goal.targetDailyDuration !== undefined
+            ? goal.targetDailyDuration / 3600
+            : undefined,
+        targetWeeklyDuration:
+          goal.type === 'time_based' && goal.targetWeeklyDuration !== undefined
+            ? goal.targetWeeklyDuration / 3600
+            : undefined,
       };
     };
 
@@ -279,11 +303,11 @@ export default defineComponent({
 
     const updateGoal = async () => {
       if (!authStore.user) {
-        updateGoalError.value = "Hedef düzenlemek için giriş yapmalısınız.";
+        updateGoalError.value = 'Hedef düzenlemek için giriş yapmalısınız.';
         return;
       }
       if (!editingGoal.value.id) {
-        updateGoalError.value = "Güncellenecek hedef kimliği bulunamadı.";
+        updateGoalError.value = 'Güncellenecek hedef kimliği bulunamadı.';
         return;
       }
 
@@ -295,25 +319,41 @@ export default defineComponent({
         try {
           parsedCriteria = JSON.parse(editingGoal.value.targetCriteria as string);
         } catch (e) {
-          throw new Error("Hedef Kriterleri geçerli bir JSON olmalıdır.");
+          throw new Error('Hedef Kriterleri geçerli bir JSON olmalıdır.');
         }
 
         const goalDataToSend = {
           ...editingGoal.value,
           targetCriteria: parsedCriteria,
           // Süre bazlı hedefler için saatleri saniyeye çevir
-          targetDuration: editingGoal.value.type === 'time_based' && editingGoal.value.targetDuration !== undefined ? editingGoal.value.targetDuration * 3600 : undefined,
-          targetDailyDuration: editingGoal.value.type === 'time_based' && editingGoal.value.targetDailyDuration !== undefined ? editingGoal.value.targetDailyDuration * 3600 : undefined,
-          targetWeeklyDuration: editingGoal.value.type === 'time_based' && editingGoal.value.targetWeeklyDuration !== undefined ? editingGoal.value.targetWeeklyDuration * 3600 : undefined,
+          targetDuration:
+            editingGoal.value.type === 'time_based' &&
+            editingGoal.value.targetDuration !== undefined
+              ? editingGoal.value.targetDuration * 3600
+              : undefined,
+          targetDailyDuration:
+            editingGoal.value.type === 'time_based' &&
+            editingGoal.value.targetDailyDuration !== undefined
+              ? editingGoal.value.targetDailyDuration * 3600
+              : undefined,
+          targetWeeklyDuration:
+            editingGoal.value.type === 'time_based' &&
+            editingGoal.value.targetWeeklyDuration !== undefined
+              ? editingGoal.value.targetWeeklyDuration * 3600
+              : undefined,
         } as Partial<Goal>; // Tip dönüşümü eklendi
 
-        await updateGoalCallable({ goalId: editingGoal.value.id, userId: authStore.user.uid, updates: goalDataToSend });
-        console.log("Hedef başarıyla güncellendi.");
+        await updateGoalCallable({
+          goalId: editingGoal.value.id,
+          userId: authStore.user.uid,
+          updates: goalDataToSend,
+        });
+        console.log('Hedef başarıyla güncellendi.');
         cancelEdit();
         fetchGoals();
       } catch (e: any) {
-        console.error("Hedef güncellenirken hata oluştu:", e);
-        updateGoalError.value = e.message || "Hedef güncellenirken bir hata oluştu.";
+        console.error('Hedef güncellenirken hata oluştu:', e);
+        updateGoalError.value = e.message || 'Hedef güncellenirken bir hata oluştu.';
       } finally {
         updatingGoal.value = false;
       }
@@ -321,20 +361,20 @@ export default defineComponent({
 
     const deleteGoal = async (goalId: string) => {
       if (!authStore.user) {
-        alert("Hedef silmek için giriş yapmalısınız.");
+        alert('Hedef silmek için giriş yapmalısınız.');
         return;
       }
-      if (!confirm("Bu hedefi silmek istediğinizden emin misiniz?")) {
+      if (!confirm('Bu hedefi silmek istediğinizden emin misiniz?')) {
         return;
       }
 
       try {
         await deleteGoalCallable({ goalId, userId: authStore.user.uid });
-        console.log("Hedef başarıyla silindi.");
+        console.log('Hedef başarıyla silindi.');
         fetchGoals();
       } catch (e: any) {
-        console.error("Hedef silinirken hata oluştu:", e);
-        alert("Hedef silinirken hata oluştu: " + (e.message || "Bilinmeyen Hata"));
+        console.error('Hedef silinirken hata oluştu:', e);
+        alert('Hedef silinirken hata oluştu: ' + (e.message || 'Bilinmeyen Hata'));
       }
     };
 
@@ -364,9 +404,17 @@ export default defineComponent({
     };
 
     const calculateProgress = (goal: Goal): number => {
-      if (goal.type === 'time_based' && goal.targetDuration !== undefined && goal.targetDuration > 0) {
+      if (
+        goal.type === 'time_based' &&
+        goal.targetDuration !== undefined &&
+        goal.targetDuration > 0
+      ) {
         return (goal.progress.currentDuration / goal.targetDuration) * 100;
-      } else if (goal.type === 'count_based' && goal.targetCount !== undefined && goal.targetCount > 0) {
+      } else if (
+        goal.type === 'count_based' &&
+        goal.targetCount !== undefined &&
+        goal.targetCount > 0
+      ) {
         return ((goal.progress.currentCount || 0) / goal.targetCount) * 100;
       }
       // Diğer hedef türleri veya tanımsız hedefler için varsayılan ilerleme
@@ -408,11 +456,16 @@ export default defineComponent({
   filters: {
     formatGoalType(type: string | undefined): string {
       switch (type) {
-        case 'time_based': return 'Süre Bazlı';
-        case 'count_based': return 'Sayı Bazlı';
-        case 'habit_based': return 'Alışkanlık Bazlı';
-        case 'milestone_based': return 'Kilometre Taşı Bazlı';
-        default: return type || '';
+        case 'time_based':
+          return 'Süre Bazlı';
+        case 'count_based':
+          return 'Sayı Bazlı';
+        case 'habit_based':
+          return 'Alışkanlık Bazlı';
+        case 'milestone_based':
+          return 'Kilometre Taşı Bazlı';
+        default:
+          return type || '';
       }
     },
   },
@@ -441,7 +494,10 @@ export default defineComponent({
   background-color: var(--background-color);
   border: 1px solid var(--light-border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 
   .card-header {
     background-color: var(--card-header-bg);
@@ -543,4 +599,4 @@ export default defineComponent({
   color: red;
   font-weight: bold;
 }
-</style> 
+</style>

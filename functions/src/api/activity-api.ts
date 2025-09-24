@@ -4,34 +4,31 @@ import { DataTransmissionType } from '../services/encryption/DataTransmissionTyp
 
 const activityService = new ActivityService();
 
-export const saveActivity = onCall(async (request) => {
+export const saveActivity = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
 
   const userId = request.auth.uid;
   const activityData = request.data.activityData;
-  const transmissionType: DataTransmissionType = request.data.transmissionType || DataTransmissionType.RAW; // Varsayılan: RAW
+  const transmissionType: DataTransmissionType =
+    request.data.transmissionType || DataTransmissionType.RAW; // Varsayılan: RAW
   const userKey: string | undefined = request.data.userKey; // İstemci tarafından gönderilen şifreleme anahtarı
 
   if (!activityData) {
-    throw new HttpsError(
-      'invalid-argument',
-      'The activityData is required.'
-    );
+    throw new HttpsError('invalid-argument', 'The activityData is required.');
   }
 
   try {
     // ActivityService'e yeni parametreleri aktar
-    const result = await activityService.saveActivity(userId, activityData, transmissionType, userKey);
+    const result = await activityService.saveActivity(
+      userId,
+      activityData,
+      transmissionType,
+      userKey
+    );
     return { status: 'success', data: result };
   } catch (error: any) {
-    throw new HttpsError(
-      'internal',
-      error.message || 'An unknown error occurred.'
-    );
+    throw new HttpsError('internal', error.message || 'An unknown error occurred.');
   }
-}); 
+});

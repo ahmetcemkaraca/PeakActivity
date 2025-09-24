@@ -5,9 +5,11 @@
     <div class="input-section">
       <div class="form-group">
         <label for="projectId">Proje ID:</label>
-        <input type="text" id="projectId" v-model="projectIdInput" placeholder="Proje ID giriniz">
+        <input type="text" id="projectId" v-model="projectIdInput" placeholder="Proje ID giriniz" />
       </div>
-      <button @click="fetchPrediction" class="btn btn-primary" :disabled="loading">Tahmini Getir</button>
+      <button @click="fetchPrediction" class="btn btn-primary" :disabled="loading">
+        Tahmini Getir
+      </button>
     </div>
 
     <p v-if="loading" class="loading-message">Tahmin yükleniyor...</p>
@@ -16,19 +18,34 @@
     <div v-if="prediction" class="prediction-results">
       <h3>Tahmin Sonuçları</h3>
       <div class="prediction-card">
-        <p><strong>Tahmini Tamamlama Tarihi:</strong> {{ prediction.estimatedCompletionDate }}</p>
-        <p><strong>Güven Seviyesi:</strong> %{{ (prediction.confidenceLevel * 100).toFixed(2) }}</p>
-        <p><strong>Mevcut İlerleme:</strong> %{{ (prediction.currentProgress * 100).toFixed(2) }}</p>
-        <p><strong>Gereken Kalan Efor:</strong> {{ (prediction.remainingEffort / 3600).toFixed(2) }} saat</p>
+        <p>
+          <strong>Tahmini Tamamlama Tarihi:</strong>
+          {{ prediction.estimatedCompletionDate }}
+        </p>
+        <p>
+          <strong>Güven Seviyesi:</strong>
+          %{{ (prediction.confidenceLevel * 100).toFixed(2) }}
+        </p>
+        <p>
+          <strong>Mevcut İlerleme:</strong>
+          %{{ (prediction.currentProgress * 100).toFixed(2) }}
+        </p>
+        <p>
+          <strong>Gereken Kalan Efor:</strong>
+          {{ (prediction.remainingEffort / 3600).toFixed(2) }} saat
+        </p>
         <p><strong>Benzer Projelerden Alınan İçgörüler:</strong></p>
         <ul>
           <li v-for="insight in prediction.insightsFromSimilarProjects" :key="insight.id">
-            {{ insight.description }} (Ortalama Tamamlama: {{ (insight.averageCompletionTime / 3600).toFixed(2) }} saat)
+            {{ insight.description }} (Ortalama Tamamlama:
+            {{ (insight.averageCompletionTime / 3600).toFixed(2) }} saat)
           </li>
         </ul>
       </div>
     </div>
-    <p v-else-if="!loading && !error && projectIdInput.length > 0">Lütfen bir Proje ID girin ve tahmini getirin.</p>
+    <p v-else-if="!loading && !error && projectIdInput.length > 0">
+      Lütfen bir Proje ID girin ve tahmini getirin.
+    </p>
   </div>
 </template>
 
@@ -66,7 +83,10 @@ export default defineComponent({
       this.prediction = null;
 
       try {
-        const predictProjectCompletionCallable = httpsCallable(this.functionsInstance, 'predictProjectCompletion');
+        const predictProjectCompletionCallable = httpsCallable(
+          this.functionsInstance,
+          'predictProjectCompletion'
+        );
         const response = await predictProjectCompletionCallable({ projectId: this.projectIdInput });
         if (response.data.status === 'success') {
           this.prediction = response.data.data;
@@ -127,7 +147,7 @@ h2 {
   font-weight: bold;
 }
 
-.form-group input[type="text"] {
+.form-group input[type='text'] {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -204,4 +224,4 @@ h2 {
 .prediction-card li {
   margin-bottom: 5px;
 }
-</style> 
+</style>

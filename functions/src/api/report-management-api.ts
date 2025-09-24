@@ -1,13 +1,12 @@
-
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { ReportManagementService } from "../services/report-management-service";
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { ReportManagementService } from '../services/report-management-service';
 
 const reportService = new ReportManagementService();
 
 /**
  * Firebase Function to create a new report or dashboard.
  */
-export const createReport = onCall(async (request) => {
+export const createReport = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -34,7 +33,7 @@ export const createReport = onCall(async (request) => {
 /**
  * Firebase Function to get a specific report or dashboard.
  */
-export const getReport = onCall(async (request) => {
+export const getReport = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -59,7 +58,7 @@ export const getReport = onCall(async (request) => {
 /**
  * Firebase Function to update an existing report or dashboard.
  */
-export const updateReport = onCall(async (request) => {
+export const updateReport = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -84,7 +83,7 @@ export const updateReport = onCall(async (request) => {
 /**
  * Firebase Function to delete a specific report or dashboard.
  */
-export const deleteReport = onCall(async (request) => {
+export const deleteReport = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -109,7 +108,7 @@ export const deleteReport = onCall(async (request) => {
 /**
  * Firebase Function to list all reports and dashboards for a user.
  */
-export const listReports = onCall(async (request) => {
+export const listReports = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -126,7 +125,7 @@ export const listReports = onCall(async (request) => {
 /**
  * Firebase Function to generate data for a specific report or dashboard.
  */
-export const generateReportData = onCall(async (request) => {
+export const generateReportData = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -146,4 +145,4 @@ export const generateReportData = onCall(async (request) => {
   } catch (error: any) {
     throw new HttpsError('internal', error.message);
   }
-}); 
+});

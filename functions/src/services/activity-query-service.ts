@@ -1,10 +1,10 @@
-import { db } from "../firebaseAdmin";
-import { ActivityEvent } from "../types/activity-event.d";
+import { db } from '../firebaseAdmin';
+import { ActivityEvent } from '../types/activity-event.d';
 
 export interface QueryOptions {
   userId: string;
   startDate?: string; // YYYY-MM-DD
-  endDate?: string;   // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
   keywords?: string[];
   categories?: string[];
   appNames?: string[];
@@ -43,34 +43,34 @@ export class ActivityQueryService {
 
     // Tarih aralığı filtreleri
     if (startDate) {
-      query = query.where("timestamp_start", ">=", startDate);
+      query = query.where('timestamp_start', '>=', startDate);
     }
     if (endDate) {
-      query = query.where("timestamp_start", "<=", endDate + "T23:59:59.999Z"); // Gün sonuna kadar
+      query = query.where('timestamp_start', '<=', endDate + 'T23:59:59.999Z'); // Gün sonuna kadar
     }
 
     // Kategori filtreleri (çoklu kategori desteklenir)
     if (categories && categories.length > 0) {
       // Firestore'da 'in' operatörü, verilen dizideki herhangi bir değerle eşleşen belgeleri sorgulamak için kullanılır.
       // 'in' operatörü ile en fazla 10 argüman sorgulanabilir. Daha fazlası için birden fazla sorgu veya farklı bir yaklaşım gerekebilir.
-      query = query.where("category", "in", categories);
+      query = query.where('category', 'in', categories);
     }
 
     // Uygulama adı filtreleri (çoklu uygulama desteklenir)
     if (appNames && appNames.length > 0) {
-      query = query.where("app", "in", appNames);
+      query = query.where('app', 'in', appNames);
     }
 
     // Süre filtreleri
     if (minDurationSeconds !== undefined) {
-      query = query.where("duration_sec", ">=", minDurationSeconds);
+      query = query.where('duration_sec', '>=', minDurationSeconds);
     }
     if (maxDurationSeconds !== undefined) {
-      query = query.where("duration_sec", "<=", maxDurationSeconds);
+      query = query.where('duration_sec', '<=', maxDurationSeconds);
     }
 
     // Sıralama (en yeni etkinlikler önce gelsin)
-    query = query.orderBy("timestamp_start", "desc");
+    query = query.orderBy('timestamp_start', 'desc');
 
     // Toplam sayıyı almak için ayrı bir sorgu
     const countSnapshot = await query.count().get();
@@ -95,7 +95,8 @@ export class ActivityQueryService {
     if (keywords && keywords.length > 0) {
       const lowerCaseKeywords = keywords.map(kw => kw.toLowerCase());
       events = events.filter(event => {
-        const searchableText = `${event.title || ''} ${event.app || ''} ${event.url || ''} ${event.category || ''}`.toLowerCase();
+        const searchableText =
+          `${event.title || ''} ${event.app || ''} ${event.url || ''} ${event.category || ''}`.toLowerCase();
         return lowerCaseKeywords.some(kw => searchableText.includes(kw));
       });
     }
@@ -105,4 +106,4 @@ export class ActivityQueryService {
       totalCount,
     };
   }
-} 
+}

@@ -210,14 +210,14 @@ export default defineComponent({
         await authService.logout();
         this.$router.push('/login'); // Çıkış yapıldıktan sonra giriş sayfasına yönlendir
       } catch (error) {
-        console.error("Çıkış yaparken hata oluştu:", error);
+        console.error('Çıkış yaparken hata oluştu:', error);
       }
     },
   },
   mounted() {
     const authService = new AuthService();
 
-    this.unsubscribeAuth = authService.onAuthChange((user) => {
+    this.unsubscribeAuth = authService.onAuthChange(user => {
       this.isAuthenticated = !!user;
     });
 
@@ -225,7 +225,9 @@ export default defineComponent({
     const bucketStore = useBucketsStore();
     bucketStore.ensureLoaded().then(() => {
       const buckets: IBucket[] = bucketStore.buckets;
-      const types_by_host: { [key: string]: { afk?: boolean; window?: boolean; android?: boolean; } } = {};
+      const types_by_host: {
+        [key: string]: { afk?: boolean; window?: boolean; android?: boolean };
+      } = {};
 
       const currentActivityViews: any[] = [];
 

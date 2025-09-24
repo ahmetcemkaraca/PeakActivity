@@ -1,13 +1,19 @@
-
-import * as functions from "firebase-functions";
-import { db } from "../firebaseAdmin";
+import * as functions from 'firebase-functions';
+import { db } from '../firebaseAdmin';
 
 interface NotificationDocument {
   id: string;
   user_id: string;
   title: string;
   message: string;
-  type: 'info' | 'warning' | 'alert' | 'goal_progress' | 'insight_available' | 'automation_trigger' | 'ai_recommendation';
+  type:
+    | 'info'
+    | 'warning'
+    | 'alert'
+    | 'goal_progress'
+    | 'insight_available'
+    | 'automation_trigger'
+    | 'ai_recommendation';
   read: boolean;
   timestamp: number;
   action_link?: string;
@@ -22,7 +28,13 @@ export class NotificationService {
    * @param notificationData The data for the new notification.
    * @returns The created notification document.
    */
-  async createNotification(userId: string, notificationData: Omit<NotificationDocument, 'id' | 'user_id' | 'timestamp' | 'version' | 'read'>): Promise<NotificationDocument> {
+  async createNotification(
+    userId: string,
+    notificationData: Omit<
+      NotificationDocument,
+      'id' | 'user_id' | 'timestamp' | 'version' | 'read'
+    >
+  ): Promise<NotificationDocument> {
     const newNotificationRef = db.collection(`users/${userId}/notifications`).doc();
     const timestamp = Date.now();
     const notification: NotificationDocument = {
@@ -43,8 +55,14 @@ export class NotificationService {
    * @param notificationId The ID of the notification to retrieve.
    * @returns The notification document, or null if not found.
    */
-  async getNotification(userId: string, notificationId: string): Promise<NotificationDocument | null> {
-    const notificationDoc = await db.collection(`users/${userId}/notifications`).doc(notificationId).get();
+  async getNotification(
+    userId: string,
+    notificationId: string
+  ): Promise<NotificationDocument | null> {
+    const notificationDoc = await db
+      .collection(`users/${userId}/notifications`)
+      .doc(notificationId)
+      .get();
     if (!notificationDoc.exists) {
       return null;
     }
@@ -58,7 +76,11 @@ export class NotificationService {
    * @param updates The fields to update.
    * @returns The updated notification document, or null if not found.
    */
-  async updateNotification(userId: string, notificationId: string, updates: Partial<Omit<NotificationDocument, 'id' | 'user_id' | 'timestamp'>>): Promise<NotificationDocument | null> {
+  async updateNotification(
+    userId: string,
+    notificationId: string,
+    updates: Partial<Omit<NotificationDocument, 'id' | 'user_id' | 'timestamp'>>
+  ): Promise<NotificationDocument | null> {
     const notificationRef = db.collection(`users/${userId}/notifications`).doc(notificationId);
     await notificationRef.update(updates);
     const updatedDoc = await notificationRef.get();
@@ -87,7 +109,10 @@ export class NotificationService {
    * @returns An array of notification documents.
    */
   async listNotifications(userId: string): Promise<NotificationDocument[]> {
-    const snapshot = await db.collection(`users/${userId}/notifications`).orderBy('timestamp', 'desc').get();
+    const snapshot = await db
+      .collection(`users/${userId}/notifications`)
+      .orderBy('timestamp', 'desc')
+      .get();
     return snapshot.docs.map(doc => doc.data() as NotificationDocument);
   }
 
@@ -124,4 +149,4 @@ export class NotificationService {
       // related_entity_id: goalUpdates.goalId, // İlgili hedef ID'si eklenebilir
     });
   }
-} 
+}

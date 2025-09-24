@@ -41,7 +41,7 @@ def temporary_bucket(ds):
         # Storage backend not available
         logger.error("Storage backend import error: %s", import_e)
         raise
-    
+
     bucket = ds.create_bucket(bucket_id, "testingtype", "test-client", "testing-box")
     yield bucket
     ds.delete_bucket(bucket_id)
@@ -59,7 +59,7 @@ def temporary_bucket(ds):
         # Storage backend not available
         logger.error("Storage backend import error: %s", e)
         raise
-    
+
     bucket = ds.create_bucket(bucket_id, "testingtype", "test-client", "testing-box")
     yield bucket
     ds.delete_bucket(bucket_id)

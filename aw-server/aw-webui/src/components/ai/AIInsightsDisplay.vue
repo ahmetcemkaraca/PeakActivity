@@ -68,7 +68,9 @@ export default defineComponent({
 
     const fetchInsights = async () => {
       await predictionStore.fetchAIInsight(insightType.value, startDate.value, endDate.value);
-      console.log(`İçgörüler getiriliyor: ${insightType.value} ${startDate.value} - ${endDate.value}`);
+      console.log(
+        `İçgörüler getiriliyor: ${insightType.value} ${startDate.value} - ${endDate.value}`
+      );
     };
 
     onMounted(() => {
@@ -172,4 +174,4 @@ li {
     border-color: darken(var(--active-highlight-color), 10%);
   }
 }
-</style> 
+</style>

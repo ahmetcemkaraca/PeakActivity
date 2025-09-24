@@ -7,22 +7,37 @@
         <div class="row g-3 align-items-center">
           <div class="col-md-4">
             <label for="userId" class="form-label">Kullanıcı ID:</label>
-            <input type="text" class="form-control" id="userId" v-model="userId" placeholder="Kullanıcı ID girin">
+            <input
+              type="text"
+              class="form-control"
+              id="userId"
+              v-model="userId"
+              placeholder="Kullanıcı ID girin"
+            />
           </div>
           <div class="col-md-4">
             <label for="timeRange" class="form-label">Zaman Aralığı:</label>
-            <input type="text" class="form-control" id="timeRange" v-model="timeRange" placeholder="Örn: last 7 days">
+            <input
+              type="text"
+              class="form-control"
+              id="timeRange"
+              v-model="timeRange"
+              placeholder="Örn: last 7 days"
+            />
           </div>
           <div class="col-md-auto">
             <button class="btn btn-primary mt-4" @click="fetchInsight" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span
+                v-if="loading"
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
               <span v-else>İçgörü Getir</span>
             </button>
           </div>
         </div>
-        <div v-if="error" class="alert alert-danger mt-3" role="alert">
-          Hata: {{ error }}
-        </div>
+        <div v-if="error" class="alert alert-danger mt-3" role="alert">Hata: {{ error }}</div>
       </div>
     </div>
 
@@ -32,7 +47,11 @@
       </div>
       <div class="card-body">
         <pre class="bg-light p-3 rounded mb-3">{{ JSON.stringify(insight, null, 2) }}</pre>
-        <LineChart v-if="chartData.datasets.length" :chartData="chartData" :chartOptions="chartOptions" />
+        <LineChart
+          v-if="chartData.datasets.length"
+          :chartData="chartData"
+          :chartOptions="chartOptions"
+        />
       </div>
     </div>
   </div>
@@ -73,12 +92,14 @@ export default defineComponent({
       }
     };
 
-    const chartData = computed<ChartData<"line">>(() => {
+    const chartData = computed<ChartData<'line'>>(() => {
       if (!insight.value || !insight.value.scores) {
         return { labels: [], datasets: [] };
       }
 
-      const labels = insight.value.scores.map((s: any) => new Date(s.date).toISOString().split('T')[0]);
+      const labels = insight.value.scores.map(
+        (s: any) => new Date(s.date).toISOString().split('T')[0]
+      );
       const data = insight.value.scores.map((s: any) => s.score);
 
       const datasets = [
@@ -93,7 +114,7 @@ export default defineComponent({
       return { labels, datasets };
     });
 
-    const chartOptions = computed<ChartOptions<"line">>(() => ({
+    const chartOptions = computed<ChartOptions<'line'>>(() => ({
       responsive: true,
       maintainAspectRatio: false,
       scales: {
@@ -164,4 +185,4 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
-</style> 
+</style>

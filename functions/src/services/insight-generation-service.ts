@@ -1,8 +1,7 @@
-
-import { db } from "../firebaseAdmin";
-import { AnomalyDetectionService } from "./anomaly-detection-service";
-import { BehavioralAnalysisService } from "./behavioral-analysis-service";
-import { FocusQualityScoreService } from "./focus-quality-score-service";
+import { db } from '../firebaseAdmin';
+import { AnomalyDetectionService } from './anomaly-detection-service';
+import { BehavioralAnalysisService } from './behavioral-analysis-service';
+import { FocusQualityScoreService } from './focus-quality-score-service';
 
 interface InsightDocument {
   id: string;
@@ -35,10 +34,14 @@ export class InsightGenerationService {
    * @param insightType The type of insight to generate.
    * @returns The generated insight document.
    */
-  async generateInsight(userId: string, insightType: InsightDocument['type'], data: any): Promise<InsightDocument> {
+  async generateInsight(
+    userId: string,
+    insightType: InsightDocument['type'],
+    data: any
+  ): Promise<InsightDocument> {
     const newInsightRef = db.collection(`users/${userId}/insights`).doc();
     const timestamp = Date.now();
-    let summary = "";
+    let summary = '';
     let details: any = {};
 
     switch (insightType) {
@@ -53,10 +56,12 @@ export class InsightGenerationService {
         const mockTrends = {
           trending_categories: [
             { category: 'productivity', trend: 'rising' as const, slope_per_day: 0.5 },
-            { category: 'communication', trend: 'stable' as const, slope_per_day: 0.1 }
-          ]
+            { category: 'communication', trend: 'stable' as const, slope_per_day: 0.1 },
+          ],
         };
-        const trendingCategoryNames = mockTrends.trending_categories.map((tc: { category: string }) => tc.category);
+        const trendingCategoryNames = mockTrends.trending_categories.map(
+          (tc: { category: string }) => tc.category
+        );
         summary = `Davranışsal eğilim özeti oluşturuldu. Tespit edilen eğilimler: ${trendingCategoryNames.join(', ')}.`;
         details = { trends: mockTrends };
         break;
@@ -71,7 +76,7 @@ export class InsightGenerationService {
         details = data.goalProgress; // Expect goal progress data in 'data'
         break;
       default:
-        summary = "Bilinmeyen içgörü tipi.";
+        summary = 'Bilinmeyen içgörü tipi.';
         break;
     }
 
@@ -124,4 +129,4 @@ export class InsightGenerationService {
     // Silme işlemi başarılıysa, belge artık mevcut değildir. Ek bir get() çağrısı gereksizdir.
     return true;
   }
-} 
+}

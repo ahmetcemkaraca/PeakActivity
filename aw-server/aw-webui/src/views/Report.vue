@@ -88,26 +88,26 @@ const reportDescription = ref('');
 const reportType = ref('report');
 const reportTypes = [
   { text: 'Rapor', value: 'report' },
-  { text: 'Kontrol Paneli', value: 'dashboard' }
+  { text: 'Kontrol Paneli', value: 'dashboard' },
 ];
 const timeRange = ref('daily');
 const timeRanges = [
   { text: 'Günlük', value: 'daily' },
   { text: 'Haftalık', value: 'weekly' },
   { text: 'Aylık', value: 'monthly' },
-  { text: 'Özel', value: 'custom' }
+  { text: 'Özel', value: 'custom' },
 ];
 const granularity = ref('daily');
 const granularities = [
   { text: 'Saatlik', value: 'hourly' },
   { text: 'Günlük', value: 'daily' },
-  { text: 'Haftalık', value: 'weekly' }
+  { text: 'Haftalık', value: 'weekly' },
 ];
 const selectedMetrics = ref<string[]>([]);
 const availableMetrics = [
   { text: 'Toplam Harcanan Süre', value: 'total_time_spent' },
   { text: 'Odak Skoru Ortalaması', value: 'focus_score_average' },
-  { text: 'Anomali Sayısı', value: 'anomaly_count' }
+  { text: 'Anomali Sayısı', value: 'anomaly_count' },
 ];
 const loading = ref(false);
 const generatedReport = ref<ReportDocument | null>(null);
@@ -125,8 +125,8 @@ const generateReport = async () => {
       configuration: {
         time_range: timeRange.value,
         granularity: granularity.value,
-        metrics: selectedMetrics.value.map(metric_name => ({ metric_name }))
-      }
+        metrics: selectedMetrics.value.map(metric_name => ({ metric_name })),
+      },
     };
 
     const createResult = await createReportCallable(newReportData);
@@ -135,7 +135,6 @@ const generateReport = async () => {
     const generateReportDataCallable = httpsCallable(functions, 'generateReportData');
     const generateResult = await generateReportDataCallable({ reportId: createdReport.id });
     generatedReport.value = generateResult.data as ReportDocument;
-
   } catch (err: any) {
     console.error('Rapor oluşturulurken hata oluştu:', err);
     error.value = err.message || 'Rapor oluşturulurken bir hata oluştu.';
@@ -143,7 +142,6 @@ const generateReport = async () => {
     loading.value = false;
   }
 };
-
 </script>
 
 <style scoped lang="scss">

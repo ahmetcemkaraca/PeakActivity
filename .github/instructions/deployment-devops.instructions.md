@@ -1,15 +1,17 @@
 ---
-applyTo: "**/deployment/**,**/docker/**,**/.github/workflows/**,**/firebase.json,**/docker-compose*.yml"
-description: "Deployment ve DevOps işlemleri için standartlar"
+applyTo: '**/deployment/**,**/docker/**,**/.github/workflows/**,**/firebase.json,**/docker-compose*.yml'
+description: 'Deployment ve DevOps işlemleri için standartlar'
 ---
 
 # Deployment ve DevOps Standartları
 
-Bu dosya, PeakActivity projesinin deployment ve DevOps süreçleri için standartları tanımlar.
+Bu dosya, PeakActivity projesinin deployment ve DevOps süreçleri için
+standartları tanımlar.
 
 ## Firebase Deployment Strategy
 
 ### Environment Management
+
 ```json
 // firebase.json
 {
@@ -21,7 +23,10 @@ Bu dosya, PeakActivity projesinin deployment ve DevOps süreçleri için standar
   "functions": {
     "source": "functions",
     "runtime": "nodejs18",
-    "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint", "npm --prefix \"$RESOURCE_DIR\" run build"],
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint",
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ],
     "postdeploy": ["npm --prefix \"$RESOURCE_DIR\" run deploy:verify"]
   },
   "hosting": {
@@ -78,13 +83,14 @@ Bu dosya, PeakActivity projesinin deployment ve DevOps süreçleri için standar
 ```
 
 ### Deployment Scripts
+
 ```bash
 # scripts/deploy.ps1
 param(
     [Parameter(Mandatory=$true)]
     [ValidateSet("development", "testing", "production")]
     [string]$Environment,
-    
+
     [switch]$SkipTests,
     [switch]$FunctionsOnly,
     [switch]$HostingOnly
@@ -129,6 +135,7 @@ Write-Host "Deployment completed successfully!" -ForegroundColor Green
 ## Docker Configuration
 
 ### Multi-Stage Dockerfile
+
 ```dockerfile
 # Dockerfile.functions
 FROM node:18-alpine AS builder
@@ -174,6 +181,7 @@ CMD ["npm", "start"]
 ```
 
 ### Docker Compose for Local Development
+
 ```yaml
 # docker-compose.dev.yml
 version: '3.8'
@@ -183,11 +191,11 @@ services:
   firebase-emulators:
     image: gcr.io/firebase-tools-docker/node:18
     ports:
-      - "4000:4000"   # Emulator UI
-      - "5000:5000"   # Hosting
-      - "5001:5001"   # Functions
-      - "8080:8080"   # Firestore
-      - "9199:9199"   # Storage
+      - '4000:4000' # Emulator UI
+      - '5000:5000' # Hosting
+      - '5001:5001' # Functions
+      - '8080:8080' # Firestore
+      - '9199:9199' # Storage
     volumes:
       - .:/workspace
       - firebase-data:/opt/workspace/.firebase
@@ -204,7 +212,7 @@ services:
       context: ./PeakActivityMain
       dockerfile: Dockerfile.aw-server
     ports:
-      - "5600:5600"
+      - '5600:5600'
     volumes:
       - aw-data:/home/user/.local/share/activitywatch
       - ./aw-server/config:/config
@@ -223,7 +231,7 @@ services:
       context: ./PeakActivityAgent
       dockerfile: Dockerfile.praisonaiagents
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       - ./PeakActivityAgent:/app
       - praisonai-data:/data
@@ -244,7 +252,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend-dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - .:/app
       - /app/node_modules
@@ -269,6 +277,7 @@ networks:
 ## CI/CD Pipeline
 
 ### GitHub Actions Workflow
+
 ```yaml
 # .github/workflows/ci-cd.yml
 name: CI/CD Pipeline
@@ -287,63 +296,63 @@ jobs:
   # Code Quality
   lint-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-    
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    
-    - name: Install dependencies
-      run: |
-        npm ci
-        pip install poetry
-        cd PeakActivityMain && poetry install
-        cd PeakActivityAgent && poetry install
-    
-    - name: Lint code
-      run: |
-        npm run lint
-        npm run lint:functions
-        cd PeakActivityMain && poetry run flake8
-        cd PeakActivityAgent && poetry run flake8
-    
-    - name: Run tests
-      run: |
-        npm test
-        npm run test:functions
-        cd PeakActivityMain && poetry run pytest
-        cd PeakActivityAgent && poetry run pytest
-    
-    - name: Build application
-      run: npm run build
-    
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install poetry
+          cd PeakActivityMain && poetry install
+          cd PeakActivityAgent && poetry install
+
+      - name: Lint code
+        run: |
+          npm run lint
+          npm run lint:functions
+          cd PeakActivityMain && poetry run flake8
+          cd PeakActivityAgent && poetry run flake8
+
+      - name: Run tests
+        run: |
+          npm test
+          npm run test:functions
+          cd PeakActivityMain && poetry run pytest
+          cd PeakActivityAgent && poetry run pytest
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
 
   # Security Scan
   security-scan:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run security audit
-      run: |
-        npm audit --audit-level high
-        pip install safety
-        safety check
-    
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - uses: actions/checkout@v4
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level high
+          pip install safety
+          safety check
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   # Deploy to Development
   deploy-dev:
@@ -351,28 +360,28 @@ jobs:
     needs: [lint-and-test, security-scan]
     runs-on: ubuntu-latest
     environment: development
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-    
-    - name: Install Firebase CLI
-      run: npm install -g firebase-tools
-    
-    - name: Build for development
-      run: npm run build:development
-    
-    - name: Deploy to Firebase
-      run: |
-        firebase use development
-        firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Build for development
+        run: npm run build:development
+
+      - name: Deploy to Firebase
+        run: |
+          firebase use development
+          firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
   # Deploy to Production
   deploy-prod:
@@ -380,43 +389,44 @@ jobs:
     needs: [lint-and-test, security-scan]
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-    
-    - name: Install Firebase CLI
-      run: npm install -g firebase-tools
-    
-    - name: Build for production
-      run: npm run build:production
-    
-    - name: Deploy to Firebase
-      run: |
-        firebase use production
-        firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-    
-    - name: Create release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
-        draft: false
-        prerelease: false
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Build for production
+        run: npm run build:production
+
+      - name: Deploy to Firebase
+        run: |
+          firebase use production
+          firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
 ```
 
 ## Infrastructure as Code
 
 ### Terraform Configuration
+
 ```hcl
 # infrastructure/main.tf
 terraform {
@@ -427,7 +437,7 @@ terraform {
       version = "~> 4.0"
     }
   }
-  
+
   backend "gcs" {
     bucket = "peakactivity-terraform-state"
     prefix = "terraform/state"
@@ -451,7 +461,7 @@ resource "google_firestore_database" "database" {
   name        = "(default)"
   location_id = var.firestore_location
   type        = "FIRESTORE_NATIVE"
-  
+
   depends_on = [google_firebase_project.default]
 }
 
@@ -467,7 +477,7 @@ resource "google_cloudfunctions2_function" "api" {
   name        = "api"
   location    = var.region
   description = "PeakActivity API functions"
-  
+
   build_config {
     runtime     = "nodejs18"
     entry_point = "api"
@@ -478,12 +488,12 @@ resource "google_cloudfunctions2_function" "api" {
       }
     }
   }
-  
+
   service_config {
     max_instance_count = var.max_instances
     available_memory   = "512Mi"
     timeout_seconds    = 300
-    
+
     environment_variables = {
       FIREBASE_CONFIG = jsonencode({
         projectId = var.project_id
@@ -531,6 +541,7 @@ variable "max_instances" {
 ## Monitoring ve Alerting
 
 ### Health Check Implementation
+
 ```typescript
 // functions/src/monitoring/health-check.ts
 import { Request, Response } from 'express';
@@ -559,7 +570,7 @@ export const healthCheck = async (req: Request, res: Response) => {
   try {
     const checks = await performHealthChecks();
     const memoryUsage = process.memoryUsage();
-    
+
     const health: HealthStatus = {
       status: allChecksPass(checks) ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -569,19 +580,18 @@ export const healthCheck = async (req: Request, res: Response) => {
       memory: {
         used: memoryUsage.heapUsed,
         total: memoryUsage.heapTotal,
-        percentage: (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100
-      }
+        percentage: (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100,
+      },
     };
-    
+
     const statusCode = health.status === 'healthy' ? 200 : 503;
     res.status(statusCode).json(health);
-    
   } catch (error) {
     console.error('Health check failed:', error);
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -590,13 +600,13 @@ async function performHealthChecks() {
   const [firestoreOk, functionsOk, storageOk] = await Promise.allSettled([
     checkFirestore(),
     checkFunctions(),
-    checkStorage()
+    checkStorage(),
   ]);
-  
+
   return {
     firestore: firestoreOk.status === 'fulfilled' && firestoreOk.value,
     functions: functionsOk.status === 'fulfilled' && functionsOk.value,
-    storage: storageOk.status === 'fulfilled' && storageOk.value
+    storage: storageOk.status === 'fulfilled' && storageOk.value,
   };
 }
 
@@ -612,6 +622,7 @@ async function checkFirestore(): Promise<boolean> {
 ```
 
 ### Alerting Configuration
+
 ```typescript
 // functions/src/monitoring/alerts.ts
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -620,39 +631,38 @@ import { logger } from 'firebase-functions/v2';
 export const monitorSystemHealth = onSchedule('every 5 minutes', async () => {
   try {
     const metrics = await collectSystemMetrics();
-    
+
     // Check thresholds
     const alerts = [];
-    
+
     if (metrics.errorRate > 0.05) {
       alerts.push({
         type: 'error_rate',
         severity: 'high',
-        message: `Error rate ${(metrics.errorRate * 100).toFixed(2)}% exceeds threshold`
+        message: `Error rate ${(metrics.errorRate * 100).toFixed(2)}% exceeds threshold`,
       });
     }
-    
+
     if (metrics.responseTime > 2000) {
       alerts.push({
         type: 'response_time',
-        severity: 'medium', 
-        message: `Average response time ${metrics.responseTime}ms exceeds threshold`
+        severity: 'medium',
+        message: `Average response time ${metrics.responseTime}ms exceeds threshold`,
       });
     }
-    
+
     if (metrics.memoryUsage > 0.8) {
       alerts.push({
         type: 'memory_usage',
         severity: 'high',
-        message: `Memory usage ${(metrics.memoryUsage * 100).toFixed(2)}% exceeds threshold`
+        message: `Memory usage ${(metrics.memoryUsage * 100).toFixed(2)}% exceeds threshold`,
       });
     }
-    
+
     // Send alerts
     for (const alert of alerts) {
       await sendAlert(alert);
     }
-    
   } catch (error) {
     logger.error('System monitoring failed:', error);
   }
@@ -665,10 +675,10 @@ async function sendAlert(alert: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       text: `🚨 ${alert.severity.toUpperCase()}: ${alert.message}`,
-      channel: '#alerts'
-    })
+      channel: '#alerts',
+    }),
   });
-  
+
   // Email notification for high severity
   if (alert.severity === 'high') {
     // Send email via SendGrid/Firebase Extensions
@@ -679,6 +689,7 @@ async function sendAlert(alert: any) {
 ## Backup ve Recovery
 
 ### Automated Backup Strategy
+
 ```bash
 #!/bin/bash
 # scripts/backup.sh
@@ -719,6 +730,7 @@ echo "Backup cleanup completed"
 ## Performance Optimization
 
 ### Bundle Analysis ve Optimization
+
 ```javascript
 // vite.config.ts
 import { defineConfig } from 'vite';
@@ -729,12 +741,13 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
     // Bundle analiz için
-    mode === 'analyze' && visualizer({
-      filename: 'dist/bundle-analysis.html',
-      open: true
-    })
+    mode === 'analyze' &&
+      visualizer({
+        filename: 'dist/bundle-analysis.html',
+        open: true,
+      }),
   ].filter(Boolean),
-  
+
   build: {
     rollupOptions: {
       output: {
@@ -742,27 +755,28 @@ export default defineConfig(({ mode }) => ({
           vendor: ['vue', 'vue-router'],
           firebase: ['firebase/app', 'firebase/firestore'],
           ai: ['@tensorflow/tfjs'],
-          charts: ['chart.js', 'vue-chartjs']
-        }
-      }
+          charts: ['chart.js', 'vue-chartjs'],
+        },
+      },
     },
-    
+
     // Build optimization
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
-        drop_debugger: mode === 'production'
-      }
-    }
+        drop_debugger: mode === 'production',
+      },
+    },
   },
-  
+
   // Development optimization
   server: {
     hmr: true,
-    cors: true
-  }
+    cors: true,
+  },
 }));
 ```
 
-Bu deployment standartları ile production-ready bir sistem kurabilir ve sürdürülebilir bir DevOps süreci oluşturabilirsiniz.
+Bu deployment standartları ile production-ready bir sistem kurabilir ve
+sürdürülebilir bir DevOps süreci oluşturabilirsiniz.

@@ -1,13 +1,18 @@
-
-import * as functions from "firebase-functions";
-import { db } from "../firebaseAdmin";
+import * as functions from 'firebase-functions';
+import { db } from '../firebaseAdmin';
 
 interface CustomEventDocument {
   id: string;
   user_id: string;
   name: string;
   description?: string;
-  type: 'app_opened' | 'app_closed' | 'category_time' | 'focus_mode_change' | 'idle_time' | 'custom';
+  type:
+    | 'app_opened'
+    | 'app_closed'
+    | 'category_time'
+    | 'focus_mode_change'
+    | 'idle_time'
+    | 'custom';
   details: {
     app_name?: string;
     category?: string;
@@ -28,7 +33,10 @@ export class CustomEventService {
    * @param eventData The data for the new custom event.
    * @returns The created custom event document.
    */
-  async createCustomEvent(userId: string, eventData: Omit<CustomEventDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version'>): Promise<CustomEventDocument> {
+  async createCustomEvent(
+    userId: string,
+    eventData: Omit<CustomEventDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version'>
+  ): Promise<CustomEventDocument> {
     const newEventRef = db.collection(`users/${userId}/custom_events`).doc();
     const timestamp = Date.now();
     const event: CustomEventDocument = {
@@ -64,7 +72,11 @@ export class CustomEventService {
    * @param updates The fields to update.
    * @returns The updated custom event document, or null if not found.
    */
-  async updateCustomEvent(userId: string, eventId: string, updates: Partial<Omit<CustomEventDocument, 'id' | 'user_id' | 'created_at'>>): Promise<CustomEventDocument | null> {
+  async updateCustomEvent(
+    userId: string,
+    eventId: string,
+    updates: Partial<Omit<CustomEventDocument, 'id' | 'user_id' | 'created_at'>>
+  ): Promise<CustomEventDocument | null> {
     const eventRef = db.collection(`users/${userId}/custom_events`).doc(eventId);
     const timestamp = Date.now();
     await eventRef.update({
@@ -100,4 +112,4 @@ export class CustomEventService {
     const snapshot = await db.collection(`users/${userId}/custom_events`).get();
     return snapshot.docs.map(doc => doc.data() as CustomEventDocument);
   }
-} 
+}

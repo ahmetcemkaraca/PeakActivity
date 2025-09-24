@@ -20,9 +20,12 @@ export class LocalStorageEncryption {
    */
   async setItem(key: string, value: string): Promise<void> {
     if (!this.userKey) {
-      throw new Error("Kullanıcı anahtarı ayarlanmamış. Şifreleme yapılamaz.");
+      throw new Error('Kullanıcı anahtarı ayarlanmamış. Şifreleme yapılamaz.');
     }
-    const { encryptedData, metadata } = await this.clientSideEncryption.encryptActivityData(value, this.userKey);
+    const { encryptedData, metadata } = await this.clientSideEncryption.encryptActivityData(
+      value,
+      this.userKey
+    );
     const storedValue = JSON.stringify({ encryptedData, metadata });
     localStorage.setItem(key, storedValue);
   }
@@ -34,7 +37,7 @@ export class LocalStorageEncryption {
    */
   async getItem(key: string): Promise<string | null> {
     if (!this.userKey) {
-      throw new Error("Kullanıcı anahtarı ayarlanmamış. Şifre çözme yapılamaz.");
+      throw new Error('Kullanıcı anahtarı ayarlanmamış. Şifre çözme yapılamaz.');
     }
     const storedValue = localStorage.getItem(key);
     if (!storedValue) {
@@ -58,4 +61,4 @@ export class LocalStorageEncryption {
   clear(): void {
     localStorage.clear();
   }
-} 
+}

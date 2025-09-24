@@ -21,8 +21,13 @@ from . import error_handler
 
 # Import constants to make them available
 from .constants import (
-    AFKStatus, EventType, BucketType, Platform,
-    AFK_THRESHOLD_DEFAULT, MANUAL_ACTIVITY_EVENT_TYPE, MICROSURVEY_EVENT_TYPE
+    AFKStatus,
+    EventType,
+    BucketType,
+    Platform,
+    AFK_THRESHOLD_DEFAULT,
+    MANUAL_ACTIVITY_EVENT_TYPE,
+    MICROSURVEY_EVENT_TYPE,
 )
 
 __all__ = [
@@ -39,6 +44,11 @@ __all__ = [
     "models",
     "schema",
     # Constants
-    "AFKStatus", "EventType", "BucketType", "Platform",
-    "AFK_THRESHOLD_DEFAULT", "MANUAL_ACTIVITY_EVENT_TYPE", "MICROSURVEY_EVENT_TYPE"
+    "AFKStatus",
+    "EventType",
+    "BucketType",
+    "Platform",
+    "AFK_THRESHOLD_DEFAULT",
+    "MANUAL_ACTIVITY_EVENT_TYPE",
+    "MICROSURVEY_EVENT_TYPE",
 ]

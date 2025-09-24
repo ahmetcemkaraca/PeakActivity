@@ -56,17 +56,17 @@ logger = logging.getLogger(__name__)
 
 def get_env() -> Dict[str, str]:
     """Get environment variables with PyInstaller LD_LIBRARY_PATH fix.
-    
+
     PyInstaller modifies LD_LIBRARY_PATH which can break xdg-open on Linux.
     This function restores the original LD_LIBRARY_PATH value if it was
     preserved in LD_LIBRARY_PATH_ORIG.
-    
+
     Returns:
         Dictionary of environment variables with corrected LD_LIBRARY_PATH
-        
+
     Reference:
         https://github.com/ActivityWatch/activitywatch/issues/208#issuecomment-417346407
-        
+
     Note:
         This fix is specific to GNU/Linux and *BSD systems where PyInstaller
         can interfere with dynamic library loading.
@@ -85,14 +85,14 @@ def get_env() -> Dict[str, str]:
 
 def open_url(url: str) -> None:
     """Open a URL using the system's default browser.
-    
+
     Args:
         url: URL to open in the default browser
-        
+
     Platform Behavior:
         - Linux: Uses xdg-open with corrected environment variables
         - Other platforms: Uses Python's webbrowser module
-        
+
     Note:
         On Linux, uses get_env() to fix PyInstaller LD_LIBRARY_PATH issues
         that can prevent xdg-open from working correctly.
@@ -109,8 +109,7 @@ def open_url(url: str) -> None:
             except Exception as fallback_error:
                 logger.error("Fallback webbrowser.open also failed: %s", fallback_error)
                 raise AWQProcessException(
-                    f"Failed to open URL {url}: {e}",
-                    command="xdg-open"
+                    f"Failed to open URL {url}: {e}", command="xdg-open"
                 ) from e
     else:
         try:
@@ -118,17 +117,16 @@ def open_url(url: str) -> None:
         except Exception as e:
             logger.error("Failed to open URL with webbrowser: %s", e)
             raise AWQProcessException(
-                f"Failed to open URL {url}: {e}",
-                command="webbrowser.open"
+                f"Failed to open URL {url}: {e}", command="webbrowser.open"
             ) from e
 
 
 def open_webui(root_url: str) -> None:
     """Open the ActivityWatch web dashboard in the default browser.
-    
+
     Args:
         root_url: Base URL of the ActivityWatch server (e.g., http://localhost:5600)
-        
+
     Note:
         Opens the main dashboard interface for viewing activity data,
         timelines, and reports.
@@ -139,10 +137,10 @@ def open_webui(root_url: str) -> None:
 
 def open_apibrowser(root_url: str) -> None:
     """Open the ActivityWatch API browser in the default browser.
-    
+
     Args:
         root_url: Base URL of the ActivityWatch server
-        
+
     Note:
         Opens the API documentation and testing interface at {root_url}/api,
         useful for developers and advanced users to explore the REST API.
@@ -153,18 +151,18 @@ def open_apibrowser(root_url: str) -> None:
 
 def open_dir(d: str) -> None:
     """Open a directory in the system's default file manager.
-    
+
     Args:
         d: Directory path to open
-        
+
     Platform Behavior:
         - Windows: Uses os.startfile() for Explorer integration
-        - macOS: Uses 'open' command for Finder integration  
+        - macOS: Uses 'open' command for Finder integration
         - Linux: Uses xdg-open with environment fix for file manager
-        
+
     Reference:
         http://stackoverflow.com/a/1795849/965332
-        
+
     Note:
         On Linux, uses get_env() to fix PyInstaller environment issues.
     """
@@ -174,8 +172,7 @@ def open_dir(d: str) -> None:
         except OSError as e:
             logger.error("Failed to open directory with startfile: %s", e)
             raise AWQProcessException(
-                f"Failed to open directory {d}: {e}",
-                command="os.startfile"
+                f"Failed to open directory {d}: {e}", command="os.startfile"
             ) from e
     elif sys.platform == "darwin":
         try:
@@ -183,8 +180,7 @@ def open_dir(d: str) -> None:
         except (OSError, subprocess.SubprocessError) as e:
             logger.error("Failed to open directory with open command: %s", e)
             raise AWQProcessException(
-                f"Failed to open directory {d}: {e}",
-                command="open"
+                f"Failed to open directory {d}: {e}", command="open"
             ) from e
     else:
         try:
@@ -193,18 +189,17 @@ def open_dir(d: str) -> None:
         except (OSError, subprocess.SubprocessError) as e:
             logger.error("Failed to open directory with xdg-open: %s", e)
             raise AWQProcessException(
-                f"Failed to open directory {d}: {e}",
-                command="xdg-open"
+                f"Failed to open directory {d}: {e}", command="xdg-open"
             ) from e
 
 
 class TrayIcon(QSystemTrayIcon):
     """ActivityWatch system tray icon with context menu and module management.
-    
+
     Provides a persistent system tray presence for ActivityWatch with quick access
     to common functions and real-time module status monitoring. Integrates with
     the Manager class to provide GUI control over ActivityWatch modules.
-    
+
     Features:
         - Double-click to open dashboard
         - Context menu with module start/stop controls
@@ -212,19 +207,20 @@ class TrayIcon(QSystemTrayIcon):
         - Quick access to logs and configuration directories
         - Visual indication of testing vs production mode
         - Platform-appropriate icon styling
-        
+
     Menu Structure:
         - Open Dashboard / API Browser
         - Modules submenu (bundled and system modules)
         - Open log/config folder shortcuts
         - Quit ActivityWatch option
-        
+
     Module Monitoring:
         - Polls module status every 2 seconds
         - Shows warning dialogs for unexpected module failures
         - Provides one-click restart functionality
         - Displays module logs in failure dialogs
     """
+
     def __init__(
         self,
         manager: Manager,
@@ -233,13 +229,13 @@ class TrayIcon(QSystemTrayIcon):
         testing: bool = False,
     ) -> None:
         """Initialize the system tray icon with ActivityWatch branding.
-        
+
         Args:
             manager: Manager instance for module lifecycle control
             icon: QIcon to display in the system tray
             parent: Optional parent widget for Qt object hierarchy
             testing: Whether running in testing mode (affects port and tooltip)
-            
+
         Setup:
             - Configures tooltip with mode indication
             - Sets up double-click handler for dashboard access
@@ -260,14 +256,14 @@ class TrayIcon(QSystemTrayIcon):
 
     def on_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         """Handle system tray icon activation events.
-        
+
         Args:
             reason: The type of activation that occurred
-            
+
         Behavior:
             - Double-click: Opens the ActivityWatch web dashboard
             - Other activations: Currently ignored (single-click shows menu automatically)
-            
+
         Note:
             Single-click behavior is handled automatically by Qt to show the context menu.
         """
@@ -276,20 +272,20 @@ class TrayIcon(QSystemTrayIcon):
 
     def _build_rootmenu(self) -> None:
         """Build the main context menu for the system tray icon.
-        
+
         Creates a comprehensive menu with the following sections:
         1. Testing mode indicator (if applicable)
         2. Quick access: Dashboard and API Browser
         3. Modules submenu: All available ActivityWatch modules
         4. Utilities: Log and config folder access
         5. Exit: Quit ActivityWatch option
-        
+
         Menu Features:
             - Dynamic module status updates every 2 seconds
             - Automatic module failure detection and restart dialogs
             - Platform-appropriate icons when available
             - Graceful handling of missing icons
-            
+
         Background Tasks:
             Sets up recurring timers for:
             - Module status monitoring and menu updates
@@ -372,22 +368,22 @@ class TrayIcon(QSystemTrayIcon):
 
     def _build_modulemenu(self, moduleMenu: QMenu) -> None:
         """Build the modules submenu with current module status.
-        
+
         Args:
             moduleMenu: QMenu instance to populate with module controls
-            
+
         Menu Structure:
             - "bundled" header (disabled, for visual grouping)
             - Bundled module toggles (checkable, show current status)
-            - "system" header (disabled, for visual grouping)  
+            - "system" header (disabled, for visual grouping)
             - System module toggles (checkable, show current status)
-            
+
         Module Items:
             - Checkable actions that reflect current module status
             - Click toggles module start/stop state
             - Sorted alphabetically within each group
             - Each action stores the Module object as data for easy access
-            
+
         Note:
             Clears existing menu items before rebuilding to ensure
             current state is always displayed.
@@ -415,20 +411,20 @@ class TrayIcon(QSystemTrayIcon):
 
 def exit(manager: Manager) -> None:
     """Gracefully shutdown ActivityWatch and all its modules.
-    
+
     Args:
         manager: Manager instance to stop all modules
-        
+
     Shutdown Process:
         1. Logs shutdown initiation
         2. Stops all running modules via manager.stop_all()
         3. Quits the Qt application
-        
+
     Note:
         Process group termination (os.killpg) is commented out as it's
         too aggressive. The current approach allows modules to shut down
         gracefully before terminating the main application.
-        
+
     TODO:
         - Implement state saving for module resume on next startup
         - Add cleanup actions for temporary files or connections
@@ -445,14 +441,14 @@ def exit(manager: Manager) -> None:
 
 def run(manager: Manager, testing: bool = False) -> Any:
     """Initialize and run the ActivityWatch Qt tray application.
-    
+
     Args:
         manager: Manager instance for module control
         testing: Whether to run in testing mode (affects ports and branding)
-        
+
     Returns:
         Exit code from the Qt application event loop
-        
+
     Setup Process:
         1. Creates QApplication instance
         2. Configures icon search paths for PyInstaller compatibility
@@ -460,21 +456,21 @@ def run(manager: Manager, testing: bool = False) -> Any:
         4. Verifies system tray availability
         5. Creates and shows TrayIcon with platform-appropriate styling
         6. Starts Qt event loop
-        
+
     Platform-Specific Features:
         - macOS: Uses monochrome icon with mask for system theme integration
         - Other platforms: Uses color logo icon
         - Linux: Requires desktop environment with system tray support
-        
+
     Error Handling:
         - Exits with error if no system tray is available
         - Provides user guidance for systems without tray support
-        
+
     Signal Handling:
         - SIGINT (Ctrl+C): Triggers graceful shutdown
         - SIGTERM: Triggers graceful shutdown
         - Timer tick every 100ms: Allows Python signal processing
-        
+
     Note:
         QApplication.setQuitOnLastWindowClosed(False) ensures the app
         continues running even if all windows are closed, as is appropriate

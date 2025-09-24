@@ -6,9 +6,14 @@
     <div v-else>
       <div v-if="category">
         <p>
-          <strong>Kategori:</strong> {{ category }} <br/>
-          <strong>Güven:</strong> {{ (confidence * 100).toFixed(2) }}% <br/>
-          <strong>Gerekçe:</strong> {{ rationale }}
+          <strong>Kategori:</strong>
+          {{ category }}
+          <br />
+          <strong>Güven:</strong>
+          {{ (confidence * 100).toFixed(2) }}%
+          <br />
+          <strong>Gerekçe:</strong>
+          {{ rationale }}
         </p>
       </div>
       <div v-else>
@@ -36,8 +41,9 @@ export default defineComponent({
       error.value = null;
       try {
         // TODO: Replace with actual context data from aw-server/aw-webui
-        const mockContext = "How to implement a responsive navigation bar in pure CSS and JavaScript";
-        const mockLanguage = "en";
+        const mockContext =
+          'How to implement a responsive navigation bar in pure CSS and JavaScript';
+        const mockLanguage = 'en';
 
         const result = await getContextualCategorization(mockContext, mockLanguage);
         category.value = result.category;
@@ -78,4 +84,4 @@ export default defineComponent({
 .error {
   color: red;
 }
-</style> 
+</style>

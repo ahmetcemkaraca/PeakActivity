@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 import { ActivityService } from './activity-service';
 import { ProjectPredictionService } from './project-prediction-service';
 import { TrelloJiraService } from './trello-jira-service';
@@ -25,7 +25,11 @@ export class MLDataPreparationService {
    */
   async prepareDataForML(userId: string, startDate: string, endDate: string) {
     try {
-      const activities = await this.activityService.getActivitiesInInterval(userId, startDate, endDate);
+      const activities = await this.activityService.getActivitiesInInterval(
+        userId,
+        startDate,
+        endDate
+      );
       const projects = await this.projectService.getAllProjects(userId);
 
       // TODO: Trello/Jira görevlerini de bu fonksiyona dahil edin
@@ -37,11 +41,19 @@ export class MLDataPreparationService {
           for (const taskId of project.associated_tasks) {
             // Basit bir örnek: Görev ID'sinin Trello veya Jira olup olmadığını kontrol edin
             // Gerçek bir uygulamada, görev ID'sinin kaynağını (Trello/Jira) depolayan bir alanınız olmalı.
-            if (taskId.startsWith('trello')) { // Örnek bir kontrol
-              const trelloTaskStatus = await this.trelloJiraService.getTrelloTaskStatus(userId, taskId.replace('trello-', ''));
+            if (taskId.startsWith('trello')) {
+              // Örnek bir kontrol
+              const trelloTaskStatus = await this.trelloJiraService.getTrelloTaskStatus(
+                userId,
+                taskId.replace('trello-', '')
+              );
               tasksFromExternalServices.push({ ...trelloTaskStatus, source: 'trello' });
-            } else if (taskId.startsWith('jira')) { // Örnek bir kontrol
-              const jiraTaskStatus = await this.trelloJiraService.getJiraTaskStatus(userId, taskId.replace('jira-', ''));
+            } else if (taskId.startsWith('jira')) {
+              // Örnek bir kontrol
+              const jiraTaskStatus = await this.trelloJiraService.getJiraTaskStatus(
+                userId,
+                taskId.replace('jira-', '')
+              );
               tasksFromExternalServices.push({ ...jiraTaskStatus, source: 'jira' });
             }
           }
@@ -77,8 +89,8 @@ export class MLDataPreparationService {
         throw new Error(`ML verisi hazırlanamadı: ${error.message}`);
       } else {
         console.error(`ML verisi hazırlanırken bilinmeyen bir hata oluştu:`, error);
-        throw new Error("ML verisi hazırlanırken bilinmeyen bir hata oluştu.");
+        throw new Error('ML verisi hazırlanırken bilinmeyen bir hata oluştu.');
       }
     }
   }
-} 
+}

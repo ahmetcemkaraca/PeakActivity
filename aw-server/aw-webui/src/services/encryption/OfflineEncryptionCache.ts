@@ -25,7 +25,11 @@ export class OfflineEncryptionCache {
    * @param encryptedData Şifrelenmiş veri (string).
    * @param metadata Şifreleme metadata'sı.
    */
-  async cacheEncryptedData(id: string, encryptedData: string, metadata: EncryptionMetadata): Promise<void> {
+  async cacheEncryptedData(
+    id: string,
+    encryptedData: string,
+    metadata: EncryptionMetadata
+  ): Promise<void> {
     // IndexedDBEncryption zaten şifreleme ve meta veri yönetimini ele alıyor.
     // Burada sadece IndexedDBEncryption'ın setItem metodunu çağıracağız.
     const valueToStore = JSON.stringify({ encryptedData, metadata });
@@ -64,4 +68,4 @@ export class OfflineEncryptionCache {
     // Şimdilik, tüm önbelleği temizleyelim.
     await this.indexedDBEncryption.clear();
   }
-} 
+}

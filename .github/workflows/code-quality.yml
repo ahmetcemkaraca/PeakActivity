@@ -15,50 +15,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install --no-root
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install --no-root
+        working-directory: aw-server
 
-    - name: Run Black (Python formatter)
-      run: poetry run black --check .
-      working-directory: aw-server
+      - name: Run Black (Python formatter)
+        run: poetry run black --check .
+        working-directory: aw-server
 
-    - name: Run Flake8 (Python linter)
-      run: poetry run flake8 .
-      working-directory: aw-server
+      - name: Run Flake8 (Python linter)
+        run: poetry run flake8 .
+        working-directory: aw-server
 
-    - name: Set up Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
 
-    - name: Run ESLint (functions)
-      run: npm run lint
-      working-directory: functions
+      - name: Run ESLint (functions)
+        run: npm run lint
+        working-directory: functions
 
-    - name: Run ESLint (aw-webui)
-      run: npm run lint
-      working-directory: aw-server/aw-webui 
+      - name: Run ESLint (aw-webui)
+        run: npm run lint
+        working-directory: aw-server/aw-webui

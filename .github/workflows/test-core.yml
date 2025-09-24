@@ -1,10 +1,10 @@
 name: PeakActivityMain Core Tests
 
-on: 
+on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test-core:
@@ -12,70 +12,70 @@ jobs:
     strategy:
       matrix:
         python-version: [3.11]
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
 
-    - name: Run Python Backend Tests
-      run: poetry run pytest tests/
-      working-directory: aw-server
+      - name: Run Python Backend Tests
+        run: poetry run pytest tests/
+        working-directory: aw-server
 
-    - name: Run Firebase Functions Tests
-      run: npm test
-      working-directory: functions
+      - name: Run Firebase Functions Tests
+        run: npm test
+        working-directory: functions
 
-    - name: Run Web UI Unit Tests
-      run: npm test
-      working-directory: aw-server/aw-webui
+      - name: Run Web UI Unit Tests
+        run: npm test
+        working-directory: aw-server/aw-webui
 
-    - name: Upload coverage reports to Codecov
-      if: matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: aw-server/coverage.xml # Adjust path if other coverage files are generated
-        flags: core-tests
-        name: core-tests-coverage
-        fail_ci_if_error: false
-        verbose: true
+      - name: Upload coverage reports to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: aw-server/coverage.xml # Adjust path if other coverage files are generated
+          flags: core-tests
+          name: core-tests-coverage
+          fail_ci_if_error: false
+          verbose: true
 
-    - name: Upload Coverage Reports (Artifacts)
-      if: matrix.python-version == '3.11'
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-reports
-        path: |
-          aw-server/.coverage
-          aw-server/htmlcov/
-          aw-server/coverage.xml
-        retention-days: 7
+      - name: Upload Coverage Reports (Artifacts)
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            aw-server/.coverage
+            aw-server/htmlcov/
+            aw-server/coverage.xml
+          retention-days: 7

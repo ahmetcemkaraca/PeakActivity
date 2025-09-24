@@ -1,6 +1,6 @@
 /**
  * Firebase Cloud Functions Type Definitions
- * 
+ *
  * Bu dosya Firebase Functions için tip güvenli tanımlar içerir.
  * Runtime validation ile compile-time safety sağlar.
  */
@@ -126,7 +126,7 @@ export interface Goal {
   updated_at: Timestamp;
 }
 
-export type GoalType = 
+export type GoalType =
   | 'time_limit'
   | 'time_target'
   | 'productivity_score'
@@ -158,7 +158,7 @@ export interface Insight {
   expires_at?: Timestamp;
 }
 
-export type InsightType = 
+export type InsightType =
   | 'productivity_trend'
   | 'focus_pattern'
   | 'time_waste_detection'
@@ -238,7 +238,7 @@ export interface DashboardWidget {
   config: WidgetConfig;
 }
 
-export type WidgetType = 
+export type WidgetType =
   | 'time_summary'
   | 'top_apps'
   | 'top_categories'
@@ -274,20 +274,26 @@ export const CreateActivityEventSchema = z.object({
   timestamp: z.string().datetime(),
   duration: z.number().positive(),
   data: z.record(z.unknown()),
-  bucket_id: z.string().min(1)
+  bucket_id: z.string().min(1),
 });
 
 export const CreateGoalSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  type: z.enum(['time_limit', 'time_target', 'productivity_score', 'category_balance', 'focus_sessions']),
+  type: z.enum([
+    'time_limit',
+    'time_target',
+    'productivity_score',
+    'category_balance',
+    'focus_sessions',
+  ]),
   target: z.object({
     value: z.number().positive(),
     unit: z.enum(['minutes', 'hours', 'score', 'sessions', 'percentage']),
     categories: z.array(z.string()).optional(),
-    apps: z.array(z.string()).optional()
+    apps: z.array(z.string()).optional(),
   }),
-  period: z.enum(['daily', 'weekly', 'monthly', 'custom'])
+  period: z.enum(['daily', 'weekly', 'monthly', 'custom']),
 });
 
 export const CreateFocusModeSchema = z.object({
@@ -303,33 +309,39 @@ export const CreateFocusModeSchema = z.object({
     mute_notifications: z.boolean().optional(),
     auto_suggest_breaks: z.boolean().optional(),
     break_interval_minutes: z.number().positive().optional(),
-    break_duration_minutes: z.number().positive().optional()
-  })
+    break_duration_minutes: z.number().positive().optional(),
+  }),
 });
 
 export const UpdateUserPreferencesSchema = z.object({
   theme: z.enum(['light', 'dark', 'auto']).optional(),
   timezone: z.string().optional(),
   language: z.string().optional(),
-  notifications: z.object({
-    email: z.boolean().optional(),
-    push: z.boolean().optional(),
-    insights: z.boolean().optional(),
-    goals: z.boolean().optional(),
-    focus_mode: z.boolean().optional()
-  }).optional(),
-  privacy: z.object({
-    data_sharing: z.boolean().optional(),
-    analytics: z.boolean().optional(),
-    ai_processing: z.boolean().optional(),
-    cloud_sync: z.boolean().optional()
-  }).optional(),
-  ai: z.object({
-    recommendations_enabled: z.boolean().optional(),
-    auto_categorization: z.boolean().optional(),
-    predictive_insights: z.boolean().optional(),
-    behavioral_analysis: z.boolean().optional()
-  }).optional()
+  notifications: z
+    .object({
+      email: z.boolean().optional(),
+      push: z.boolean().optional(),
+      insights: z.boolean().optional(),
+      goals: z.boolean().optional(),
+      focus_mode: z.boolean().optional(),
+    })
+    .optional(),
+  privacy: z
+    .object({
+      data_sharing: z.boolean().optional(),
+      analytics: z.boolean().optional(),
+      ai_processing: z.boolean().optional(),
+      cloud_sync: z.boolean().optional(),
+    })
+    .optional(),
+  ai: z
+    .object({
+      recommendations_enabled: z.boolean().optional(),
+      auto_categorization: z.boolean().optional(),
+      predictive_insights: z.boolean().optional(),
+      behavioral_analysis: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 // Type inference from schemas

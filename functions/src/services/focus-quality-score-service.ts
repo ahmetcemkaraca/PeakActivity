@@ -1,4 +1,11 @@
-import { parseISO, differenceInSeconds, getHours, setHours, setMinutes, setSeconds } from 'date-fns';
+import {
+  parseISO,
+  differenceInSeconds,
+  getHours,
+  setHours,
+  setMinutes,
+  setSeconds,
+} from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 
 interface ActivityEvent {
@@ -27,14 +34,16 @@ interface FocusQualityScoreOutput {
 }
 
 export class FocusQualityScoreService {
-
   /**
    * Calculates the focus quality score for a single session.
    * @param sessionEvents Events belonging to the session.
    * @param userTimeZone User's time zone.
    * @returns Calculated session score.
    */
-  private calculateSessionScore(sessionEvents: ActivityEvent[], userTimeZone: string): SessionScore | null {
+  private calculateSessionScore(
+    sessionEvents: ActivityEvent[],
+    userTimeZone: string
+  ): SessionScore | null {
     if (sessionEvents.length === 0) {
       return null;
     }
@@ -58,7 +67,10 @@ export class FocusQualityScoreService {
     let distractions = 0;
     if (sessionEvents.length > 1) {
       for (let i = 1; i < sessionEvents.length; i++) {
-        if (sessionEvents[i].app !== sessionEvents[i - 1].app || sessionEvents[i].title !== sessionEvents[i - 1].title) {
+        if (
+          sessionEvents[i].app !== sessionEvents[i - 1].app ||
+          sessionEvents[i].title !== sessionEvents[i - 1].title
+        ) {
           contextSwitchPenalty += 1;
           distractions += 1;
         }
@@ -77,7 +89,9 @@ export class FocusQualityScoreService {
 
     // 4. -10 points if any social-media category app is used in the session.
     const socialMediaCategories = ['social']; // Kurala uygun olarak sadece 'social' kategorisi
-    if (sessionEvents.some(event => event.category && socialMediaCategories.includes(event.category))) {
+    if (
+      sessionEvents.some(event => event.category && socialMediaCategories.includes(event.category))
+    ) {
       baseScore -= 10;
       distractions += 1; // Social media usage is also a distraction
     }
@@ -116,12 +130,17 @@ export class FocusQualityScoreService {
    * @param userTimeZone User's time zone.
    * @returns Output object containing calculated focus quality scores.
    */
-  public calculateFocusQualityScores(events: ActivityEvent[], userTimeZone: string): FocusQualityScoreOutput {
+  public calculateFocusQualityScores(
+    events: ActivityEvent[],
+    userTimeZone: string
+  ): FocusQualityScoreOutput {
     const sessionScores: SessionScore[] = [];
     let currentSession: ActivityEvent[] = [];
 
     // Sort events by chronological order (if necessary)
-    events.sort((a, b) => new Date(a.timestamp_start).getTime() - new Date(b.timestamp_start).getTime());
+    events.sort(
+      (a, b) => new Date(a.timestamp_start).getTime() - new Date(b.timestamp_start).getTime()
+    );
 
     for (const event of events) {
       if (currentSession.length === 0) {
@@ -129,8 +148,12 @@ export class FocusQualityScoreService {
       } else {
         const lastEventInSession = currentSession[currentSession.length - 1];
         // If the event starts less than 5 minutes after the end of the previous session, consider it part of the same session
-        const gap = differenceInSeconds(parseISO(event.timestamp_start), parseISO(lastEventInSession.timestamp_end));
-        if (gap <= 300) { // 5 minutes = 300 seconds
+        const gap = differenceInSeconds(
+          parseISO(event.timestamp_start),
+          parseISO(lastEventInSession.timestamp_end)
+        );
+        if (gap <= 300) {
+          // 5 minutes = 300 seconds
           currentSession.push(event);
         } else {
           const score = this.calculateSessionScore(currentSession, userTimeZone);
@@ -149,13 +172,14 @@ export class FocusQualityScoreService {
     }
 
     const totalScores = sessionScores.map(s => s.focus_quality_score);
-    const dailyAverage = totalScores.length > 0 
-      ? parseFloat((totalScores.reduce((sum, s) => sum + s, 0) / totalScores.length).toFixed(0)) 
-      : null; // Return null if no qualifying sessions
+    const dailyAverage =
+      totalScores.length > 0
+        ? parseFloat((totalScores.reduce((sum, s) => sum + s, 0) / totalScores.length).toFixed(0))
+        : null; // Return null if no qualifying sessions
 
-    let explanations = "Odak kalitesi analizi tamamlandı.";
+    let explanations = 'Odak kalitesi analizi tamamlandı.';
     if (sessionScores.length === 0) {
-      explanations = "Nitelikli odak oturumu bulunamadı.";
+      explanations = 'Nitelikli odak oturumu bulunamadı.';
     }
 
     return {
@@ -164,4 +188,4 @@ export class FocusQualityScoreService {
       explanations: explanations,
     };
   }
-} 
+}

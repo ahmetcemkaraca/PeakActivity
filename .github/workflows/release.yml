@@ -13,132 +13,132 @@ jobs:
     timeout-minutes: 90
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
-        poetry --version
-        poetry config --list
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.create true
+          poetry --version
+          poetry config --list
 
-    - name: Install Python Dependencies (aw-server)
-      run: poetry install
-      working-directory: aw-server
+      - name: Install Python Dependencies (aw-server)
+        run: poetry install
+        working-directory: aw-server
 
-    - name: Install pip-audit
-      run: pip install pip-audit
+      - name: Install pip-audit
+        run: pip install pip-audit
 
-    - name: Run Python Dependency Audit (aw-server)
-      run: pip-audit
-      working-directory: aw-server
+      - name: Run Python Dependency Audit (aw-server)
+        run: pip-audit
+        working-directory: aw-server
 
-    - name: Run Python Backend Tests
-      run: poetry run pytest tests/
-      working-directory: aw-server
+      - name: Run Python Backend Tests
+        run: poetry run pytest tests/
+        working-directory: aw-server
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install Node.js Dependencies (functions)
-      run: npm install
-      working-directory: functions
+      - name: Install Node.js Dependencies (functions)
+        run: npm install
+        working-directory: functions
 
-    - name: Run npm audit (functions)
-      run: npm audit
-      working-directory: functions
+      - name: Run npm audit (functions)
+        run: npm audit
+        working-directory: functions
 
-    - name: Install Node.js Dependencies (aw-webui)
-      run: npm install
-      working-directory: aw-server/aw-webui
+      - name: Install Node.js Dependencies (aw-webui)
+        run: npm install
+        working-directory: aw-server/aw-webui
 
-    - name: Run npm audit (aw-webui)
-      run: npm audit
-      working-directory: aw-server/aw-webui
+      - name: Run npm audit (aw-webui)
+        run: npm audit
+        working-directory: aw-server/aw-webui
 
-    - name: Run Black (Python formatter)
-      run: poetry run black --check .
-      working-directory: aw-server
+      - name: Run Black (Python formatter)
+        run: poetry run black --check .
+        working-directory: aw-server
 
-    - name: Run Flake8 (Python linter)
-      run: poetry run flake8 .
-      working-directory: aw-server
+      - name: Run Flake8 (Python linter)
+        run: poetry run flake8 .
+        working-directory: aw-server
 
-    - name: Run ESLint (functions)
-      run: npm run lint
-      working-directory: functions
+      - name: Run ESLint (functions)
+        run: npm run lint
+        working-directory: functions
 
-    - name: Run ESLint (aw-webui)
-      run: npm run lint
-      working-directory: aw-server/aw-webui
+      - name: Run ESLint (aw-webui)
+        run: npm run lint
+        working-directory: aw-server/aw-webui
 
-    - name: Build Web UI
-      run: npm run build
-      working-directory: aw-server/aw-webui
+      - name: Build Web UI
+        run: npm run build
+        working-directory: aw-server/aw-webui
 
-    - name: Run Web UI Tests
-      run: npm test
-      working-directory: aw-server/aw-webui
+      - name: Run Web UI Tests
+        run: npm test
+        working-directory: aw-server/aw-webui
 
-    - name: Install Firebase CLI and functions dependencies
-      run: |
-        npm install -g firebase-tools
-        npm install --prefix functions
+      - name: Install Firebase CLI and functions dependencies
+        run: |
+          npm install -g firebase-tools
+          npm install --prefix functions
 
-    - name: Start Firebase Emulators and Run Tests
-      run: |
-        firebase emulators:exec --project ${{ secrets.FIRESTORE_PROJECT_ID }} --only firestore "npm --prefix functions test functions/test/security/firestore.test.ts"
-      env:
-        FIRESTORE_EMULATOR_HOST: localhost:8080
+      - name: Start Firebase Emulators and Run Tests
+        run: |
+          firebase emulators:exec --project ${{ secrets.FIRESTORE_PROJECT_ID }} --only firestore "npm --prefix functions test functions/test/security/firestore.test.ts"
+        env:
+          FIRESTORE_EMULATOR_HOST: localhost:8080
 
   create-release:
     needs: [build-and-test]
     runs-on: ubuntu-latest
     if: success()
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create Git Tag
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git tag -a ${{ github.event.inputs.tag }} -m "Release ${{ github.event.inputs.tag }}"
-        git push origin ${{ github.event.inputs.tag }}
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a ${{ github.event.inputs.tag }} -m "Release ${{ github.event.inputs.tag }}"
+          git push origin ${{ github.event.inputs.tag }}
 
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        tag_name: ${{ github.event.inputs.tag }}
-        release_name: Release ${{ github.event.inputs.tag }}
-        body: |
-          Changes in this release:
-          - Update `todo.md` for project roadmap and assessment.
-          - Update `firebase-rules-test.yml` for improved security scans.
-          - Updated `release.yml` for PeakActivityMain project.
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: Release ${{ github.event.inputs.tag }}
+          body: |
+            Changes in this release:
+            - Update `todo.md` for project roadmap and assessment.
+            - Update `firebase-rules-test.yml` for improved security scans.
+            - Updated `release.yml` for PeakActivityMain project.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Deploy to Firebase
-      run: firebase deploy --only hosting,functions
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      - name: Deploy to Firebase
+        run: firebase deploy --only hosting,functions
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

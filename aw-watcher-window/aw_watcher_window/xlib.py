@@ -62,7 +62,8 @@ def get_current_window() -> Optional[Window]:
 
 def get_window_name(window: Window) -> str:
     """After some annoying debugging I resorted to pretty much copying selfspy.
-    Source: https://github.com/gurgeh/selfspy/blob/8a34597f81000b3a1be12f8cde092a40604e49cf/selfspy/sniff_x.py#L165"""
+    Source: https://github.com/gurgeh/selfspy/blob/8a34597f81000b3a1be12f8cde092a40604e49cf/selfspy/sniff_x.py#L165
+    """
     try:
         d = window.get_full_property(NET_WM_NAME, UTF8_STRING)
     except Xlib.error.XError as e:

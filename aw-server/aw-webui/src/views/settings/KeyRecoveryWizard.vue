@@ -10,11 +10,15 @@
         <label for="recoveryOption">{{ $t('settings.keyRecovery.step1.chooseOption') }}</label>
         <select id="recoveryOption" v-model="recoveryOption">
           <option value="">{{ $t('settings.keyRecovery.step1.select') }}</option>
-          <option value="securityQuestions">{{ $t('settings.keyRecovery.step1.securityQuestions') }}</option>
+          <option value="securityQuestions">
+            {{ $t('settings.keyRecovery.step1.securityQuestions') }}
+          </option>
           <option value="backupCode">{{ $t('settings.keyRecovery.step1.backupCode') }}</option>
         </select>
       </div>
-      <button @click="nextStep" :disabled="!recoveryOption">{{ $t('settings.keyRecovery.next') }}</button>
+      <button @click="nextStep" :disabled="!recoveryOption">
+        {{ $t('settings.keyRecovery.next') }}
+      </button>
     </div>
 
     <div class="wizard-step" v-if="currentStep === 2">
@@ -23,15 +27,27 @@
         <p>{{ $t('settings.keyRecovery.step2.securityQuestionsDescription') }}</p>
         <div v-for="(qa, index) in enteredSecurityAnswers" :key="index" class="question-item">
           <label :for="'question-verify-' + index">{{ qa.questionText }}</label>
-          <input :id="'question-verify-' + index" type="password" v-model="qa.answer" autocomplete="off">
+          <input
+            :id="'question-verify-' + index"
+            type="password"
+            v-model="qa.answer"
+            autocomplete="off"
+          />
         </div>
-        <button @click="addSecurityQuestionField" v-if="enteredSecurityAnswers.length < maxSecurityQuestions">{{ $t('settings.keyRecovery.step2.addQuestion') }}</button>
+        <button
+          @click="addSecurityQuestionField"
+          v-if="enteredSecurityAnswers.length < maxSecurityQuestions"
+        >
+          {{ $t('settings.keyRecovery.step2.addQuestion') }}
+        </button>
       </div>
       <div v-else-if="recoveryOption === 'backupCode'">
         <p>{{ $t('settings.keyRecovery.step2.backupCodeDescription') }}</p>
         <div class="form-group">
-          <label for="backupCodeInput">{{ $t('settings.keyRecovery.step2.enterBackupCode') }}</label>
-          <input type="text" id="backupCodeInput" v-model="enteredBackupCode">
+          <label for="backupCodeInput">
+            {{ $t('settings.keyRecovery.step2.enterBackupCode') }}
+          </label>
+          <input type="text" id="backupCodeInput" v-model="enteredBackupCode" />
         </div>
       </div>
       <button @click="verifyRecoveryData">{{ $t('settings.keyRecovery.verify') }}</button>
@@ -43,11 +59,23 @@
       <p>{{ $t('settings.keyRecovery.step3.description') }}</p>
       <div class="form-group">
         <label for="newMasterPassword">{{ $t('settings.keyRecovery.step3.newPassword') }}</label>
-        <input type="password" id="newMasterPassword" v-model="newMasterPassword" autocomplete="new-password">
+        <input
+          type="password"
+          id="newMasterPassword"
+          v-model="newMasterPassword"
+          autocomplete="new-password"
+        />
       </div>
       <div class="form-group">
-        <label for="confirmNewMasterPassword">{{ $t('settings.keyRecovery.step3.confirmNewPassword') }}</label>
-        <input type="password" id="confirmNewMasterPassword" v-model="confirmNewMasterPassword" autocomplete="new-password">
+        <label for="confirmNewMasterPassword">
+          {{ $t('settings.keyRecovery.step3.confirmNewPassword') }}
+        </label>
+        <input
+          type="password"
+          id="confirmNewMasterPassword"
+          v-model="confirmNewMasterPassword"
+          autocomplete="new-password"
+        />
       </div>
       <button @click="resetMasterKey">{{ $t('settings.keyRecovery.step3.resetButton') }}</button>
       <button @click="currentStep = 2">{{ $t('settings.keyRecovery.back') }}</button>
@@ -59,7 +87,14 @@
       <button @click="closeWizard">{{ $t('settings.keyRecovery.finish') }}</button>
     </div>
 
-    <div v-if="statusMessage" :class="{ 'status-message': true, 'error': statusType === 'error', 'success': statusType === 'success' }">
+    <div
+      v-if="statusMessage"
+      :class="{
+        'status-message': true,
+        error: statusType === 'error',
+        success: statusType === 'success',
+      }"
+    >
       {{ statusMessage }}
     </div>
   </div>
@@ -136,7 +171,10 @@ export default Vue.extend({
       if (this.recoveryOption) {
         this.currentStep = 2;
         // Güvenlik soruları seçildiyse, boş alanları ekle
-        if (this.recoveryOption === 'securityQuestions' && this.enteredSecurityAnswers.length === 0) {
+        if (
+          this.recoveryOption === 'securityQuestions' &&
+          this.enteredSecurityAnswers.length === 0
+        ) {
           this.addSecurityQuestionField();
         }
       } else {
@@ -187,7 +225,10 @@ export default Vue.extend({
         }
       } catch (error) {
         console.error('Veri doğrulanırken hata oluştu:', error);
-        this.setStatus(this.$t('settings.keyRecovery.verificationError') + `: ${error.message}`, 'error');
+        this.setStatus(
+          this.$t('settings.keyRecovery.verificationError') + `: ${error.message}`,
+          'error'
+        );
       }
     },
     async resetMasterKey() {
@@ -281,8 +322,8 @@ h3 {
   color: #555;
 }
 
-.form-group input[type="password"],
-.form-group input[type="text"],
+.form-group input[type='password'],
+.form-group input[type='text'],
 .form-group select {
   width: 100%;
   padding: 10px;
@@ -337,4 +378,4 @@ button:disabled {
   background-color: #f8d7da;
   color: #721c24;
 }
-</style> 
+</style>

@@ -37,8 +37,12 @@
             <span v-if="addingRule">Ekleniyor...</span>
             <span v-else>Kural Ekle</span>
           </b-button>
-          <b-alert v-if="addRuleSuccess" show variant="success" class="mt-3">Kural başarıyla eklendi!</b-alert>
-          <b-alert v-if="addRuleError" show variant="danger" class="mt-3">Hata: {{ addRuleError }}</b-alert>
+          <b-alert v-if="addRuleSuccess" show variant="success" class="mt-3">
+            Kural başarıyla eklendi!
+          </b-alert>
+          <b-alert v-if="addRuleError" show variant="danger" class="mt-3">
+            Hata: {{ addRuleError }}
+          </b-alert>
         </b-form>
       </div>
     </div>
@@ -49,17 +53,28 @@
         <div v-if="loadingRules">Kurallar yükleniyor...</div>
         <div v-else-if="rulesError" class="error">Hata: {{ rulesError }}</div>
         <div v-else-if="communityRules.length === 0">
-          <p>Henüz topluluk kuralı bulunamadı. Yukarıdaki formu kullanarak yeni bir kural ekleyin.</p>
+          <p>
+            Henüz topluluk kuralı bulunamadı. Yukarıdaki formu kullanarak yeni bir kural ekleyin.
+          </p>
         </div>
         <div v-else>
           <ul class="list-group">
-            <li v-for="rule in communityRules" :key="rule.pattern + rule.category" class="list-group-item d-flex justify-content-between align-items-center">
+            <li
+              v-for="rule in communityRules"
+              :key="rule.pattern + rule.category"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
               <div>
-                <strong>Desen:</strong> {{ rule.pattern }} <br/>
-                <strong>Kategori:</strong> {{ rule.category }}
-                <span v-if="rule.popularity"> (Popülerlik: {{ rule.popularity }})</span>
+                <strong>Desen:</strong>
+                {{ rule.pattern }}
+                <br />
+                <strong>Kategori:</strong>
+                {{ rule.category }}
+                <span v-if="rule.popularity">(Popülerlik: {{ rule.popularity }})</span>
               </div>
-              <b-button variant="danger" size="sm" @click="deleteRule(rule.pattern, rule.category)">Sil</b-button>
+              <b-button variant="danger" size="sm" @click="deleteRule(rule.pattern, rule.category)">
+                Sil
+              </b-button>
             </li>
           </ul>
         </div>
@@ -101,17 +116,19 @@
 
           <div v-if="matchResult" class="mt-3">
             <p v-if="matchResult.matched_rule">
-              <strong>Eşleşen Kural:</strong> {{ matchResult.matched_rule.pattern }} (Kategori: {{ matchResult.category }})
+              <strong>Eşleşen Kural:</strong>
+              {{ matchResult.matched_rule.pattern }} (Kategori: {{ matchResult.category }})
             </p>
             <p v-else>
               <strong class="text-danger">Hiçbir kural eşleşmedi.</strong>
             </p>
           </div>
-          <b-alert v-if="matchError" show variant="danger" class="mt-3">Hata: {{ matchError }}</b-alert>
+          <b-alert v-if="matchError" show variant="danger" class="mt-3">
+            Hata: {{ matchError }}
+          </b-alert>
         </b-form>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -148,7 +165,7 @@ export default defineComponent({
     const addingRule = ref(false);
     const addRuleSuccess = ref(false);
     const addRuleError = ref<string | null>(null);
-    
+
     const eventToMatch = ref<ActivityEvent>({ app: '', title: '', url: null });
     const matchingEvent = ref(false);
     const matchResult = ref<CommunityRuleMatchOutput | null>(null);
@@ -214,7 +231,10 @@ export default defineComponent({
       matchResult.value = null;
       matchError.value = null;
       try {
-        const result = await matchCommunityRuleCallable({ event: eventToMatch.value, communityRules: communityRules.value });
+        const result = await matchCommunityRuleCallable({
+          event: eventToMatch.value,
+          communityRules: communityRules.value,
+        });
         matchResult.value = (result.data as { data: CommunityRuleMatchOutput }).data;
       } catch (e: any) {
         matchError.value = e.message || 'Olay eşleştirilirken bir hata oluştu.';
@@ -261,7 +281,10 @@ export default defineComponent({
   background-color: var(--background-color);
   border: 1px solid var(--light-border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .card-title {
@@ -324,4 +347,4 @@ export default defineComponent({
 .error {
   color: red;
 }
-</style> 
+</style>

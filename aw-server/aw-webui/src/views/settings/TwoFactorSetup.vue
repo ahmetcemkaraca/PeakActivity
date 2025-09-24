@@ -14,12 +14,20 @@
           <img :src="qrCodeSvg" alt="QR Code" v-if="qrCodeSvg" />
           <p v-if="qrCodeSvg">QR Kodu burada gösterilecektir. URI: {{ totpUri }}</p>
         </div>
-        <p><strong>{{ $t('settings.twoFactor.totp.manualEntry') }}:</strong> {{ totpSecret }}</p>
-        
+        <p>
+          <strong>{{ $t('settings.twoFactor.totp.manualEntry') }}:</strong>
+          {{ totpSecret }}
+        </p>
+
         <label for="totpCode">{{ $t('settings.twoFactor.totp.enterCode') }}</label>
-        <input type="text" id="totpCode" v-model="totpVerificationCode" maxlength="6">
+        <input type="text" id="totpCode" v-model="totpVerificationCode" maxlength="6" />
         <button @click="verifyTotp">{{ $t('settings.twoFactor.totp.verifyAndEnable') }}</button>
-        <div v-if="totpStatus" :class="{ 'status-message': true, 'error': totpStatus.includes('hata') }">{{ totpStatus }}</div>
+        <div
+          v-if="totpStatus"
+          :class="{ 'status-message': true, error: totpStatus.includes('hata') }"
+        >
+          {{ totpStatus }}
+        </div>
       </div>
       <div v-else-if="!totpEnabled">
         <button @click="initiateTotpSetup">{{ $t('settings.twoFactor.totp.setupButton') }}</button>
@@ -38,17 +46,27 @@
         <ul class="backup-code-list">
           <li v-for="(code, index) in backupCodes" :key="index">{{ code }}</li>
         </ul>
-        <button @click="generateBackupCodes">{{ $t('settings.twoFactor.backupCodes.regenerateButton') }}</button>
+        <button @click="generateBackupCodes">
+          {{ $t('settings.twoFactor.backupCodes.regenerateButton') }}
+        </button>
       </div>
       <div v-else>
-        <button @click="generateBackupCodes">{{ $t('settings.twoFactor.backupCodes.generateButton') }}</button>
+        <button @click="generateBackupCodes">
+          {{ $t('settings.twoFactor.backupCodes.generateButton') }}
+        </button>
       </div>
       <div v-if="backupCodesStatus">{{ backupCodesStatus }}</div>
     </section>
 
-    <div v-if="saveStatus === 'saving'" class="status-message saving">{{ $t('settings.saving') }}</div>
-    <div v-if="saveStatus === 'success'" class="status-message success">{{ $t('settings.saveSuccess') }}</div>
-    <div v-if="saveStatus === 'error'" class="status-message error">{{ $t('settings.saveError') }}</div>
+    <div v-if="saveStatus === 'saving'" class="status-message saving">
+      {{ $t('settings.saving') }}
+    </div>
+    <div v-if="saveStatus === 'success'" class="status-message success">
+      {{ $t('settings.saveSuccess') }}
+    </div>
+    <div v-if="saveStatus === 'error'" class="status-message error">
+      {{ $t('settings.saveError') }}
+    </div>
   </div>
 </template>
 
@@ -98,7 +116,9 @@ export default Vue.extend({
         if (response.data.success && response.data.data) {
           const status: TwoFactorAuthData = response.data.data;
           this.totpEnabled = status.hasTotp || false;
-          this.backupCodes = status.hasBackupCodes ? [this.$t('settings.twoFactor.backupCodes.alreadyGenerated')] : [];
+          this.backupCodes = status.hasBackupCodes
+            ? [this.$t('settings.twoFactor.backupCodes.alreadyGenerated')]
+            : [];
         }
       } catch (error) {
         console.error('2FA durumu yüklenirken hata oluştu:', error);
@@ -109,14 +129,17 @@ export default Vue.extend({
       // if (!this.twoFactorManager) return; // Kaldırıldı
       this.totpStatus = '';
       try {
-        const response = await this.$axios.post('/api/two-factor/initiate-totp', { userId: this.userId });
+        const response = await this.$axios.post('/api/two-factor/initiate-totp', {
+          userId: this.userId,
+        });
         if (response.data.success && response.data.data) {
           const { secret, uri } = response.data.data;
           this.totpSecret = secret;
           this.totpUri = uri;
           this.qrCodeSvg = await QRCode.toDataURL(uri); // QR kodu SVG olarak oluşturuldu
         } else {
-          this.totpStatus = this.$t('settings.twoFactor.totp.setupError') + `: ${response.data.message}`;
+          this.totpStatus =
+            this.$t('settings.twoFactor.totp.setupError') + `: ${response.data.message}`;
         }
       } catch (error) {
         console.error('TOTP kurulumu başlatılırken hata oluştu:', error);
@@ -130,7 +153,7 @@ export default Vue.extend({
         const response = await this.$axios.post('/api/two-factor/verify-totp', {
           userId: this.userId,
           secret: this.totpSecret,
-          code: this.totpVerificationCode
+          code: this.totpVerificationCode,
         });
 
         if (response.data.success) {
@@ -140,7 +163,8 @@ export default Vue.extend({
           this.totpUri = '';
           this.totpStatus = this.$t('settings.twoFactor.totp.verifySuccess');
         } else {
-          this.totpStatus = this.$t('settings.twoFactor.totp.verifyError') + `: ${response.data.message}`;
+          this.totpStatus =
+            this.$t('settings.twoFactor.totp.verifyError') + `: ${response.data.message}`;
         }
       } catch (error) {
         console.error('TOTP doğrulanırken hata oluştu:', error);
@@ -157,7 +181,8 @@ export default Vue.extend({
           this.totpStatus = this.$t('settings.twoFactor.totp.disableSuccess');
           await this.loadTwoFactorStatus();
         } else {
-          this.totpStatus = this.$t('settings.twoFactor.totp.disableError') + `: ${response.data.message}`;
+          this.totpStatus =
+            this.$t('settings.twoFactor.totp.disableError') + `: ${response.data.message}`;
         }
       } catch (error) {
         console.error('TOTP devre dışı bırakılırken hata oluştu:', error);
@@ -168,16 +193,20 @@ export default Vue.extend({
       // if (!this.twoFactorManager) return; // Kaldırıldı
       this.backupCodesStatus = '';
       try {
-        const response = await this.$axios.post('/api/two-factor/generate-backup-codes', { userId: this.userId });
+        const response = await this.$axios.post('/api/two-factor/generate-backup-codes', {
+          userId: this.userId,
+        });
         if (response.data.success && response.data.data) {
           this.backupCodes = response.data.data.codes;
           this.backupCodesStatus = this.$t('settings.twoFactor.backupCodes.generateSuccess');
         } else {
-          this.backupCodesStatus = this.$t('settings.twoFactor.backupCodes.generateError') + `: ${response.data.message}`;
+          this.backupCodesStatus =
+            this.$t('settings.twoFactor.backupCodes.generateError') + `: ${response.data.message}`;
         }
       } catch (error) {
         console.error('Yedek kodlar oluşturulurken hata oluştu:', error);
-        this.backupCodesStatus = this.$t('settings.twoFactor.backupCodes.generateError') + `: ${error.message}`;
+        this.backupCodesStatus =
+          this.$t('settings.twoFactor.backupCodes.generateError') + `: ${error.message}`;
       }
     },
   },
@@ -233,7 +262,7 @@ button:hover {
   background-color: #0056b3;
 }
 
-input[type="text"] {
+input[type='text'] {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
@@ -300,4 +329,4 @@ input[type="text"] {
   background-color: #ffebee;
   color: #c62828;
 }
-</style> 
+</style>

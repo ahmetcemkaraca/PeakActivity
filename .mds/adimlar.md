@@ -1,8 +1,11 @@
 # PeakActivity Proje Tamamlama Planı - 100 Adım
 
-Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanımlar. Adımlar, mevcut durumdan (fork, partial integration) başlayarak tam fonksiyonel bir ürüne ulaşmayı hedefler. Adımlar 5 faza ayrılmıştır.
+Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanımlar.
+Adımlar, mevcut durumdan (fork, partial integration) başlayarak tam fonksiyonel
+bir ürüne ulaşmayı hedefler. Adımlar 5 faza ayrılmıştır.
 
 ## Faz 1: Temel Temizlik ve Organizasyon (Adımlar 1-20)
+
 1. Tüm .cursor/rules dosyalarını incele ve redundant olanları sil.
 2. Proje kök dizinini organize et: src, tests, docs klasörleri oluştur.
 3. Git ignore dosyalarını güncelle: node_modules, .env, build artifacts.
@@ -25,6 +28,7 @@ Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanım
 20. Initial cleanup commit'i yap.
 
 ## Faz 2: Core Integration (Adımlar 21-40)
+
 21. Firebase Admin SDK entegrasyonunu tamamla (auth, firestore).
 22. ActivityWatch core ile Firebase datastore'u entegre et.
 23. User authentication flow'u implement et (sign up, login).
@@ -47,6 +51,7 @@ Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanım
 40. Phase 1-2 test suite çalıştır.
 
 ## Faz 3: AI Features (Adımlar 41-60)
+
 41. TensorFlow.js model yükle (local classification).
 42. Gemini API entegrasyonu tamamla (cloud insights).
 43. Anomaly detection modülü implement et.
@@ -69,6 +74,7 @@ Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanım
 60. Phase 3 test suite çalıştır.
 
 ## Faz 4: Testing (Adımlar 61-80)
+
 61. Unit test coverage %80'e çıkar.
 62. Integration tests for Firebase + AW.
 63. E2E tests with Playwright (user flows).
@@ -91,6 +97,7 @@ Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanım
 80. Phase 4 test suite çalıştır.
 
 ## Faz 5: Documentation and Deployment (Adımlar 81-100)
+
 81. API docs (Swagger/OpenAPI) oluştur.
 82. User manual yaz (Türkçe/English).
 83. Developer guide güncelle.
@@ -110,4 +117,4 @@ Bu belge, PeakActivity projesinin tamamlama için 100 adımlık planını tanım
 97. Release candidate build.
 98. Beta testing plan.
 99. Final review and audit.
-100. Project complete: Release v1.0.0.
+100.  Project complete: Release v1.0.0.

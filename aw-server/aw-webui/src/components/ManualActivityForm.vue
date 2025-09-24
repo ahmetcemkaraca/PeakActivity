@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 export default {
   name: 'ManualActivityForm',
   data() {
@@ -33,7 +33,7 @@ export default {
       duration: 0,
       category: '',
       description: '',
-    }
+    };
   },
   methods: {
     async submit() {
@@ -45,16 +45,16 @@ export default {
           category: this.category || undefined,
           description: this.description || undefined,
         },
-      }
-      await axios.post('/api/0/manualactivity', payload)
-      this.$emit('saved')
-      this.label = ''
-      this.duration = 0
-      this.category = ''
-      this.description = ''
+      };
+      await axios.post('/api/0/manualactivity', payload);
+      this.$emit('saved');
+      this.label = '';
+      this.duration = 0;
+      this.category = '';
+      this.description = '';
     },
   },
-}
+};
 </script>
 
 <style scoped>
@@ -62,4 +62,4 @@ export default {
   max-width: 400px;
   margin: 0 auto;
 }
-</style> 
+</style>

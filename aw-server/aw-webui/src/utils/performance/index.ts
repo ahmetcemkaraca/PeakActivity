@@ -1,6 +1,6 @@
 /**
  * Performance Optimization Utilities Index (141-160)
- * 
+ *
  * Merkezi export point for all performance optimization utilities.
  * Frontend performance monitoring, caching, memory management ve bundle optimization.
  */
@@ -14,7 +14,7 @@ export {
   createLazyComponent,
   BundleAnalyzer,
   type FrontendPerformanceMetrics,
-  type ComponentMetrics
+  type ComponentMetrics,
 } from './frontend-performance';
 
 // Advanced Caching Strategies (146-150)
@@ -26,7 +26,7 @@ export {
   cachePreloader,
   type CacheEntry,
   type CacheStats,
-  type CacheConfig
+  type CacheConfig,
 } from './advanced-caching';
 
 // Memory Management (151-155)
@@ -40,7 +40,7 @@ export {
   useVirtualScrolling,
   type MemoryStats,
   type MemoryAlert,
-  type ObjectPoolConfig
+  type ObjectPoolConfig,
 } from './memory-management';
 
 // Bundle Optimization (156-160)
@@ -54,7 +54,7 @@ export {
   useResourcePreloader,
   type BundleChunk,
   type LoadingStrategy,
-  type ResourceMetrics
+  type ResourceMetrics,
 } from './bundle-optimization';
 
 /**
@@ -98,7 +98,6 @@ export class PerformanceOptimizer {
 
       this.isInitialized = true;
       console.log('✅ Performance Optimization Systems initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize performance systems:', error);
     }
@@ -124,7 +123,12 @@ export class PerformanceOptimizer {
       memory: memoryStats,
       cache: cacheStats,
       bundle: bundleMetrics,
-      recommendations: this.generateRecommendations(frontendMetrics, memoryStats, cacheStats, bundleMetrics)
+      recommendations: this.generateRecommendations(
+        frontendMetrics,
+        memoryStats,
+        cacheStats,
+        bundleMetrics
+      ),
     };
   }
 
@@ -166,12 +170,14 @@ export class PerformanceOptimizer {
       recommendations.push('Low cache hit rate - optimize caching strategy');
     }
 
-    if (cache.totalSize > 50 * 1024 * 1024) { // 50MB
+    if (cache.totalSize > 50 * 1024 * 1024) {
+      // 50MB
       recommendations.push('Cache size is large - implement cache cleanup');
     }
 
     // Bundle recommendations
-    if (bundle.totalBundleSize > 2 * 1024 * 1024) { // 2MB
+    if (bundle.totalBundleSize > 2 * 1024 * 1024) {
+      // 2MB
       recommendations.push('Large bundle size - consider code splitting');
     }
 
@@ -187,7 +193,7 @@ export class PerformanceOptimizer {
    */
   private registerPerformanceCallbacks(): void {
     // Memory alerts
-    frontendMemoryMonitor.onMemoryChange('optimizer', (stats) => {
+    frontendMemoryMonitor.onMemoryChange('optimizer', stats => {
       if (stats.usedPercentage > 90) {
         console.warn('🚨 Critical memory usage:', stats.usedPercentage.toFixed(1), '%');
         this.handleCriticalMemoryUsage();
@@ -247,7 +253,7 @@ export const PerformanceOptimizationPlugin = {
       monitor: frontendPerformanceMonitor,
       cache: globalCacheManager,
       memory: frontendMemoryMonitor,
-      optimizer: performanceOptimizer
+      optimizer: performanceOptimizer,
     };
 
     // Development-only performance warnings
@@ -258,7 +264,7 @@ export const PerformanceOptimizationPlugin = {
         }
       };
     }
-  }
+  },
 };
 
 /**
@@ -269,6 +275,6 @@ export function usePerformanceOptimization() {
     optimizer: performanceOptimizer,
     report: () => performanceOptimizer.getPerformanceReport(),
     initialize: () => performanceOptimizer.initialize(),
-    cleanup: () => performanceOptimizer.destroy()
+    cleanup: () => performanceOptimizer.destroy(),
   };
 }

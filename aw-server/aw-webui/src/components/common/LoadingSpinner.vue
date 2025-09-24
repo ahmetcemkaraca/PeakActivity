@@ -11,14 +11,9 @@
       </div>
       <div class="loading-progress" v-if="showProgress && progress !== undefined">
         <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            :style="{ width: `${progress}%` }"
-          ></div>
+          <div class="progress-fill" :style="{ width: `${progress}%` }"></div>
         </div>
-        <div class="progress-text">
-          {{ Math.round(progress) }}%
-        </div>
+        <div class="progress-text">{{ Math.round(progress) }}%</div>
       </div>
     </div>
   </div>
@@ -33,31 +28,32 @@ export default defineComponent({
     size: {
       type: String as () => 'small' | 'medium' | 'large',
       default: 'medium',
-      validator: (value: string) => ['small', 'medium', 'large'].includes(value)
+      validator: (value: string) => ['small', 'medium', 'large'].includes(value),
     },
     variant: {
       type: String as () => 'primary' | 'secondary' | 'success' | 'warning' | 'danger',
       default: 'primary',
-      validator: (value: string) => ['primary', 'secondary', 'success', 'warning', 'danger'].includes(value)
+      validator: (value: string) =>
+        ['primary', 'secondary', 'success', 'warning', 'danger'].includes(value),
     },
     text: {
       type: String,
-      default: ''
+      default: '',
     },
     fullPage: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showProgress: {
       type: Boolean,
-      default: false
+      default: false,
     },
     progress: {
       type: Number,
       default: undefined,
-      validator: (value: number | undefined) => value === undefined || (value >= 0 && value <= 100)
-    }
-  }
+      validator: (value: number | undefined) => value === undefined || (value >= 0 && value <= 100),
+    },
+  },
 });
 </script>
 
@@ -67,7 +63,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  
+
   &.full-page {
     position: fixed;
     top: 0;
@@ -85,17 +81,17 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  
+
   &.size-small .spinner {
     width: 24px;
     height: 24px;
   }
-  
+
   &.size-medium .spinner {
     width: 40px;
     height: 40px;
   }
-  
+
   &.size-large .spinner {
     width: 60px;
     height: 60px;
@@ -107,42 +103,42 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   gap: 2px;
-  
+
   > div {
     border-radius: 100%;
     display: inline-block;
     animation: sk-bouncedelay 1.4s infinite ease-in-out both;
   }
-  
+
   .bounce1 {
     animation-delay: -0.32s;
   }
-  
+
   .bounce2 {
     animation-delay: -0.16s;
   }
-  
+
   .bounce3 {
     animation-delay: 0s;
   }
-  
+
   // Color variants
   &.primary > div {
     background-color: #007bff;
   }
-  
+
   &.secondary > div {
     background-color: #6c757d;
   }
-  
+
   &.success > div {
     background-color: #28a745;
   }
-  
+
   &.warning > div {
     background-color: #ffc107;
   }
-  
+
   &.danger > div {
     background-color: #dc3545;
   }
@@ -168,11 +164,11 @@ export default defineComponent({
   font-size: 0.875rem;
   font-weight: 500;
   text-align: center;
-  
+
   .size-small & {
     font-size: 0.75rem;
   }
-  
+
   .size-large & {
     font-size: 1rem;
   }
@@ -208,10 +204,13 @@ export default defineComponent({
 }
 
 @keyframes sk-bouncedelay {
-  0%, 80%, 100% { 
+  0%,
+  80%,
+  100% {
     transform: scale(0);
-  } 40% { 
-    transform: scale(1.0);
+  }
+  40% {
+    transform: scale(1);
   }
 }
 
@@ -220,15 +219,15 @@ export default defineComponent({
   .loading-spinner-container.full-page {
     background: rgba(0, 0, 0, 0.8);
   }
-  
+
   .loading-text {
     color: #a0aec0;
   }
-  
+
   .progress-bar {
     background: #4a5568;
   }
-  
+
   .progress-text {
     color: #a0aec0;
   }
@@ -239,7 +238,7 @@ export default defineComponent({
   .loading-spinner-container {
     padding: 0.5rem;
   }
-  
+
   .loading-progress {
     min-width: 150px;
   }

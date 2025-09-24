@@ -6,7 +6,10 @@ export class UserKeyManager {
   private keyDerivationService: KeyDerivationService;
   private secureStorageService: SecureStorageService;
 
-  constructor(keyDerivationService: KeyDerivationService, secureStorageService: SecureStorageService) {
+  constructor(
+    keyDerivationService: KeyDerivationService,
+    secureStorageService: SecureStorageService
+  ) {
     this.keyDerivationService = keyDerivationService;
     this.secureStorageService = secureStorageService;
   }
@@ -42,7 +45,7 @@ export class UserKeyManager {
     // Anahtarı doğrula
     const isValid = await this.keyDerivationService.verifyKey(masterPassword, key, saltBytes);
     if (!isValid) {
-      console.error("Anahtar doğrulaması başarısız oldu.");
+      console.error('Anahtar doğrulaması başarısız oldu.');
       return null;
     }
 
@@ -71,4 +74,4 @@ export class UserKeyManager {
     const { key } = JSON.parse(storedKeyMetadata);
     return key;
   }
-} 
+}

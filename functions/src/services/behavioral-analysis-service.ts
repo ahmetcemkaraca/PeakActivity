@@ -1,11 +1,23 @@
-import { db } from "../firebaseAdmin";
-import { ActivityEvent } from "../types/activity-event"; // ActivityEvent'ı içe aktar
-import { linearRegression, linearRegressionLine, mean, standardDeviation } from '../services/utils/math-utils'; // İstatistiksel yardımcı fonksiyonları içe aktar
+import { db } from '../firebaseAdmin';
+import { ActivityEvent } from '../types/activity-event'; // ActivityEvent'ı içe aktar
+import {
+  linearRegression,
+  linearRegressionLine,
+  mean,
+  standardDeviation,
+} from '../services/utils/math-utils'; // İstatistiksel yardımcı fonksiyonları içe aktar
 
 interface RealtimeBehavioralPattern {
   user_id: string;
   timestamp: string; // Olayın zaman damgası
-  pattern_type: 'idle_detection' | 'focus_shift' | 'high_activity' | 'low_activity' | 'unusual_category_use' | 'focus_score_trend' | 'anomaly_detection';
+  pattern_type:
+    | 'idle_detection'
+    | 'focus_shift'
+    | 'high_activity'
+    | 'low_activity'
+    | 'unusual_category_use'
+    | 'focus_score_trend'
+    | 'anomaly_detection';
   description: string; // Tespit edilen örüntünün açıklaması
   confidence_score?: number; // Güven skoru (0-1 arası, ML entegrasyonu için)
   related_activity_id?: string; // İlgili aktivite olayının ID'si
@@ -14,7 +26,6 @@ interface RealtimeBehavioralPattern {
 }
 
 export class BehavioralAnalysisService {
-
   /**
    * Tekil bir aktivite olayı üzerinden gerçek zamanlı davranışsal örüntüleri analiz eder.
    * Bu fonksiyon, gelecekte daha gelişmiş makine öğrenimi modellerinin entegrasyonu için bir yer tutucudur.
@@ -23,7 +34,10 @@ export class BehavioralAnalysisService {
    * @param event Analiz edilecek aktivite olayı.
    * @returns Tespit edilen örüntüleri içeren bir RealtimeBehavioralPattern nesnesi veya null.
    */
-  public async analyzeRealtimeBehavioralPattern(userId: string, event: ActivityEvent): Promise<RealtimeBehavioralPattern | null> {
+  public async analyzeRealtimeBehavioralPattern(
+    userId: string,
+    event: ActivityEvent
+  ): Promise<RealtimeBehavioralPattern | null> {
     // Gelecekteki makine öğrenimi modeli entegrasyon noktası.
     // Buraya TensorFlow.js veya başka bir ML modeli ile gerçek zamanlı sınıflandırma/tespit algoritmaları eklenebilir.
     // Örneğin, kullanıcının o anki aktivitesini geçmiş desenlerle karşılaştıran bir model.
@@ -32,7 +46,8 @@ export class BehavioralAnalysisService {
     const timestamp = new Date().toISOString(); // Anlık zaman damgası
 
     // Örnek: Yüksek AFK süresi tespiti (basit kural tabanlı)
-    if (event.is_afk && event.duration_sec > 300) { // 5 dakikadan fazla AFK
+    if (event.is_afk && event.duration_sec > 300) {
+      // 5 dakikadan fazla AFK
       pattern = {
         user_id: userId,
         timestamp: event.timestamp_start,
@@ -40,7 +55,7 @@ export class BehavioralAnalysisService {
         description: `Kullanıcı ${Math.floor(event.duration_sec / 60)} dakikadan fazla süredir hareketsiz.`, // Türkçeleştirilmiş açıklama
         confidence_score: 0.8,
         related_activity_id: event.id, // Eğer ActivityEvent'ta id varsa
-        model_version: "v1.0-rule-based",
+        model_version: 'v1.0-rule-based',
       };
     }
 
@@ -54,7 +69,7 @@ export class BehavioralAnalysisService {
         description: mlModelPrediction.description,
         confidence_score: mlModelPrediction.confidence_score,
         related_activity_id: event.id,
-        model_version: "v2.0-ml-powered",
+        model_version: 'v2.0-ml-powered',
       };
     }
 
@@ -73,7 +88,7 @@ export class BehavioralAnalysisService {
     explanation: string;
   } {
     if (focusScores.length < 2) {
-      return { trend: 'unknown', explanation: "Trend analizi için yeterli veri yok." };
+      return { trend: 'unknown', explanation: 'Trend analizi için yeterli veri yok.' };
     }
 
     // Basit lineer regresyon ile trend tespiti
@@ -82,13 +97,15 @@ export class BehavioralAnalysisService {
     const slope = lr.slope;
 
     let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
-    if (slope > 0.1) { // Eşik değeri ayarlanabilir
+    if (slope > 0.1) {
+      // Eşik değeri ayarlanabilir
       trend = 'increasing';
-    } else if (slope < -0.1) { // Eşik değeri ayarlanabilir
+    } else if (slope < -0.1) {
+      // Eşik değeri ayarlanabilir
       trend = 'decreasing';
     }
 
-    const explanation = `Odak skoru trendi: ${trend}. Eğim: ${slope.toFixed(2)}.`
+    const explanation = `Odak skoru trendi: ${trend}. Eğim: ${slope.toFixed(2)}.`;
     return { trend, slope, explanation };
   }
 
@@ -98,12 +115,15 @@ export class BehavioralAnalysisService {
    * @param threshold Z-skoru eşiği (varsayılan 2.0 veya 3.0).
    * @returns Anomali içeren noktaların listesi ve anomali tespiti hakkında bilgi.
    */
-  public detectAnomalyWithZScore(dataPoints: number[], threshold: number = 2.5): {
+  public detectAnomalyWithZScore(
+    dataPoints: number[],
+    threshold: number = 2.5
+  ): {
     anomalies: { value: number; index: number; zScore: number }[];
     explanation: string;
   } {
     if (dataPoints.length < 2) {
-      return { anomalies: [], explanation: "Anomali tespiti için yeterli veri yok." };
+      return { anomalies: [], explanation: 'Anomali tespiti için yeterli veri yok.' };
     }
 
     const dataMean = mean(dataPoints);
@@ -112,7 +132,7 @@ export class BehavioralAnalysisService {
     const anomalies: { value: number; index: number; zScore: number }[] = [];
 
     if (dataStdDev === 0) {
-      return { anomalies: [], explanation: "Tüm veriler aynı, anomali tespit edilemedi." };
+      return { anomalies: [], explanation: 'Tüm veriler aynı, anomali tespit edilemedi.' };
     }
 
     dataPoints.forEach((value, index) => {
@@ -122,9 +142,10 @@ export class BehavioralAnalysisService {
       }
     });
 
-    const explanation = anomalies.length > 0 
-      ? `${anomalies.length} anomali tespit edildi (eşik: ${threshold}).` 
-      : `Anomali tespit edilmedi (eşik: ${threshold}).`;
+    const explanation =
+      anomalies.length > 0
+        ? `${anomalies.length} anomali tespit edildi (eşik: ${threshold}).`
+        : `Anomali tespit edilmedi (eşik: ${threshold}).`;
 
     return { anomalies, explanation };
   }
@@ -139,10 +160,10 @@ export class BehavioralAnalysisService {
     // Buraya Google Cloud Natural Language API veya benzeri bir NLP servisi entegre edilebilir.
     // Şimdilik sadece bir yer tutucu.
     return {
-      sentiment: "neutral",
+      sentiment: 'neutral',
       entities: [],
       categories: [],
-      summary: "Bu metin için NLP analizi henüz uygulanmadı.",
+      summary: 'Bu metin için NLP analizi henüz uygulanmadı.',
     };
   }
 
@@ -152,7 +173,9 @@ export class BehavioralAnalysisService {
    * @deprecated Artık kullanılmamaktadır. analyzeRealtimeBehavioralPattern kullanın.
    */
   public analyzeBehavioralPatterns(): never {
-    throw new Error("analyzeBehavioralPatterns fonksiyonu artık kullanılmamaktadır. Lütfen analyzeRealtimeBehavioralPattern kullanın.");
+    throw new Error(
+      'analyzeBehavioralPatterns fonksiyonu artık kullanılmamaktadır. Lütfen analyzeRealtimeBehavioralPattern kullanın.'
+    );
   }
 
   /**
@@ -160,30 +183,42 @@ export class BehavioralAnalysisService {
    * @param event The activity event to analyze.
    * @returns A promise that resolves to an object indicating if an anomaly was detected.
    */
-  private async runMlModel(event: ActivityEvent): Promise<
-    { isAnomaly: false } | 
-    { isAnomaly: true; pattern_type: RealtimeBehavioralPattern['pattern_type']; description: string; confidence_score: number; }
+  private async runMlModel(
+    event: ActivityEvent
+  ): Promise<
+    | { isAnomaly: false }
+    | {
+        isAnomaly: true;
+        pattern_type: RealtimeBehavioralPattern['pattern_type'];
+        description: string;
+        confidence_score: number;
+      }
   > {
     // Makine öğrenimi modeli tahminini simüle et
     await new Promise(resolve => setTimeout(resolve, 100)); // Ağ gecikmesini simüle et
 
     const randomValue = Math.random();
 
-    if (randomValue < 0.05) { // %5 olasılıkla yüksek aktivite anomalisi
+    if (randomValue < 0.05) {
+      // %5 olasılıkla yüksek aktivite anomalisi
       return {
         isAnomaly: true,
         pattern_type: 'high_activity',
-        description: 'Makine öğrenimi modeli tarafından alışılmadık derecede yüksek bir aktivite tespit edildi.',
+        description:
+          'Makine öğrenimi modeli tarafından alışılmadık derecede yüksek bir aktivite tespit edildi.',
         confidence_score: parseFloat((0.7 + Math.random() * 0.3).toFixed(2)), // 0.7-1.0 arası güven
       };
-    } else if (randomValue < 0.10) { // %5 olasılıkla düşük aktivite anomalisi
+    } else if (randomValue < 0.1) {
+      // %5 olasılıkla düşük aktivite anomalisi
       return {
         isAnomaly: true,
         pattern_type: 'low_activity',
-        description: 'Makine öğrenimi modeli tarafından alışılmadık derecede düşük bir aktivite tespit edildi.',
+        description:
+          'Makine öğrenimi modeli tarafından alışılmadık derecede düşük bir aktivite tespit edildi.',
         confidence_score: parseFloat((0.7 + Math.random() * 0.3).toFixed(2)),
       };
-    } else if (randomValue < 0.15) { // %5 olasılıkla olağandışı kategori kullanımı anomalisi
+    } else if (randomValue < 0.15) {
+      // %5 olasılıkla olağandışı kategori kullanımı anomalisi
       return {
         isAnomaly: true,
         pattern_type: 'unusual_category_use',
@@ -201,6 +236,6 @@ export class BehavioralAnalysisService {
    * @deprecated Artık kullanılmamaktadır.
    */
   private detectWeekendDrop(): boolean {
-    throw new Error("detectWeekendDrop fonksiyonu artık kullanılmamaktadır.");
+    throw new Error('detectWeekendDrop fonksiyonu artık kullanılmamaktadır.');
   }
-} 
+}

@@ -8,15 +8,26 @@
         <h4>Eşleşen Kural:</h4>
         <ul>
           <li>
-            <strong>Desen:</strong> {{ matchedRule.pattern }} <br/>
-            <strong>Kategori:</strong> {{ matchedRule.category }}
+            <strong>Desen:</strong>
+            {{ matchedRule.pattern }}
+            <br />
+            <strong>Kategori:</strong>
+            {{ matchedRule.category }}
           </li>
         </ul>
-        <p>Atanan Kategori: <strong>{{ category }}</strong> (Kaynak: {{ source }})</p>
+        <p>
+          Atanan Kategori:
+          <strong>{{ category }}</strong>
+          (Kaynak: {{ source }})
+        </p>
       </div>
       <div v-else>
         <p>Eşleşen kural bulunamadı.</p>
-        <p>Atanan Kategori: <strong>{{ category || 'Yok' }}</strong> (Kaynak: {{ source }})</p>
+        <p>
+          Atanan Kategori:
+          <strong>{{ category || 'Yok' }}</strong>
+          (Kaynak: {{ source }})
+        </p>
       </div>
     </div>
   </div>
@@ -46,12 +57,12 @@ export default defineComponent({
       error.value = null;
       try {
         // TODO: Replace with actual event and community_rules data from aw-server/aw-webui
-        const mockEvent = { "app": "slack.exe", "title": "#general-chat", "url": null };
+        const mockEvent = { app: 'slack.exe', title: '#general-chat', url: null };
         const mockCommunityRules = [
-          { "pattern": "*slack.exe", "category": "communication", "popularity": 100 },
-          { "pattern": "*github.com", "category": "coding", "popularity": 90 },
-          { "pattern": "*.google.com/meet", "category": "communication", "popularity": 80 },
-          { "pattern": "*facebook.com", "category": "social", "popularity": 70 },
+          { pattern: '*slack.exe', category: 'communication', popularity: 100 },
+          { pattern: '*github.com', category: 'coding', popularity: 90 },
+          { pattern: '*.google.com/meet', category: 'communication', popularity: 80 },
+          { pattern: '*facebook.com', category: 'social', popularity: 70 },
         ];
 
         const result = await applyCommunityRules(mockEvent, mockCommunityRules);
@@ -106,4 +117,4 @@ li {
 .error {
   color: red;
 }
-</style> 
+</style>

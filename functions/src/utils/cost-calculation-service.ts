@@ -1,10 +1,9 @@
-
 // Token fiyatları (USD)
-const GEMINI_FLASH_INPUT_PRICE_PER_MILLION_TOKENS = 0.30; // 1M input token başına $0.30
-const GEMINI_FLASH_OUTPUT_PRICE_PER_MILLION_TOKENS = 2.50; // 1M output token başına $2.50
+const GEMINI_FLASH_INPUT_PRICE_PER_MILLION_TOKENS = 0.3; // 1M input token başına $0.30
+const GEMINI_FLASH_OUTPUT_PRICE_PER_MILLION_TOKENS = 2.5; // 1M output token başına $2.50
 
 // Maksimum aylık maliyet limiti
-const MAX_MONTHLY_COST_PER_USER = 7.00; // Kullanıcı başına $7
+const MAX_MONTHLY_COST_PER_USER = 7.0; // Kullanıcı başına $7
 
 // Varsayılan ücretli kullanıcı sayısı
 const NUMBER_OF_PAID_USERS = 1000;
@@ -22,14 +21,20 @@ export async function calculateTokenCost(text: string, type: 'input' | 'output')
   return cost;
 }
 
-export async function calculateMonthlyAgentCostEstimate(monthlyAgentGenerationsPerUser: number, avgInputTokensPerGeneration: number, avgOutputTokensPerGeneration: number): Promise<{
+export async function calculateMonthlyAgentCostEstimate(
+  monthlyAgentGenerationsPerUser: number,
+  avgInputTokensPerGeneration: number,
+  avgOutputTokensPerGeneration: number
+): Promise<{
   totalMonthlyCost: number;
   costPerUser: number;
   exceedsBudget: boolean;
 }> {
   // Tek bir agent oluşturmanın tahmini maliyeti
-  const singleGenerationInputCost = (avgInputTokensPerGeneration / 1_000_000) * GEMINI_FLASH_INPUT_PRICE_PER_MILLION_TOKENS;
-  const singleGenerationOutputCost = (avgOutputTokensPerGeneration / 1_000_000) * GEMINI_FLASH_OUTPUT_PRICE_PER_MILLION_TOKENS;
+  const singleGenerationInputCost =
+    (avgInputTokensPerGeneration / 1_000_000) * GEMINI_FLASH_INPUT_PRICE_PER_MILLION_TOKENS;
+  const singleGenerationOutputCost =
+    (avgOutputTokensPerGeneration / 1_000_000) * GEMINI_FLASH_OUTPUT_PRICE_PER_MILLION_TOKENS;
   const costPerGeneration = singleGenerationInputCost + singleGenerationOutputCost;
 
   // Kullanıcı başına aylık toplam maliyet
@@ -43,6 +48,6 @@ export async function calculateMonthlyAgentCostEstimate(monthlyAgentGenerationsP
   return {
     totalMonthlyCost,
     costPerUser,
-    exceedsBudget
+    exceedsBudget,
   };
-} 
+}

@@ -25,7 +25,7 @@ export default defineComponent({
     };
   },
   watch: {
-    '$route': {
+    $route: {
       immediate: true,
       handler(to) {
         document.title = to.meta.title ? `${to.meta.title} - ActivityWatch` : 'ActivityWatch';
@@ -46,7 +46,11 @@ export default defineComponent({
       // Vue 2'de router'a this.$router üzerinden erişilir
       if (!user && this.$router.currentRoute.meta.requiresAuth) {
         this.$router.push('/login');
-      } else if (user && (this.$router.currentRoute.path === '/login' || this.$router.currentRoute.path === '/register')) {
+      } else if (
+        user &&
+        (this.$router.currentRoute.path === '/login' ||
+          this.$router.currentRoute.path === '/register')
+      ) {
         this.$router.push('/'); // Kullanıcı giriş yapmışsa ve giriş/kayıt sayfasındaysa ana sayfaya yönlendir
       }
     };

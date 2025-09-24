@@ -9,29 +9,64 @@
         <input type="password" id="newPassword" v-model="newPassword" autocomplete="new-password" />
       </div>
       <div class="form-group">
-        <label for="confirmNewPassword">{{ $t('settings.masterPassword.confirmNewPassword') }}</label>
-        <input type="password" id="confirmNewPassword" v-model="confirmNewPassword" autocomplete="new-password" />
+        <label for="confirmNewPassword">
+          {{ $t('settings.masterPassword.confirmNewPassword') }}
+        </label>
+        <input
+          type="password"
+          id="confirmNewPassword"
+          v-model="confirmNewPassword"
+          autocomplete="new-password"
+        />
       </div>
       <button @click="setupMasterPassword">{{ $t('settings.masterPassword.setupButton') }}</button>
     </div>
     <div v-else>
       <div class="form-group">
         <label for="currentPassword">{{ $t('settings.masterPassword.currentPassword') }}</label>
-        <input type="password" id="currentPassword" v-model="currentPassword" autocomplete="current-password" />
+        <input
+          type="password"
+          id="currentPassword"
+          v-model="currentPassword"
+          autocomplete="current-password"
+        />
       </div>
       <div class="form-group">
         <label for="changeNewPassword">{{ $t('settings.masterPassword.newPassword') }}</label>
-        <input type="password" id="changeNewPassword" v-model="newPassword" autocomplete="new-password" />
+        <input
+          type="password"
+          id="changeNewPassword"
+          v-model="newPassword"
+          autocomplete="new-password"
+        />
       </div>
       <div class="form-group">
-        <label for="changeConfirmNewPassword">{{ $t('settings.masterPassword.confirmNewPassword') }}</label>
-        <input type="password" id="changeConfirmNewPassword" v-model="confirmNewPassword" autocomplete="new-password" />
+        <label for="changeConfirmNewPassword">
+          {{ $t('settings.masterPassword.confirmNewPassword') }}
+        </label>
+        <input
+          type="password"
+          id="changeConfirmNewPassword"
+          v-model="confirmNewPassword"
+          autocomplete="new-password"
+        />
       </div>
-      <button @click="changeMasterPassword">{{ $t('settings.masterPassword.changeButton') }}</button>
-      <button @click="removeMasterPassword" class="remove-button">{{ $t('settings.masterPassword.removeButton') }}</button>
+      <button @click="changeMasterPassword">
+        {{ $t('settings.masterPassword.changeButton') }}
+      </button>
+      <button @click="removeMasterPassword" class="remove-button">
+        {{ $t('settings.masterPassword.removeButton') }}
+      </button>
     </div>
 
-    <div v-if="statusMessage" :class="{ 'status-message': true, 'error': statusType === 'error', 'success': statusType === 'success' }">
+    <div
+      v-if="statusMessage"
+      :class="{
+        'status-message': true,
+        error: statusType === 'error',
+        success: statusType === 'success',
+      }"
+    >
       {{ statusMessage }}
     </div>
   </div>
@@ -65,7 +100,9 @@ export default Vue.extend({
   methods: {
     async checkMasterPasswordStatus() {
       try {
-        const response = await this.$axios.get(`/api/encryption/master-password-status/${this.userId}`);
+        const response = await this.$axios.get(
+          `/api/encryption/master-password-status/${this.userId}`
+        );
         if (response.data.success && typeof response.data.data === 'boolean') {
           this.hasMasterPassword = response.data.data;
         } else {
@@ -98,11 +135,17 @@ export default Vue.extend({
           this.hasMasterPassword = true;
           this.clearPasswords();
         } else {
-          this.setStatus(this.$t('settings.masterPassword.setupError') + `: ${response.data.message}`, 'error');
+          this.setStatus(
+            this.$t('settings.masterPassword.setupError') + `: ${response.data.message}`,
+            'error'
+          );
         }
       } catch (error) {
         console.error('Ana parola ayarlanırken hata oluştu:', error);
-        this.setStatus(this.$t('settings.masterPassword.setupError') + `: ${error.message}`, 'error');
+        this.setStatus(
+          this.$t('settings.masterPassword.setupError') + `: ${error.message}`,
+          'error'
+        );
       }
     },
     async changeMasterPassword() {
@@ -126,29 +169,43 @@ export default Vue.extend({
           this.setStatus(this.$t('settings.masterPassword.changeSuccess'), 'success');
           this.clearPasswords();
         } else {
-          this.setStatus(this.$t('settings.masterPassword.changeError') + `: ${response.data.message}`, 'error');
+          this.setStatus(
+            this.$t('settings.masterPassword.changeError') + `: ${response.data.message}`,
+            'error'
+          );
         }
       } catch (error) {
         console.error('Ana parola değiştirilirken hata oluştu:', error);
-        this.setStatus(this.$t('settings.masterPassword.changeError') + `: ${error.message}`, 'error');
+        this.setStatus(
+          this.$t('settings.masterPassword.changeError') + `: ${error.message}`,
+          'error'
+        );
       }
     },
     async removeMasterPassword() {
       this.setStatus(this.$t('settings.masterPassword.removing'), '');
       // TODO: Onay mekanizması ekle
       try {
-        const response = await this.$axios.post('/api/encryption/remove-master-password', { userId: this.userId });
+        const response = await this.$axios.post('/api/encryption/remove-master-password', {
+          userId: this.userId,
+        });
 
         if (response.data.success) {
           this.setStatus(this.$t('settings.masterPassword.removeSuccess'), 'success');
           this.hasMasterPassword = false;
           this.clearPasswords();
         } else {
-          this.setStatus(this.$t('settings.masterPassword.removeError') + `: ${response.data.message}`, 'error');
+          this.setStatus(
+            this.$t('settings.masterPassword.removeError') + `: ${response.data.message}`,
+            'error'
+          );
         }
       } catch (error) {
         console.error('Ana parola kaldırılırken hata oluştu:', error);
-        this.setStatus(this.$t('settings.masterPassword.removeError') + `: ${error.message}`, 'error');
+        this.setStatus(
+          this.$t('settings.masterPassword.removeError') + `: ${error.message}`,
+          'error'
+        );
       }
     },
     clearPasswords() {
@@ -199,7 +256,7 @@ p {
   color: #555;
 }
 
-.form-group input[type="password"] {
+.form-group input[type='password'] {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -248,4 +305,4 @@ button.remove-button:hover {
   background-color: #f8d7da;
   color: #721c24;
 }
-</style> 
+</style>

@@ -6,12 +6,9 @@ const mlDataPreparationService = new MLDataPreparationService();
 /**
  * ML modeli eğitimi için hazırlanmış kullanıcı aktivite ve görev verilerini getiren Firebase İşlevi.
  */
-export const prepareMLTrainingData = onCall(async (request) => {
+export const prepareMLTrainingData = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { startDate, endDate } = request.data;
@@ -21,10 +18,17 @@ export const prepareMLTrainingData = onCall(async (request) => {
   }
 
   try {
-    const preparedData = await mlDataPreparationService.prepareDataForML(userId, startDate, endDate);
+    const preparedData = await mlDataPreparationService.prepareDataForML(
+      userId,
+      startDate,
+      endDate
+    );
     return { success: true, data: preparedData };
   } catch (error: any) {
     console.error('ML eğitim verileri hazırlanırken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'ML eğitim verileri hazırlanırken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'ML eğitim verileri hazırlanırken bilinmeyen bir hata oluştu.'
+    );
   }
-}); 
+});

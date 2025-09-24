@@ -5,7 +5,7 @@ import { AutomationRuleService } from '../services/automation-rule-service';
 const automationRuleService = new AutomationRuleService();
 
 // Create Automation Rule
-export const createAutomationRule = onCall(async (request) => {
+export const createAutomationRule = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
   }
@@ -29,7 +29,7 @@ export const createAutomationRule = onCall(async (request) => {
 });
 
 // Get Automation Rule by ID
-export const getAutomationRule = onCall(async (request) => {
+export const getAutomationRule = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
   }
@@ -43,22 +43,22 @@ export const getAutomationRule = onCall(async (request) => {
   try {
     const rule = await automationRuleService.getRule(userId, ruleId);
     if (!rule) {
-      throw new HttpsError('not-found', "Kural bulunamadı.");
+      throw new HttpsError('not-found', 'Kural bulunamadı.');
     }
     return { success: true, rule };
   } catch (error) {
     if (error instanceof Error) {
-      throw new HttpsError('internal', "Kural getirilirken hata oluştu.", error.message);
+      throw new HttpsError('internal', 'Kural getirilirken hata oluştu.', error.message);
     } else {
-      throw new HttpsError('internal', "Bilinmeyen bir hata oluştu.");
+      throw new HttpsError('internal', 'Bilinmeyen bir hata oluştu.');
     }
   }
 });
 
 // Get All Automation Rules for a user
-export const getAllAutomationRules = onCall(async (request) => {
+export const getAllAutomationRules = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError('unauthenticated', "Kullanıcı kimliği doğrulanmadı.");
+    throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
   }
   const userId = request.auth.uid;
 
@@ -67,17 +67,17 @@ export const getAllAutomationRules = onCall(async (request) => {
     return { success: true, rules };
   } catch (error) {
     if (error instanceof Error) {
-      throw new HttpsError('internal', "Kurallar getirilirken hata oluştu.", error.message);
+      throw new HttpsError('internal', 'Kurallar getirilirken hata oluştu.', error.message);
     } else {
-      throw new HttpsError('internal', "Bilinmeyen bir hata oluştu.");
+      throw new HttpsError('internal', 'Bilinmeyen bir hata oluştu.');
     }
   }
 });
 
 // Update Automation Rule
-export const updateAutomationRule = onCall(async (request) => {
+export const updateAutomationRule = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError('unauthenticated', "Kullanıcı kimliği doğrulanmadı.");
+    throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
   }
   const userId = request.auth.uid;
   const { ruleId, updates } = request.data;
@@ -91,17 +91,17 @@ export const updateAutomationRule = onCall(async (request) => {
     return { success: true };
   } catch (error) {
     if (error instanceof Error) {
-      throw new HttpsError('internal', "Kural güncellenirken hata oluştu.", error.message);
+      throw new HttpsError('internal', 'Kural güncellenirken hata oluştu.', error.message);
     } else {
-      throw new HttpsError('internal', "Bilinmeyen bir hata oluştu.");
+      throw new HttpsError('internal', 'Bilinmeyen bir hata oluştu.');
     }
   }
 });
 
 // Delete Automation Rule
-export const deleteAutomationRule = onCall(async (request) => {
+export const deleteAutomationRule = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError('unauthenticated', "Kullanıcı kimliği doğrulanmadı.");
+    throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmadı.');
   }
   const userId = request.auth.uid;
   const { ruleId } = request.data;
@@ -115,9 +115,9 @@ export const deleteAutomationRule = onCall(async (request) => {
     return { success: true };
   } catch (error) {
     if (error instanceof Error) {
-      throw new HttpsError('internal', "Kural silinirken hata oluştu.", error.message);
+      throw new HttpsError('internal', 'Kural silinirken hata oluştu.', error.message);
     } else {
-      throw new HttpsError('internal', "Bilinmeyen bir hata oluştu.");
+      throw new HttpsError('internal', 'Bilinmeyen bir hata oluştu.');
     }
   }
-}); 
+});

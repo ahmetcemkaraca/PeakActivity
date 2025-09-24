@@ -13,9 +13,14 @@ import iso8601
 from aw_core.dirs import get_data_dir
 from aw_core.models import Event
 from aw_core.exceptions import (
-    AWDatabaseException, AWPeeweeException, AWDatabaseConnectionException,
-    AWDatabaseIntegrityException, AWDatabaseMigrationException,
-    AWFileException, AWPermissionException, AWDiskSpaceException
+    AWDatabaseException,
+    AWPeeweeException,
+    AWDatabaseConnectionException,
+    AWDatabaseIntegrityException,
+    AWDatabaseMigrationException,
+    AWFileException,
+    AWPermissionException,
+    AWDiskSpaceException,
 )
 from aw_core.error_handler import safe_execute, with_retry, error_context
 from playhouse.migrate import SqliteMigrator, migrate
@@ -65,14 +70,16 @@ def auto_migrate(path: str) -> None:
             raise AWDatabaseMigrationException(
                 f"Failed to query table structure: {e}",
                 operation="table_info_check",
-                table="bucketmodel"
+                table="bucketmodel",
             ) from e
 
         if not has_datastr:
             try:
                 datastr_field = CharField(default="{}")
                 with db.atomic():
-                    migrate(migrator.add_column("bucketmodel", "datastr", datastr_field))
+                    migrate(
+                        migrator.add_column("bucketmodel", "datastr", datastr_field)
+                    )
                 logger.info("Successfully added datastr column to bucketmodel")
             except peewee.DatabaseError as e:
                 logger.error("Failed to add datastr column: %s", e)
@@ -83,27 +90,23 @@ def auto_migrate(path: str) -> None:
                     raise AWDatabaseMigrationException(
                         f"Failed to add column: {e}",
                         operation="add_column",
-                        table="bucketmodel"
+                        table="bucketmodel",
                     ) from e
 
         try:
             db.close()
         except Exception as e:
             logger.warning("Failed to close database connection: %s", e)
-            
+
     except PermissionError as e:
         logger.error("Permission error accessing database: %s", e)
         raise AWPermissionException(
-            f"Permission denied: {e}",
-            file_path=path,
-            operation="migration"
+            f"Permission denied: {e}", file_path=path, operation="migration"
         ) from e
     except (OSError, IOError) as e:
         logger.error("File I/O error during migration: %s", e)
         raise AWFileException(
-            f"Database file error: {e}",
-            file_path=path,
-            operation="migration"
+            f"Database file error: {e}", file_path=path, operation="migration"
         ) from e
 
 
@@ -146,7 +149,9 @@ class BucketModel(BaseModel):
             "type": str(self.type),
             "client": str(self.client),
             "hostname": str(self.hostname),
-            "data": json.loads(str(self.datastr)) if self.datastr else {},  # CharField değerini str'ye çevir
+            "data": (
+                json.loads(str(self.datastr)) if self.datastr else {}
+            ),  # CharField değerini str'ye çevir
         }
 
 
@@ -173,14 +178,16 @@ class EventModel(BaseModel):
                 "id": self.id,
                 "timestamp": self.timestamp,
                 "duration": float(self.duration),
-                "data": json.loads(str(self.datastr)) if self.datastr else {},  # CharField değerini str'ye çevir
+                "data": (
+                    json.loads(str(self.datastr)) if self.datastr else {}
+                ),  # CharField değerini str'ye çevir
             }
         except (json.JSONDecodeError, ValueError) as e:
             logger.error("Error parsing event data: %s", e)
             raise AWDataFormatException(
                 f"Invalid JSON data in event: {e}",
                 data=str(self.datastr),
-                event_id=str(self.id)
+                event_id=str(self.id),
             ) from e
 
 

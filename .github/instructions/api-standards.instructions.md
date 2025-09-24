@@ -1,15 +1,17 @@
 ---
-applyTo: "functions/src/api/**/*.ts"
-description: "API response standards and data modeling guidelines"
+applyTo: 'functions/src/api/**/*.ts'
+description: 'API response standards and data modeling guidelines'
 ---
 
 # API Geliştirme Standartları
 
-Bu dosya, PeakActivity API'leri için yanıt formatları ve veri modelleme standartlarını tanımlar.
+Bu dosya, PeakActivity API'leri için yanıt formatları ve veri modelleme
+standartlarını tanımlar.
 
 ## Standart API Response Format
 
 ### Başarılı Yanıtlar
+
 ```typescript
 interface SuccessResponse<T> {
   success: true;
@@ -24,12 +26,13 @@ export function createSuccessResponse<T>(data: T): SuccessResponse<T> {
     success: true,
     data,
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
   };
 }
 ```
 
 ### Hata Yanıtları
+
 ```typescript
 interface ErrorResponse {
   success: false;
@@ -42,12 +45,16 @@ interface ErrorResponse {
   version: string;
 }
 
-export function createErrorResponse(code: string, message: string, details?: any): ErrorResponse {
+export function createErrorResponse(
+  code: string,
+  message: string,
+  details?: any
+): ErrorResponse {
   return {
     success: false,
     error: { code, message, details },
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
   };
 }
 ```
@@ -55,6 +62,7 @@ export function createErrorResponse(code: string, message: string, details?: any
 ## ActivityWatch API Compatibility
 
 ### Event CRUD Operations
+
 ```typescript
 // GET /0/buckets/{bucket_id}/events
 interface GetEventsResponse {
@@ -80,6 +88,7 @@ interface HeartbeatRequest {
 ```
 
 ### Bucket Management
+
 ```typescript
 interface BucketMetadata {
   id: string;
@@ -103,6 +112,7 @@ interface CreateBucketRequest {
 ## Firebase Cloud Functions Response Patterns
 
 ### Authentication Middleware Response
+
 ```typescript
 export const authenticatedFunction = onCall(
   { enforceAppCheck: true },
@@ -110,20 +120,28 @@ export const authenticatedFunction = onCall(
     try {
       // Authentication check
       if (!request.auth) {
-        return createErrorResponse('AUTH_REQUIRED', 'Kullanıcı kimlik doğrulaması gerekli');
+        return createErrorResponse(
+          'AUTH_REQUIRED',
+          'Kullanıcı kimlik doğrulaması gerekli'
+        );
       }
 
       const result = await processRequest(request.data);
       return createSuccessResponse(result);
     } catch (error) {
       logger.error('Function execution failed', { error: error.message });
-      return createErrorResponse('INTERNAL_ERROR', 'İç sunucu hatası', error.message);
+      return createErrorResponse(
+        'INTERNAL_ERROR',
+        'İç sunucu hatası',
+        error.message
+      );
     }
   }
 );
 ```
 
 ### Pagination Support
+
 ```typescript
 interface PaginationRequest {
   limit?: number;
@@ -149,7 +167,7 @@ export function createPaginatedResponse<T>(
 ): PaginatedResponse<T> {
   const limit = request.limit || 50;
   const offset = request.offset || 0;
-  
+
   return {
     items,
     pagination: {
@@ -157,9 +175,11 @@ export function createPaginatedResponse<T>(
       limit,
       offset,
       has_more: offset + items.length < total,
-      next_cursor: offset + items.length < total ? 
-        Buffer.from(`${offset + limit}`).toString('base64') : undefined
-    }
+      next_cursor:
+        offset + items.length < total
+          ? Buffer.from(`${offset + limit}`).toString('base64')
+          : undefined,
+    },
   };
 }
 ```
@@ -167,6 +187,7 @@ export function createPaginatedResponse<T>(
 ## Input Validation Patterns
 
 ### Zod Schema Validation
+
 ```typescript
 import { z } from 'zod';
 
@@ -175,7 +196,7 @@ export const ActivityEventSchema = z.object({
   timestamp: z.string().datetime(),
   duration: z.number().min(0),
   data: z.record(z.any()),
-  bucket_id: z.string().min(1)
+  bucket_id: z.string().min(1),
 });
 
 // User settings validation
@@ -183,7 +204,7 @@ export const UserSettingsSchema = z.object({
   timezone: z.string(),
   start_of_day: z.string().regex(/^\d{2}:\d{2}$/),
   privacy_mode: z.boolean(),
-  data_retention_days: z.number().min(1).max(3650)
+  data_retention_days: z.number().min(1).max(3650),
 });
 
 // Validation middleware
@@ -201,6 +222,7 @@ export function validateInput<T>(schema: z.ZodSchema<T>) {
 ## Rate Limiting ve Quota
 
 ### Request Rate Limiting
+
 ```typescript
 interface RateLimitConfig {
   requests_per_minute: number;
@@ -210,21 +232,29 @@ interface RateLimitConfig {
 
 export class RateLimiter {
   private static readonly CONFIGS: Record<string, RateLimitConfig> = {
-    'free': { requests_per_minute: 60, requests_per_hour: 1000, burst_size: 10 },
-    'premium': { requests_per_minute: 300, requests_per_hour: 10000, burst_size: 50 },
-    'pro': { requests_per_minute: 1000, requests_per_hour: 50000, burst_size: 200 }
+    free: { requests_per_minute: 60, requests_per_hour: 1000, burst_size: 10 },
+    premium: {
+      requests_per_minute: 300,
+      requests_per_hour: 10000,
+      burst_size: 50,
+    },
+    pro: {
+      requests_per_minute: 1000,
+      requests_per_hour: 50000,
+      burst_size: 200,
+    },
   };
 
   static async checkLimit(userId: string, tier: string): Promise<boolean> {
     const config = this.CONFIGS[tier] || this.CONFIGS['free'];
     const key = `rate_limit:${userId}`;
-    
+
     // Redis-based rate limiting implementation
     const current = await redis.incr(key);
     if (current === 1) {
       await redis.expire(key, 60); // 1 minute window
     }
-    
+
     return current <= config.requests_per_minute;
   }
 }
@@ -233,42 +263,44 @@ export class RateLimiter {
 ## Error Handling Standards
 
 ### Standart Error Codes
+
 ```typescript
 export const API_ERROR_CODES = {
   // Authentication errors
   AUTH_REQUIRED: 'Kullanıcı kimlik doğrulaması gerekli',
   AUTH_INVALID: 'Geçersiz kimlik bilgileri',
   AUTH_EXPIRED: 'Oturum süresi dolmuş',
-  
+
   // Authorization errors
   FORBIDDEN: 'Bu işlem için yetkiniz yok',
   QUOTA_EXCEEDED: 'Kullanım kotası aşıldı',
-  
+
   // Validation errors
   INVALID_INPUT: 'Geçersiz giriş verisi',
   MISSING_REQUIRED: 'Gerekli alan eksik',
-  
+
   // Resource errors
   NOT_FOUND: 'Kaynak bulunamadı',
   ALREADY_EXISTS: 'Kaynak zaten mevcut',
-  
+
   // System errors
   INTERNAL_ERROR: 'İç sunucu hatası',
-  SERVICE_UNAVAILABLE: 'Servis geçici olarak kullanılamıyor'
+  SERVICE_UNAVAILABLE: 'Servis geçici olarak kullanılamıyor',
 } as const;
 ```
 
 ### Structured Error Logging
+
 ```typescript
 export function logError(error: Error, context: Record<string, any> = {}) {
   logger.error('API Error', {
     error: {
       name: error.name,
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
     },
     context,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 ```
@@ -276,6 +308,7 @@ export function logError(error: Error, context: Record<string, any> = {}) {
 ## API Versioning Strategy
 
 ### URL-based Versioning
+
 ```typescript
 // v1 endpoints
 export const apiV1 = functions.https.onRequest(express().use('/v1', v1Router));
@@ -284,7 +317,11 @@ export const apiV1 = functions.https.onRequest(express().use('/v1', v1Router));
 export const apiV2 = functions.https.onRequest(express().use('/v2', v2Router));
 
 // Version detection middleware
-export function versionMiddleware(req: Request, res: Response, next: NextFunction) {
+export function versionMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const version = req.path.split('/')[1] || 'v1';
   req.apiVersion = version;
   next();

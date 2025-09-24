@@ -51,7 +51,7 @@ _parent_dir = os.path.abspath(os.path.join(_module_dir, os.pardir))
 
 def _log_modules(modules: List["Module"]) -> None:
     """Log discovered modules for debugging purposes.
-    
+
     Args:
         modules: List of Module objects to log
     """
@@ -64,13 +64,13 @@ ignored_filenames = ["aw-cli", "aw-client", "aw-qt", "aw-qt.desktop", "aw-qt.spe
 
 def filter_modules(modules: Iterable["Module"]) -> Set["Module"]:
     """Filter out non-module executables from discovered files.
-    
+
     Args:
         modules: Iterable of Module objects to filter
-        
+
     Returns:
         Set of modules excluding utility programs like aw-qt itself or aw-cli
-        
+
     Note:
         Removes programs that are not ActivityWatch modules but match the aw-* pattern.
     """
@@ -81,14 +81,14 @@ def filter_modules(modules: Iterable["Module"]) -> Set["Module"]:
 
 def is_executable(path: str, filename: str) -> bool:
     """Check if a file is executable and should be considered as a module.
-    
+
     Args:
         path: Full path to the file
         filename: Just the filename portion
-        
+
     Returns:
         True if the file is executable and not filtered out
-        
+
     Platform Behavior:
         - Windows: Files ending with .exe are considered executable
         - Unix/Linux: Files with executable permission, excluding .desktop files
@@ -110,13 +110,13 @@ def is_executable(path: str, filename: str) -> bool:
 
 def _discover_modules_in_directory(path: str) -> List["Module"]:
     """Look for modules in given directory path and recursively in subdirs matching aw-*.
-    
+
     Args:
         path: Directory path to search for ActivityWatch modules
-        
+
     Returns:
         List of Module objects found in the directory and its aw-* subdirectories
-        
+
     Note:
         Recursively searches subdirectories that match the aw-* pattern.
         Warns about files that match the pattern but are not executable.
@@ -138,10 +138,10 @@ def _discover_modules_in_directory(path: str) -> List["Module"]:
 
 def _filename_to_name(filename: str) -> str:
     """Convert executable filename to module name.
-    
+
     Args:
         filename: The executable filename (e.g., 'aw-server.exe')
-        
+
     Returns:
         Module name with .exe extension removed (e.g., 'aw-server')
     """
@@ -150,15 +150,15 @@ def _filename_to_name(filename: str) -> str:
 
 def _discover_modules_bundled() -> List["Module"]:
     """Use ``_discover_modules_in_directory`` to find all bundled modules.
-    
+
     Returns:
         List of bundled Module objects found in the application directory
-        
+
     Search Paths:
         - Module directory (where aw_qt is located)
         - Parent directory (PyInstaller bundle location)
         - MacOS: Additional MacOS bundle directory
-        
+
     Note:
         Bundled modules are those shipped with the aw-qt distribution.
     """
@@ -181,10 +181,10 @@ def _discover_modules_bundled() -> List["Module"]:
 
 def _discover_modules_system() -> List["Module"]:
     """Find all aw- modules in PATH.
-    
+
     Returns:
         List of system-installed Module objects found in PATH directories
-        
+
     Note:
         - Excludes PyInstaller bundle directory to avoid duplicates
         - Respects PATH priority (first match wins)
@@ -226,30 +226,31 @@ def _discover_modules_system() -> List["Module"]:
 
 class Module:
     """Represents an ActivityWatch module with process lifecycle management.
-    
+
     A Module encapsulates an executable ActivityWatch component (server or watcher)
     with its metadata and provides methods to start, stop, and monitor the process.
-    
+
     Attributes:
         name: Module name (e.g., 'aw-server', 'aw-watcher-window')
         path: Path to the executable file
         type: Either 'system' or 'bundled' indicating installation source
         started: True if module is supposed to be running, else False
-        
+
     Process Management:
         - Handles platform-specific startup configurations
         - Supports testing mode flag for all modules
         - Manages process lifecycle with proper cleanup
         - Tracks unexpected process termination
     """
+
     def __init__(self, name: str, path: Path, type: str) -> None:
         """Initialize a Module instance.
-        
+
         Args:
             name: Module name (executable name without extension)
             path: Path to the executable file
             type: Either 'system' or 'bundled'
-            
+
         Raises:
             AssertionError: If type is not 'system' or 'bundled'
         """
@@ -276,15 +277,15 @@ class Module:
 
     def start(self, testing: bool) -> None:
         """Start the module process.
-        
+
         Args:
             testing: If True, adds --testing flag to the command line
-            
+
         Platform-Specific Behavior:
             - Windows: Hides console window to prevent UI clutter
             - macOS: Disables dock icon for background operation
             - Unix: Standard process creation
-            
+
         Note:
             stdout and stderr are not piped to prevent subprocess hanging
             issues. See: https://github.com/ActivityWatch/aw-server/issues/27
@@ -321,33 +322,33 @@ class Module:
             raise AWModuleStartException(
                 f"Permission denied starting module {self.name}: {e}",
                 module_name=self.name,
-                operation="start"
+                operation="start",
             ) from e
         except FileNotFoundError as e:
             logger.error("Module executable not found %s: %s", self.name, e)
             raise AWModuleStartException(
                 f"Module executable not found {self.name}: {e}",
                 module_name=self.name,
-                operation="start"
+                operation="start",
             ) from e
         except (OSError, subprocess.SubprocessError) as e:
             logger.error("Failed to start module %s: %s", self.name, e)
             raise AWQProcessStartupException(
                 f"Failed to start module {self.name}: {e}",
                 process_name=self.name,
-                command=" ".join(exec_cmd)
+                command=" ".join(exec_cmd),
             ) from e
 
     def stop(self) -> None:
         """Stop the module process and wait for termination.
-        
+
         Performs graceful shutdown by sending SIGTERM and waiting for
         the process to exit. Updates internal state tracking.
-        
+
         Warning:
             Currently does not implement timeout for process termination.
             A hanging module could block this method indefinitely.
-            
+
         TODO: Add timeout to p.wait() and use p.kill() if timeout is reached.
         """
         """
@@ -367,9 +368,9 @@ class Module:
                 raise AWModuleStopException(
                     f"No process reference for module {self.name}",
                     module_name=self.name,
-                    operation="stop"
+                    operation="stop",
                 )
-            
+
             logger.debug(f"Stopping module {self.name}")
             try:
                 if self._process:
@@ -388,18 +389,20 @@ class Module:
                         self._process.wait()
                     logger.warning("Force killed module %s", self.name)
                 except Exception as kill_error:
-                    logger.error("Failed to force kill module %s: %s", self.name, kill_error)
+                    logger.error(
+                        "Failed to force kill module %s: %s", self.name, kill_error
+                    )
                     raise AWQProcessTerminationException(
                         f"Failed to stop module {self.name}: {e}",
                         process_name=self.name,
-                        exit_code=getattr(self._process, 'returncode', None)
+                        exit_code=getattr(self._process, "returncode", None),
                     ) from e
             except Exception as e:
                 logger.error("Unexpected error stopping module %s: %s", self.name, e)
                 raise AWModuleStopException(
                     f"Unexpected error stopping module {self.name}: {e}",
                     module_name=self.name,
-                    operation="stop"
+                    operation="stop",
                 ) from e
 
         assert not self.is_alive()
@@ -409,10 +412,10 @@ class Module:
 
     def toggle(self, testing: bool) -> None:
         """Toggle the module's running state.
-        
+
         Args:
             testing: Testing mode flag passed to start() if starting
-            
+
         Note:
             If module is running, stops it. If stopped, starts it.
         """
@@ -423,10 +426,10 @@ class Module:
 
     def is_alive(self) -> bool:
         """Check if the module process is currently running.
-        
+
         Returns:
             True if the process is alive, False otherwise
-            
+
         Note:
             Uses poll() to check process status without blocking.
             A None returncode indicates the process is still running.
@@ -440,14 +443,14 @@ class Module:
 
     def read_log(self, testing: bool) -> str:
         """Retrieve the latest log contents for this module.
-        
+
         Args:
             testing: Whether to look for testing or production logs
-            
+
         Returns:
             String containing the full log file contents, or error message
             if no log file is found
-            
+
         Note:
             Uses aw_core.log.get_latest_log_file() to locate the most recent
             log file for this module.
@@ -463,28 +466,29 @@ class Module:
 
 class Manager:
     """Central manager for all ActivityWatch modules.
-    
+
     Provides high-level interface for discovering, starting, stopping, and monitoring
     ActivityWatch modules. Handles both bundled and system-installed modules with
     preference for bundled versions.
-    
+
     Key Features:
         - Automatic module discovery on initialization
         - Bulk operations (autostart, stop_all)
         - Status monitoring and reporting
         - Unexpected shutdown detection
         - Testing mode support
-        
+
     Module Priority:
         Bundled modules are preferred over system modules when both exist
         with the same name.
     """
+
     def __init__(self, testing: bool = False) -> None:
         """Initialize the Manager and discover all available modules.
-        
+
         Args:
             testing: Whether to operate in testing mode
-            
+
         Note:
             Automatically runs module discovery during initialization.
         """
@@ -496,7 +500,7 @@ class Manager:
     @property
     def modules_system(self) -> List[Module]:
         """Get all system-installed modules.
-        
+
         Returns:
             List of modules with type='system'
         """
@@ -505,7 +509,7 @@ class Manager:
     @property
     def modules_bundled(self) -> List[Module]:
         """Get all bundled modules.
-        
+
         Returns:
             List of modules with type='bundled'
         """
@@ -513,11 +517,11 @@ class Manager:
 
     def discover_modules(self) -> None:
         """Discover and update the list of available modules.
-        
+
         Searches for both bundled and system modules, filters out non-modules,
         and updates the internal module list. Existing modules are preserved
         to maintain their state.
-        
+
         Note:
             Can be called multiple times to refresh the module list.
         """
@@ -533,10 +537,10 @@ class Manager:
 
     def get_unexpected_stops(self) -> List[Module]:
         """Find modules that should be running but have stopped unexpectedly.
-        
+
         Returns:
             List of modules where started=True but is_alive()=False
-            
+
         Note:
             Useful for detecting crashed modules that need to be restarted.
         """
@@ -544,13 +548,13 @@ class Manager:
 
     def start(self, module_name: str) -> None:
         """Start a specific module by name.
-        
+
         Args:
             module_name: Name of the module to start (e.g., 'aw-server')
-            
+
         Priority:
             Always prefers bundled version over system version if both exist.
-            
+
         Note:
             This will not affect the aw-qt menu since it directly calls
             the module's start() method.
@@ -568,14 +572,14 @@ class Manager:
 
     def autostart(self, autostart_modules: List[str]) -> None:
         """Start multiple modules in the correct order.
-        
+
         Args:
             autostart_modules: List of module names to start automatically
-            
+
         Startup Order:
             1. aw-server-rust (if present) or aw-server (fallback)
             2. All other modules in the provided list
-            
+
         Note:
             Currently impossible to autostart a system module if a bundled
             module with the same name exists. Removes duplicates from the list.
@@ -602,10 +606,10 @@ class Manager:
 
     def stop(self, module_name: str) -> None:
         """Stop a specific module by name.
-        
+
         Args:
             module_name: Name of the module to stop
-            
+
         Note:
             Stops the first module found with the given name, regardless
             of whether it's bundled or system.
@@ -619,7 +623,7 @@ class Manager:
 
     def stop_all(self) -> None:
         """Stop all currently running modules.
-        
+
         Iterates through all modules and stops those that are alive.
         Useful for clean shutdown of the entire ActivityWatch system.
         """
@@ -628,11 +632,11 @@ class Manager:
 
     def print_status(self, module_name: Optional[str] = None) -> None:
         """Print status information for modules.
-        
+
         Args:
             module_name: If provided, show status only for this module.
                         If None, show status for all modules.
-                        
+
         Output Format:
             Logs a formatted table showing module name, status (running/stopped),
             and type (bundled/system).
@@ -653,10 +657,10 @@ class Manager:
 
     def _print_status_module(self, module: Module) -> None:
         """Print formatted status line for a single module.
-        
+
         Args:
             module: Module object to print status for
-            
+
         Output Format:
             "{name:18}  {status:10}  {type}"
         """

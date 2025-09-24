@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     initAuthService() {
       const authService = new AuthService();
-      authService.onAuthChange((user) => {
+      authService.onAuthChange(user => {
         this.user = user;
         this.loading = false;
       });
@@ -66,4 +66,4 @@ export const useAuthStore = defineStore('auth', {
       }
     },
   },
-}); 
+});

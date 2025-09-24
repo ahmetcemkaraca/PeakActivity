@@ -1,13 +1,12 @@
-
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { CustomEventService } from "../services/custom-event-service";
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { CustomEventService } from '../services/custom-event-service';
 
 const customEventService = new CustomEventService();
 
 /**
  * Firebase Function to create a new custom event.
  */
-export const createCustomEvent = onCall(async (request) => {
+export const createCustomEvent = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -34,7 +33,7 @@ export const createCustomEvent = onCall(async (request) => {
 /**
  * Firebase Function to get a specific custom event.
  */
-export const getCustomEvent = onCall(async (request) => {
+export const getCustomEvent = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -59,7 +58,7 @@ export const getCustomEvent = onCall(async (request) => {
 /**
  * Firebase Function to update an existing custom event.
  */
-export const updateCustomEvent = onCall(async (request) => {
+export const updateCustomEvent = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -84,7 +83,7 @@ export const updateCustomEvent = onCall(async (request) => {
 /**
  * Firebase Function to delete a specific custom event.
  */
-export const deleteCustomEvent = onCall(async (request) => {
+export const deleteCustomEvent = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -109,7 +108,7 @@ export const deleteCustomEvent = onCall(async (request) => {
 /**
  * Firebase Function to list all custom events for a user.
  */
-export const listCustomEvents = onCall(async (request) => {
+export const listCustomEvents = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -121,4 +120,4 @@ export const listCustomEvents = onCall(async (request) => {
   } catch (error: any) {
     throw new HttpsError('internal', error.message);
   }
-}); 
+});

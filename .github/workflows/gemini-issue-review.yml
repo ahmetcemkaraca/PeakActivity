@@ -58,17 +58,17 @@ jobs:
             echo "Unable to determine issue number"
             exit 1
           fi
-          
+
           # Get issue details
           gh issue view $ISSUE_NUMBER --json title,body,labels,assignees > issue_details.json
-          
+
           # Extract additional instructions from comment if triggered by comment
           ADDITIONAL_INSTRUCTIONS=""
           if [ "${{ github.event_name }}" = "issue_comment" ]; then
             COMMENT_BODY="${{ github.event.comment.body }}"
             ADDITIONAL_INSTRUCTIONS=$(echo "$COMMENT_BODY" | sed -n 's/.*@gemini[[:space:]]*\(.*\)/\1/p' | head -1)
           fi
-          
+
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
           echo "ADDITIONAL_INSTRUCTIONS=$ADDITIONAL_INSTRUCTIONS" >> $GITHUB_OUTPUT
 
@@ -85,78 +85,78 @@ jobs:
           OTLP_GOOGLE_CLOUD_PROJECT: ${{ secrets.OTLP_GOOGLE_CLOUD_PROJECT }}
           prompt: |
             You are a helpful GitHub issue assistant for the PeakActivityMain project. Your task is to analyze and help with GitHub issues.
-            
+
             **Issue Details:**
             - Issue Number: #${ISSUE_NUMBER}
             - Repository: ${REPOSITORY}
             - Issue URL: ${{ github.event.issue.html_url }}
-            
+
             **Additional Instructions:** ${ADDITIONAL_INSTRUCTIONS}
-            
+
             **CRITICAL: When making code modifications, follow this EXACT workflow:**
-            
+
             **STEP 1: Analyze the Issue**
             - Use: `gh issue view ${ISSUE_NUMBER} --json title,body,labels,assignees`
             - Analyze issue content thoroughly
             - Search codebase for related files using `grep_search`, `codebase_search`, `list_dir`, `file_search`
-            
+
             **STEP 2: If Code Changes Are Needed**
             Create a new branch with 'gemini/' prefix:
             - Use: `git checkout -b gemini/issue-${ISSUE_NUMBER}-description`
             - Example: `git checkout -b gemini/issue-123-fix-sequential-tools`
-            
+
             **STEP 3: Make Code Modifications**
             - Use `read_file` to examine existing code
             - Use `edit_file` to make changes (replace, insert, delete sections)
             - Use `grep_search` or `codebase_search` to find related code
             - Make focused, targeted changes to fix the issue
-            
+
             **STEP 4: Test Changes (if applicable)**
             - Run relevant tests if test files exist
             - Use `run_terminal_cmd` to execute test commands
-            
+
             **STEP 5: Commit and Push Changes**
             - Use: `git add .` (or specific files)
             - Use: `git commit -m "Gemini: [Issue #${ISSUE_NUMBER}] Brief description of fix"`
             - Use: `git push -u origin gemini/issue-${ISSUE_NUMBER}-description`
-            
+
             **STEP 6: Create Pull Request**
             - Use: `gh pr create --title "Fix #${ISSUE_NUMBER}: Issue description" --body "Fixes #${ISSUE_NUMBER}\n\nSummary of changes:\n- Change 1\n- Change 2" --head gemini/issue-${ISSUE_NUMBER}-description --base main`
             - This will return a PR URL like: https://github.com/repo/pull/123
-            
+
             **STEP 7: Comment on Issue with Results**
             Use: `gh issue comment ${ISSUE_NUMBER} -b "MESSAGE"`
-            
+
             **Your final comment MUST include:**
             - Summary of what was analyzed
             - What changes were made (if any)
             - Link to the created PR (if applicable)
             - Brief explanation of the solution
-            
+
             **Example final comment:**
             ```
             Hi! I've analyzed and fixed this issue.
-            
+
             **Problem:** Example problem description.
-            
+
             **Solution:** Example solution description.
-            
+
             **Changes Made:**
             - Example modification 1
             - Example modification 2
-            
+
             **Pull Request:** https://github.com/PeakActivity/PeakActivityMain/pull/YOUR_PR_NUMBER
-            
+
             The fix is ready for review. Please test and let me know if you encounter any issues!
             ```
-            
+
             **IMPORTANT NOTES:**
             - Always create branches with 'gemini/' prefix
             - Always include issue number in branch name and commit message
             - Always create PR that references the issue
             - Always provide PR link in your final response
             - Use the GITHUB_TOKEN environment variable for authentication
-            
+
             Please proceed with helping resolve this issue following this exact workflow.
 
           settings_json: |

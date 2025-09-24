@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 import { GoogleCalendarService } from './google-calendar-service';
 import { ActivityService } from './activity-service';
 import { parseISO, format, isWithinInterval, addHours, startOfDay, endOfDay } from 'date-fns';
@@ -24,7 +24,11 @@ export class AutomaticEventCreationService {
   async createEventsFromActivityPatterns(userId: string, startDate: string, endDate: string) {
     const createdEvents: any[] = [];
     try {
-      const activities = await this.activityService.getActivitiesInInterval(userId, startDate, endDate);
+      const activities = await this.activityService.getActivitiesInInterval(
+        userId,
+        startDate,
+        endDate
+      );
       console.log(`Kullanıcı ${userId} için ${activities.length} aktivite bulundu.`);
 
       // Basit bir örnek: Belirli bir uygulamada uzun süreli odaklanmayı tespit et
@@ -53,7 +57,7 @@ export class AutomaticEventCreationService {
         if (focus.duration >= appFocusThresholdMinutes) {
           const eventSummary = `Odaklanılan Çalışma: ${appName}`;
           const eventDescription = `Bu etkinlik, ${format(focus.start, 'PPP p')} ile ${format(focus.end, 'PPP p')} arasında ${appName} üzerinde ${Math.round(focus.duration)} dakika süren odaklanmış bir çalışma oturumu olarak otomatik olarak oluşturuldu.`;
-          
+
           const newEvent = {
             summary: eventSummary,
             description: eventDescription,
@@ -72,11 +76,10 @@ export class AutomaticEventCreationService {
           console.log(`Google Takvim'e yeni etkinlik eklendi: ${eventSummary}`);
         }
       }
-
     } catch (error) {
       console.error(`Otomatik etkinlik oluşturulurken hata oluştu:`, error);
       throw error;
     }
     return createdEvents;
   }
-} 
+}

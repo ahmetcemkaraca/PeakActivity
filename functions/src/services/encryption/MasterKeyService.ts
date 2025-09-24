@@ -18,7 +18,7 @@ export class MasterKeyService {
       await this.userKeyManager.createUserKey(userId, masterPassword);
       return true;
     } catch (error) {
-      console.error("Master parola ayarlanırken hata oluştu:", error);
+      console.error('Master parola ayarlanırken hata oluştu:', error);
       return false;
     }
   }
@@ -43,21 +43,25 @@ export class MasterKeyService {
       await this.userKeyManager.deleteUserKey(userId);
       return true;
     } catch (error) {
-      console.error("Master anahtar silinirken hata oluştu:", error);
+      console.error('Master anahtar silinirken hata oluştu:', error);
       return false;
     }
   }
 
   // Anahtar rotasyonu için placeholder. Daha sonra implemente edilecek.
-  async rotateMasterKey(userId: string, oldPassword: string, newPassword: string): Promise<boolean> {
-    console.warn("rotateMasterKey henüz implemente edilmedi.");
+  async rotateMasterKey(
+    userId: string,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<boolean> {
+    console.warn('rotateMasterKey henüz implemente edilmedi.');
     // Mevcut anahtarı doğrula
     const currentKey = await this.userKeyManager.retrieveUserKey(userId, oldPassword);
     if (!currentKey) {
-      console.error("Mevcut parola ile anahtar doğrulanamadı.");
+      console.error('Mevcut parola ile anahtar doğrulanamadı.');
       return false;
     }
     // Yeni parola ile yeni anahtar oluştur
     return this.setMasterPassword(userId, newPassword);
   }
-} 
+}

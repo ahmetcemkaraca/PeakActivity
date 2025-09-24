@@ -17,7 +17,10 @@ export interface ErrorResponse {
   timestamp: string;
 }
 
-export function successResponse<T>(data?: T, message: string = 'İşlem başarıyla tamamlandı.'): ApiResponse<T> {
+export function successResponse<T>(
+  data?: T,
+  message: string = 'İşlem başarıyla tamamlandı.'
+): ApiResponse<T> {
   return {
     data,
     message,
@@ -36,4 +39,4 @@ export function errorResponse(code: string, message: string, details?: any): Err
     status: 'error',
     timestamp: new Date().toISOString(),
   };
-} 
+}

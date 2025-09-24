@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 import { genkitInstance } from '../index';
 import { z } from 'zod'; // Zod'u import et
 import { googleAI } from '@genkit-ai/googleai'; // Google AI'yı import et
@@ -87,11 +87,12 @@ export class AnomalyDetectionService {
    * @returns Anomali uyarıları dizisi.
    */
   public async getAnomalyAlerts(userId: string): Promise<AnomalyResult[]> {
-    const snapshot = await db.collection(`users/${userId}/anomalyAlerts`)
-      .orderBy("date", "desc")
+    const snapshot = await db
+      .collection(`users/${userId}/anomalyAlerts`)
+      .orderBy('date', 'desc')
       .limit(20) // En son 20 uyarıyı getir
       .get();
-    
+
     return snapshot.docs.map(doc => doc.data() as AnomalyResult);
   }
 }
@@ -111,8 +112,9 @@ export const detectAnomaliesFlow = genkitInstance.defineFlow(
         anomalies: [],
         baseline_mean: 0,
         baseline_stddev: 0,
-        explanation: "Anomali tespiti için yeterli veri yok. En az 5 günlük veri gereklidir. Gelişmiş anomali tespiti için daha fazla veri önerilir.",
-        model_version: "v1.0-statistical"
+        explanation:
+          'Anomali tespiti için yeterli veri yok. En az 5 günlük veri gereklidir. Gelişmiş anomali tespiti için daha fazla veri önerilir.',
+        model_version: 'v1.0-statistical',
       };
     }
 
@@ -126,18 +128,19 @@ export const detectAnomaliesFlow = genkitInstance.defineFlow(
       let isAnomaly = false;
       let anomalyScore = 0;
       let deviationPercent = 0;
-      let explanationText = "";
+      let explanationText = '';
 
       if (stdDev === 0) {
         if (dailyTotal.total_seconds !== mean) {
           isAnomaly = true;
           anomalyScore = 1.0;
           deviationPercent = ((dailyTotal.total_seconds - mean) / (mean || 1)) * 100;
-          explanationText = "Tüm değerler aynıyken farklı bir aktivite tespit edildi.";
+          explanationText = 'Tüm değerler aynıyken farklı bir aktivite tespit edildi.';
         }
       } else {
         const zScore = (dailyTotal.total_seconds - mean) / stdDev;
-        if (Math.abs(zScore) >= 2) { // Z-skoru eşiği (ayarlanabilir)
+        if (Math.abs(zScore) >= 2) {
+          // Z-skoru eşiği (ayarlanabilir)
           isAnomaly = true;
           anomalyScore = Math.min(1.0, Math.abs(zScore) / 3); // Skoru 0-1 arasına normalize etmeye çalış
           deviationPercent = ((dailyTotal.total_seconds - mean) / mean) * 100;
@@ -160,7 +163,7 @@ export const detectAnomaliesFlow = genkitInstance.defineFlow(
 
     // GenKit'in AI modelini kullanarak ek analiz veya açıklama alma (placeholder)
     // Bu kısım, AI modelinin daha karmaşık anomali kalıplarını tanıması için kullanılabilir.
-    let aiExplanation = "Yapay zeka analizi bekleniyor...";
+    let aiExplanation = 'Yapay zeka analizi bekleniyor...';
     try {
       const prompt = `Aşağıdaki günlük aktivite verilerini inceleyin ve herhangi bir anormallik olup olmadığını, nedenini ve potansiyel etkilerini açıklayın: ${JSON.stringify(dailyTotals)}. Anomali olarak kabul edilecek bir durum, normalden önemli ölçüde sapan bir aktivite süresi olacaktır.`;
       const { text } = await genkitInstance.generate({
@@ -168,21 +171,23 @@ export const detectAnomaliesFlow = genkitInstance.defineFlow(
         prompt: prompt,
         config: {
           temperature: 0.2, // Daha tutarlı sonuçlar için düşük sıcaklık
-        }
+        },
       });
       aiExplanation = text;
     } catch (error) {
-      console.error("GenKit AI analizi sırasında hata oluştu:", error);
-      aiExplanation = "Yapay zeka analizi sırasında bir hata oluştu.";
+      console.error('GenKit AI analizi sırasında hata oluştu:', error);
+      aiExplanation = 'Yapay zeka analizi sırasında bir hata oluştu.';
     }
-
 
     return {
       anomalies: anomalies.slice(0, 10),
       baseline_mean: parseFloat(mean.toFixed(2)),
       baseline_stddev: parseFloat(stdDev.toFixed(2)),
-      explanation: anomalies.length > 0 ? "Belirlenen aktivite verilerinde anormal günler tespit edildi. " + aiExplanation : "Anormal aktivite verisi tespit edilmedi. " + aiExplanation,
-      model_version: "v2.0-genkit-statistical-hybrid"
+      explanation:
+        anomalies.length > 0
+          ? 'Belirlenen aktivite verilerinde anormal günler tespit edildi. ' + aiExplanation
+          : 'Anormal aktivite verisi tespit edilmedi. ' + aiExplanation,
+      model_version: 'v2.0-genkit-statistical-hybrid',
     };
   }
-); 
+);

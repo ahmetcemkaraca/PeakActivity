@@ -1,4 +1,3 @@
-
 import { db } from '../firebaseAdmin';
 
 interface GoalDocument {
@@ -23,7 +22,10 @@ export class GoalManagementService {
    * @param goalData Yeni hedefin verileri.
    * @returns Oluşturulan hedef belgesi.
    */
-  async createGoal(userId: string, goalData: Omit<GoalDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version'>): Promise<GoalDocument> {
+  async createGoal(
+    userId: string,
+    goalData: Omit<GoalDocument, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'version'>
+  ): Promise<GoalDocument> {
     const newGoalRef = db.collection(`users/${userId}/goals`).doc();
     const timestamp = Date.now();
     const goal: GoalDocument = {
@@ -59,7 +61,11 @@ export class GoalManagementService {
    * @param updates Güncellenecek alanlar.
    * @returns Güncellenen hedef belgesi veya bulunamazsa null.
    */
-  async updateGoal(userId: string, goalId: string, updates: Partial<Omit<GoalDocument, 'id' | 'user_id' | 'created_at' | 'version'>>): Promise<GoalDocument | null> {
+  async updateGoal(
+    userId: string,
+    goalId: string,
+    updates: Partial<Omit<GoalDocument, 'id' | 'user_id' | 'created_at' | 'version'>>
+  ): Promise<GoalDocument | null> {
     const goalRef = db.collection(`users/${userId}/goals`).doc(goalId);
     const timestamp = Date.now();
     await goalRef.update({
@@ -95,4 +101,4 @@ export class GoalManagementService {
     const snapshot = await db.collection(`users/${userId}/goals`).get();
     return snapshot.docs.map(doc => doc.data() as GoalDocument);
   }
-} 
+}

@@ -8,9 +8,14 @@
         <h4>Tespit Edilen Anomaliler:</h4>
         <ul>
           <li v-for="anomaly in anomalies" :key="anomaly.date">
-            <strong>Tarih:</strong> {{ anomaly.date }} <br/>
-            <strong>Z-Skoru:</strong> {{ anomaly.z_score }} <br/>
-            <strong>Sapma Yüzdesi:</strong> {{ anomaly.deviation_percent }}%
+            <strong>Tarih:</strong>
+            {{ anomaly.date }}
+            <br />
+            <strong>Z-Skoru:</strong>
+            {{ anomaly.z_score }}
+            <br />
+            <strong>Sapma Yüzdesi:</strong>
+            {{ anomaly.deviation_percent }}%
           </li>
         </ul>
       </div>
@@ -54,21 +59,21 @@ export default defineComponent({
       try {
         // TODO: Replace with actual daily_totals data from aw-server/aw-webui
         const mockDailyTotals = [
-          { "date": "2024-06-01", "total_seconds": 28000 },
-          { "date": "2024-06-02", "total_seconds": 29000 },
-          { "date": "2024-06-03", "total_seconds": 28500 },
-          { "date": "2024-06-04", "total_seconds": 35000 }, // Anomaly
-          { "date": "2024-06-05", "total_seconds": 27000 },
-          { "date": "2024-06-06", "total_seconds": 26000 },
-          { "date": "2024-06-07", "total_seconds": 10000 }, // Anomaly
-          { "date": "2024-06-08", "total_seconds": 29500 },
-          { "date": "2024-06-09", "total_seconds": 28200 },
-          { "date": "2024-06-10", "total_seconds": 27800 },
-          { "date": "2024-06-11", "total_seconds": 34000 }, // Anomaly
-          { "date": "2024-06-12", "total_seconds": 26500 },
-          { "date": "2024-06-13", "total_seconds": 25500 },
-          { "date": "2024-06-14", "total_seconds": 12000 }, // Anomaly
-          { "date": "2024-06-15", "total_seconds": 29000 },
+          { date: '2024-06-01', total_seconds: 28000 },
+          { date: '2024-06-02', total_seconds: 29000 },
+          { date: '2024-06-03', total_seconds: 28500 },
+          { date: '2024-06-04', total_seconds: 35000 }, // Anomaly
+          { date: '2024-06-05', total_seconds: 27000 },
+          { date: '2024-06-06', total_seconds: 26000 },
+          { date: '2024-06-07', total_seconds: 10000 }, // Anomaly
+          { date: '2024-06-08', total_seconds: 29500 },
+          { date: '2024-06-09', total_seconds: 28200 },
+          { date: '2024-06-10', total_seconds: 27800 },
+          { date: '2024-06-11', total_seconds: 34000 }, // Anomaly
+          { date: '2024-06-12', total_seconds: 26500 },
+          { date: '2024-06-13', total_seconds: 25500 },
+          { date: '2024-06-14', total_seconds: 12000 }, // Anomaly
+          { date: '2024-06-15', total_seconds: 29000 },
         ];
 
         const result = await getAnomalyDetection(mockDailyTotals);
@@ -131,4 +136,4 @@ li {
 .error {
   color: red;
 }
-</style> 
+</style>

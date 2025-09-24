@@ -1,2 +1,2 @@
 class PeeweeStorage:
-    pass 
+    pass

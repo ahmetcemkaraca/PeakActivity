@@ -43,7 +43,7 @@ def get_current_window_windows() -> Optional[dict]:
 
     window_handle = windows.get_active_window_handle()
     app = None
-    
+
     try:
         app = windows.get_app_name(window_handle)
     except (AttributeError, OSError, PermissionError) as e:

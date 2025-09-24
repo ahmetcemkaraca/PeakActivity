@@ -3,14 +3,11 @@ import { AutoCategorizationService } from '../services/auto-categorization-servi
 
 const autoCategorizationService = new AutoCategorizationService();
 
-export const autoCategorize = onCall(async (request) => {
+export const autoCategorize = onCall(async request => {
   const { events } = request.data;
 
   if (!events || !Array.isArray(events)) {
-    throw new HttpsError(
-      'invalid-argument',
-      "Geçersiz giriş: 'events' dizisi gerekli."
-    );
+    throw new HttpsError('invalid-argument', "Geçersiz giriş: 'events' dizisi gerekli.");
   }
 
   try {
@@ -18,11 +15,11 @@ export const autoCategorize = onCall(async (request) => {
     return { success: true, data: result };
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Otomatik kategorizasyon sırasında hata oluştu:", error.message);
+      console.error('Otomatik kategorizasyon sırasında hata oluştu:', error.message);
       throw new HttpsError('internal', error.message);
     } else {
-      console.error("Bilinmeyen bir hata oluştu:", error);
-      throw new HttpsError('internal', "Bilinmeyen bir hata oluştu.");
+      console.error('Bilinmeyen bir hata oluştu:', error);
+      throw new HttpsError('internal', 'Bilinmeyen bir hata oluştu.');
     }
   }
-}); 
+});

@@ -1,6 +1,6 @@
 /**
  * Vue Router Configuration
- * 
+ *
  * Feature-based routing organization ile modern Vue 3 router configuration.
  * Lazy loading, guard patterns ve type safety.
  */
@@ -24,8 +24,8 @@ const routes = [
       title: 'Dashboard',
       requiresAuth: false,
       showInNavigation: true,
-      icon: 'dashboard'
-    }
+      icon: 'dashboard',
+    },
   },
   {
     path: '/activity',
@@ -35,8 +35,8 @@ const routes = [
       title: 'Activity',
       requiresAuth: false,
       showInNavigation: true,
-      icon: 'activity'
-    }
+      icon: 'activity',
+    },
   },
   {
     path: '/ai-insights',
@@ -46,8 +46,8 @@ const routes = [
       title: 'AI Insights',
       requiresAuth: false,
       showInNavigation: true,
-      icon: 'brain'
-    }
+      icon: 'brain',
+    },
   },
   {
     path: '/settings',
@@ -57,8 +57,8 @@ const routes = [
       title: 'Settings',
       requiresAuth: false,
       showInNavigation: true,
-      icon: 'settings'
-    }
+      icon: 'settings',
+    },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -67,9 +67,9 @@ const routes = [
     meta: {
       title: 'Page Not Found',
       requiresAuth: false,
-      showInNavigation: false
-    }
-  }
+      showInNavigation: false,
+    },
+  },
 ];
 
 // Router instance
@@ -82,7 +82,7 @@ const router = createRouter({
     } else {
       return { top: 0 };
     }
-  }
+  },
 });
 
 // Navigation guards
@@ -129,7 +129,7 @@ export const routeUtils = {
   getRouteMeta(routeName: string) {
     const route = routes.find(r => r.name === routeName);
     return route?.meta;
-  }
+  },
 };
 
 export default router;

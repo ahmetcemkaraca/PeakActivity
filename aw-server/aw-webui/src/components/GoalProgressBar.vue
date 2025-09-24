@@ -2,9 +2,7 @@
   <div class="goal-progress-bar">
     <div class="progress-header">
       <span>İlerleme: {{ progressPercentage.toFixed(1) }}%</span>
-      <span v-if="goal.type === 'time_based'">
-        Kalan: {{ formatDuration(remainingTime) }}
-      </span>
+      <span v-if="goal.type === 'time_based'">Kalan: {{ formatDuration(remainingTime) }}</span>
       <span v-else-if="goal.type === 'count_based'">
         Kalan: {{ goal.targetCount - goal.progress.currentCount }} adet
       </span>
@@ -14,12 +12,16 @@
     </div>
     <div class="progress-details">
       <p v-if="goal.type === 'time_based'">
-        Mevcut: {{ formatDuration(goal.progress.currentDuration) }} / Hedef: {{ formatDuration(goal.targetDuration) }}
+        Mevcut: {{ formatDuration(goal.progress.currentDuration) }} / Hedef:
+        {{ formatDuration(goal.targetDuration) }}
       </p>
       <p v-else-if="goal.type === 'count_based'">
         Mevcut: {{ goal.progress.currentCount }} / Hedef: {{ goal.targetCount }}
       </p>
-      <p>Mevcut Seri: {{ goal.progress.currentStreak }} gün (En Uzun: {{ goal.progress.longestStreak }} gün)</p>
+      <p>
+        Mevcut Seri: {{ goal.progress.currentStreak }} gün (En Uzun:
+        {{ goal.progress.longestStreak }} gün)
+      </p>
     </div>
   </div>
 </template>
@@ -88,7 +90,7 @@ export default {
 
 .progress-bar {
   height: 100%;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   border-radius: 5px;
   transition: width 0.5s ease-in-out;
 }
@@ -102,4 +104,4 @@ export default {
 .progress-details p {
   margin-bottom: 4px;
 }
-</style> 
+</style>

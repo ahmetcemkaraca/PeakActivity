@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 export default {
   name: 'MicroSurveyModal',
   props: {
@@ -44,7 +44,7 @@ export default {
       energy: null,
       focus: null,
       notes: '',
-    }
+    };
   },
   methods: {
     async submit() {
@@ -57,16 +57,16 @@ export default {
           focus: this.focus || undefined,
           notes: this.notes || undefined,
         },
-      }
-      await axios.post('/api/0/microsurvey', payload)
-      this.close()
-      this.$emit('submitted')
+      };
+      await axios.post('/api/0/microsurvey', payload);
+      this.close();
+      this.$emit('submitted');
     },
     close() {
-      this.$emit('update:visible', false)
+      this.$emit('update:visible', false);
     },
   },
-}
+};
 </script>
 
 <style scoped>
@@ -87,4 +87,4 @@ export default {
   border-radius: 8px;
   width: 300px;
 }
-</style> 
+</style>

@@ -6,12 +6,9 @@ const automaticEventCreationService = new AutomaticEventCreationService();
 /**
  * Kullanıcının aktivite kalıplarına göre otomatik olarak takvim etkinlikleri oluşturan Firebase İşlevi.
  */
-export const createAutomaticCalendarEvents = onCall(async (request) => {
+export const createAutomaticCalendarEvents = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { startDate, endDate } = request.data;
@@ -21,10 +18,17 @@ export const createAutomaticCalendarEvents = onCall(async (request) => {
   }
 
   try {
-    const createdEvents = await automaticEventCreationService.createEventsFromActivityPatterns(userId, startDate, endDate);
+    const createdEvents = await automaticEventCreationService.createEventsFromActivityPatterns(
+      userId,
+      startDate,
+      endDate
+    );
     return { success: true, createdEvents };
   } catch (error: any) {
     console.error('Otomatik etkinlik oluşturulurken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Otomatik etkinlik oluşturulurken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Otomatik etkinlik oluşturulurken bilinmeyen bir hata oluştu.'
+    );
   }
-}); 
+});

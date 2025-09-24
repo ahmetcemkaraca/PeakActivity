@@ -25,14 +25,27 @@ export class ContextualCategorizationService {
 
   // Gelişmiş anahtar kelime tabanlı sınıflandırma (LLM simülasyonu)
   private readonly KEYWORD_GROUPS: { [category: string]: string[] } = {
-    'coding': ['code', 'github', 'stack overflow', 'css', 'html', 'javascript', 'python', 'develop', 'programming', 'vscode', 'intellij', 'bug'],
-    'design': ['figma', 'photoshop', 'illustrator', 'design', 'ui', 'ux', 'blender', 'sketch'],
-    'research': ['wiki', 'article', 'study', 'research', 'paper', 'learn', 'scholar', 'analyze'],
-    'social': ['facebook', 'twitter', 'instagram', 'linkedin', 'reddit', 'chat', 'meet', 'discord'],
-    'news': ['cnn', 'bbc', 'haber', 'gündem', 'news', 'makale'],
-    'entertainment': ['movie', 'film', 'youtube', 'netflix', 'oyun', 'game', 'dizi', 'müzik'],
-    'communication': ['email', 'outlook', 'gmail', 'slack', 'teams', 'zoom', 'call'],
-    'shopping': ['shop', 'buy', 'amazon', 'trendyol', 'n11', 'satın al'],
+    coding: [
+      'code',
+      'github',
+      'stack overflow',
+      'css',
+      'html',
+      'javascript',
+      'python',
+      'develop',
+      'programming',
+      'vscode',
+      'intellij',
+      'bug',
+    ],
+    design: ['figma', 'photoshop', 'illustrator', 'design', 'ui', 'ux', 'blender', 'sketch'],
+    research: ['wiki', 'article', 'study', 'research', 'paper', 'learn', 'scholar', 'analyze'],
+    social: ['facebook', 'twitter', 'instagram', 'linkedin', 'reddit', 'chat', 'meet', 'discord'],
+    news: ['cnn', 'bbc', 'haber', 'gündem', 'news', 'makale'],
+    entertainment: ['movie', 'film', 'youtube', 'netflix', 'oyun', 'game', 'dizi', 'müzik'],
+    communication: ['email', 'outlook', 'gmail', 'slack', 'teams', 'zoom', 'call'],
+    shopping: ['shop', 'buy', 'amazon', 'trendyol', 'n11', 'satın al'],
   };
 
   /**
@@ -65,9 +78,9 @@ export class ContextualCategorizationService {
 
     const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
 
-    let assignedCategory: string = "other";
+    let assignedCategory: string = 'other';
     let confidence = 0.5;
-    let rationale = "Belirlenen anahtar kelime bulunamadı.";
+    let rationale = 'Belirlenen anahtar kelime bulunamadı.';
 
     if (totalScore > 0) {
       // En yüksek puanlı kategoriyi bul
@@ -84,7 +97,7 @@ export class ContextualCategorizationService {
 
       // Gerekçe oluştur
       if (relevantKeywords[assignedCategory] && relevantKeywords[assignedCategory].length > 0) {
-        const keywordsStr = relevantKeywords[assignedCategory].join(", ");
+        const keywordsStr = relevantKeywords[assignedCategory].join(', ');
         rationale = `Anahtar kelimeler içeriyor: ${keywordsStr}. Kategoriye işaret ediyor: ${assignedCategory}.`;
       } else {
         rationale = `Bağlam ilgili: ${assignedCategory}.`;
@@ -97,4 +110,4 @@ export class ContextualCategorizationService {
       rationale: rationale.substring(0, 140), // 140 karakterle sınırlı
     };
   }
-} 
+}

@@ -1,5 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { CustomError, InternalServerError, API_ERROR_CODES, HTTP_STATUS_CODE_MAP } from '../utils/api-error-codes';
+import {
+  CustomError,
+  InternalServerError,
+  API_ERROR_CODES,
+  HTTP_STATUS_CODE_MAP,
+} from '../utils/api-error-codes';
 import { errorResponse } from '../utils/api-response-formats';
 
 /**
@@ -11,7 +16,7 @@ import { errorResponse } from '../utils/api-response-formats';
  * @param next Bir sonraki middleware fonksiyonu.
  */
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("API Hata Yakalandı:", err);
+  console.error('API Hata Yakalandı:', err);
 
   let errorToRespond: CustomError;
 
@@ -22,14 +27,14 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     errorToRespond = new InternalServerError(err.message, { originalError: err.message });
   } else {
     // Hiçbir hata sınıfına uymayan durumlar için
-    errorToRespond = new InternalServerError("Bilinmeyen bir sunucu hatası oluştu.", { originalError: err });
+    errorToRespond = new InternalServerError('Bilinmeyen bir sunucu hatası oluştu.', {
+      originalError: err,
+    });
   }
 
   const httpStatus = errorToRespond.httpStatus || HTTP_STATUS_CODE_MAP[errorToRespond.code] || 500;
 
-  res.status(httpStatus).json(errorResponse(
-    errorToRespond.code,
-    errorToRespond.message,
-    errorToRespond.details
-  ));
-}; 
+  res
+    .status(httpStatus)
+    .json(errorResponse(errorToRespond.code, errorToRespond.message, errorToRespond.details));
+};

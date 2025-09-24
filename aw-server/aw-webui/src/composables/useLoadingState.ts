@@ -1,6 +1,6 @@
 /**
  * Loading State Composable
- * 
+ *
  * Bu composable loading state yönetimi sağlar.
  */
 
@@ -25,7 +25,7 @@ export interface UseLoadingStateReturn {
  */
 export function useLoadingState(): UseLoadingStateReturn {
   const loadingStates = ref<LoadingState>({
-    default: false
+    default: false,
   });
 
   // Global loading state - true if any operation is loading
@@ -69,6 +69,6 @@ export function useLoadingState(): UseLoadingStateReturn {
     setLoading,
     getLoading,
     clearLoading,
-    clearAllLoading
+    clearAllLoading,
   };
 }

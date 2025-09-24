@@ -1,13 +1,12 @@
-
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { NotificationService } from "../services/notification-service";
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { NotificationService } from '../services/notification-service';
 
 const notificationService = new NotificationService();
 
 /**
  * Firebase Function to create a new notification.
  */
-export const createNotification = onCall(async (request) => {
+export const createNotification = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -35,7 +34,7 @@ export const createNotification = onCall(async (request) => {
 /**
  * Firebase Function to get a specific notification.
  */
-export const getNotification = onCall(async (request) => {
+export const getNotification = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -60,7 +59,7 @@ export const getNotification = onCall(async (request) => {
 /**
  * Firebase Function to update an existing notification.
  */
-export const updateNotification = onCall(async (request) => {
+export const updateNotification = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -72,7 +71,11 @@ export const updateNotification = onCall(async (request) => {
   }
 
   try {
-    const updatedNotification = await notificationService.updateNotification(userId, notificationId, updates);
+    const updatedNotification = await notificationService.updateNotification(
+      userId,
+      notificationId,
+      updates
+    );
     if (!updatedNotification) {
       throw new HttpsError('not-found', 'Güncellenecek bildirim bulunamadı.');
     }
@@ -85,7 +88,7 @@ export const updateNotification = onCall(async (request) => {
 /**
  * Firebase Function to delete a specific notification.
  */
-export const deleteNotification = onCall(async (request) => {
+export const deleteNotification = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -110,7 +113,7 @@ export const deleteNotification = onCall(async (request) => {
 /**
  * Firebase Function to list all notifications for a user.
  */
-export const listNotifications = onCall(async (request) => {
+export const listNotifications = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -122,4 +125,4 @@ export const listNotifications = onCall(async (request) => {
   } catch (error: any) {
     throw new HttpsError('internal', error.message);
   }
-}); 
+});

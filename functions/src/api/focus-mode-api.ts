@@ -1,13 +1,12 @@
-
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { FocusModeService } from "../services/focus-mode-service";
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { FocusModeService } from '../services/focus-mode-service';
 
 const focusModeService = new FocusModeService();
 
 /**
  * Firebase Function to create a new focus mode.
  */
-export const createFocusMode = onCall(async (request) => {
+export const createFocusMode = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -33,7 +32,7 @@ export const createFocusMode = onCall(async (request) => {
 /**
  * Firebase Function to get a specific focus mode.
  */
-export const getFocusMode = onCall(async (request) => {
+export const getFocusMode = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -58,7 +57,7 @@ export const getFocusMode = onCall(async (request) => {
 /**
  * Firebase Function to update an existing focus mode.
  */
-export const updateFocusMode = onCall(async (request) => {
+export const updateFocusMode = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -83,7 +82,7 @@ export const updateFocusMode = onCall(async (request) => {
 /**
  * Firebase Function to delete a specific focus mode.
  */
-export const deleteFocusMode = onCall(async (request) => {
+export const deleteFocusMode = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -108,7 +107,7 @@ export const deleteFocusMode = onCall(async (request) => {
 /**
  * Firebase Function to list all focus modes for a user.
  */
-export const listFocusModes = onCall(async (request) => {
+export const listFocusModes = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -125,7 +124,7 @@ export const listFocusModes = onCall(async (request) => {
 /**
  * Firebase Function to set a specific focus mode as active for a user.
  */
-export const setActiveFocusMode = onCall(async (request) => {
+export const setActiveFocusMode = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -145,4 +144,4 @@ export const setActiveFocusMode = onCall(async (request) => {
   } catch (error: any) {
     throw new HttpsError('internal', error.message);
   }
-}); 
+});

@@ -1,7 +1,8 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-os.environ['TESTING'] = '1'
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+os.environ["TESTING"] = "1"
 import logging
 
 import pytest
@@ -13,18 +14,22 @@ if os.environ.get("TESTING") or "PYTEST_CURRENT_TEST" in os.environ:
     from unittest.mock import MagicMock
     import firebase_admin
     from firebase_admin import firestore
+
     firebase_admin.initialize_app = MagicMock()
     firestore.client = MagicMock(return_value=MagicMock())
 
 logging.basicConfig(level=logging.WARN)
 
+
 @pytest.fixture(scope="session")
 def app():
     return AWFlask("127.0.0.1", testing=True)
 
+
 @pytest.fixture(scope="session")
 def flask_client(app):
     yield app.test_client()
+
 
 @pytest.fixture(scope="session")
 def aw_client():

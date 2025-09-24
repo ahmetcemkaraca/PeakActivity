@@ -25,11 +25,11 @@ root = Blueprint("root", __name__, url_prefix="/")
 
 class AWFlask(Flask):
     """ActivityWatch Flask Application.
-    
+
     Custom Flask application class that initializes and configures the ActivityWatch server
     with datastore, API endpoints, CORS, and background synchronization tasks.
     """
-    
+
     def __init__(
         self,
         host: str,
@@ -39,10 +39,10 @@ class AWFlask(Flask):
         custom_static=dict(),
         static_folder=static_folder,
         static_url_path="",
-        user_id: str = "default_user_id", # user_id parametresi eklendi
+        user_id: str = "default_user_id",  # user_id parametresi eklendi
     ):
         name = "aw-server"
-        
+
         # Configure JSON provider for custom datetime/timedelta serialization
         # Pretty-print JSON only in testing mode for better performance in production
         self.json_provider_class = CustomJSONProvider
@@ -55,10 +55,10 @@ class AWFlask(Flask):
             static_folder=static_folder,
             static_url_path=static_url_path,
         )
-        
+
         # Store host configuration for DNS rebinding protection
         self.config["HOST"] = host  # needed for host-header check
-        
+
         # Configure CORS (Cross-Origin Resource Sharing) within app context
         with self.app_context():
             _config_cors(cors_origins, testing)
@@ -67,14 +67,16 @@ class AWFlask(Flask):
         if storage_method is None:
             storage_method = aw_datastore.get_storage_methods()["memory"]
         db = Datastore(storage_method, testing=testing)
-        
+
         # Initialize ServerAPI with configured datastore
         self.api = ServerAPI(db=db, testing=testing)
 
         # Register Flask blueprints for different URL namespaces
         self.register_blueprint(root)  # Root routes (/)
         self.register_blueprint(rest.blueprint)  # REST API routes (/api)
-        self.register_blueprint(get_custom_static_blueprint(custom_static))  # Custom static files
+        self.register_blueprint(
+            get_custom_static_blueprint(custom_static)
+        )  # Custom static files
 
         # Configure background task scheduler for periodic operations
         scheduler = APScheduler()
@@ -82,13 +84,14 @@ class AWFlask(Flask):
         scheduler.start()
 
         # Schedule periodic Firebase synchronization every 4 hours
-        @scheduler.task('interval', id='full_sync_job', hours=4)
+        @scheduler.task("interval", id="full_sync_job", hours=4)
         def periodic_sync_job():
             """Background task for periodic Firebase data synchronization."""
             with self.app_context():
                 logger.info("Periyodik Firebase senkronizasyonu başlatılıyor...")
                 # Run async sync in new event loop since APScheduler uses its own thread
                 import asyncio
+
                 asyncio.run(self.api.sync_data("full"))
                 logger.info("Periyodik Firebase senkronizasyonu tamamlandı.")
 
@@ -149,7 +152,7 @@ def _start(
     testing: bool = False,
     cors_origins: List[str] = [],
     custom_static: Dict[str, str] = dict(),
-    user_id: str = "default_user_id", # user_id parametresi eklendi
+    user_id: str = "default_user_id",  # user_id parametresi eklendi
 ):
     app = AWFlask(
         host,
@@ -157,7 +160,7 @@ def _start(
         storage_method=storage_method,
         cors_origins=cors_origins,
         custom_static=custom_static,
-        user_id=user_id, # user_id parametresi AWFlask'a iletildi
+        user_id=user_id,  # user_id parametresi AWFlask'a iletildi
     )
     try:
         app.run(

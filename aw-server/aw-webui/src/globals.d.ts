@@ -22,21 +22,21 @@ declare module 'aw-client' {
     req: any;
     post(url: string, data?: any, config?: any): Promise<any>;
     get(url: string, params?: any): Promise<any>;
-    
+
     // Bucket işlemleri
     getBuckets(): Promise<any>;
     deleteBucket(bucketId: string): Promise<any>;
-    
+
     // Event işlemleri
     getEvents(bucketId: string, params?: any): Promise<any>;
     insertEvents(bucketId: string, events: any[]): Promise<any>;
     countEvents(bucketId: string): Promise<any>;
-    
+
     // Query işlemleri
     query(timeperiods: any[], query: string, options?: any): Promise<any>;
     abort(): void;
     controller: AbortController;
-    
+
     // Diğer metodlar
     getInfo(): Promise<any>;
     get_settings(): Promise<any>;

@@ -1,13 +1,12 @@
-
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { InsightGenerationService } from "../services/insight-generation-service";
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { InsightGenerationService } from '../services/insight-generation-service';
 
 const insightService = new InsightGenerationService();
 
 /**
  * Firebase Function to generate a new insight.
  */
-export const generateInsight = onCall(async (request) => {
+export const generateInsight = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -15,7 +14,10 @@ export const generateInsight = onCall(async (request) => {
   const { insightType, insightData } = request.data;
 
   if (!insightType || !insightData) {
-    throw new HttpsError('invalid-argument', 'Gerekli alanlar eksik: içgörü tipi veya içgörü verileri.');
+    throw new HttpsError(
+      'invalid-argument',
+      'Gerekli alanlar eksik: içgörü tipi veya içgörü verileri.'
+    );
   }
 
   try {
@@ -29,7 +31,7 @@ export const generateInsight = onCall(async (request) => {
 /**
  * Firebase Function to list all insights for a user.
  */
-export const listInsights = onCall(async (request) => {
+export const listInsights = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -46,7 +48,7 @@ export const listInsights = onCall(async (request) => {
 /**
  * Firebase Function to get a specific insight.
  */
-export const getInsight = onCall(async (request) => {
+export const getInsight = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -71,7 +73,7 @@ export const getInsight = onCall(async (request) => {
 /**
  * Firebase Function to delete a specific insight.
  */
-export const deleteInsight = onCall(async (request) => {
+export const deleteInsight = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Kullanıcı kimliği doğrulanmamış.');
   }
@@ -91,4 +93,4 @@ export const deleteInsight = onCall(async (request) => {
   } catch (error: any) {
     throw new HttpsError('internal', error.message);
   }
-}); 
+});

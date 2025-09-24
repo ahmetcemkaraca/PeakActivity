@@ -10,6 +10,7 @@ type AsyncFunction = (req: Request, res: Response, next: NextFunction) => Promis
  * @param fn Asenkron Express rota işleyici fonksiyonu.
  * @returns Hataları yakalayan ve next() çağrısıyla ileten bir Express rota işleyici.
  */
-export const asyncHandler = (fn: AsyncFunction) => (req: Request, res: Response, next: NextFunction) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-}; 
+export const asyncHandler =
+  (fn: AsyncFunction) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };

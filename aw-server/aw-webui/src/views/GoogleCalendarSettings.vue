@@ -67,7 +67,7 @@ const connectGoogleAccount = async () => {
     if (response.data.success && response.data.authUrl) {
       window.location.href = response.data.authUrl;
     } else {
-      connectionError.value = response.data.message || 'Kimlik doğrulama URL\'si alınamadı.'; // Hata mesajı düzeltildi
+      connectionError.value = response.data.message || "Kimlik doğrulama URL'si alınamadı."; // Hata mesajı düzeltildi
     }
     // connectionStatus.value = 'Google hesabınız başarıyla bağlandı!'; // Artık backend'den gelecek
     // isConnected.value = true;
@@ -84,7 +84,7 @@ const fetchCalendars = async () => {
   try {
     // const result = await listGoogleCalendarsCallable(); // Kaldırıldı
     const response = await axios.get('/api/google-calendar/list-calendars/test_user_id'); // TODO: Gerçek userId
-    const calendars = (response.data.data) as Calendar[];
+    const calendars = response.data.data as Calendar[];
     availableCalendars.value = calendars.map(cal => ({
       text: cal.summary + (cal.primary ? ' (Birincil)' : ''),
       value: cal.id,
@@ -148,4 +148,4 @@ const checkConnectionStatus = async () => {
 .google-calendar-settings {
   padding: 20px;
 }
-</style> 
+</style>

@@ -15,7 +15,7 @@ export const linearRegression = (data: [number, number][]) => {
     sumXX += x * x;
   }
 
-  const denominator = (N * sumXX - sumX * sumX);
+  const denominator = N * sumXX - sumX * sumX;
   if (denominator === 0) {
     // Tüm x değerleri aynıysa tanımsız eğim
     return { slope: 0, intercept: sumY / N };
@@ -46,4 +46,4 @@ export const standardDeviation = (data: number[]) => {
   });
   const avgSquareDiff = mean(squareDiffs);
   return Math.sqrt(avgSquareDiff);
-}; 
+};

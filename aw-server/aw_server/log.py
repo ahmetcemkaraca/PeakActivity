@@ -37,4 +37,4 @@ class FlaskLogHandler(serving.WSGIRequestHandler):
 
         log_message = f"{code} ({self.address_string()}): {msg}"
         self.logger.log(levelno, log_message)
-        cloud_logger.log(levelno, log_message) # Cloud Logging'e gönder
+        cloud_logger.log(levelno, log_message)  # Cloud Logging'e gönder

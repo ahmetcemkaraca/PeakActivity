@@ -3,7 +3,16 @@ import moment from 'moment';
 import * as _ from 'lodash';
 import { map, filter, values, groupBy, sortBy, flow, reverse } from 'lodash/fp';
 import { IEvent } from '~/util/interfaces';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, Unsubscribe, Query } from 'firebase/firestore'; // Firebase Firestore importları
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  Unsubscribe,
+  Query,
+} from 'firebase/firestore'; // Firebase Firestore importları
 import { getAuth } from 'firebase/auth';
 
 import { window_events } from '~/util/fakedata';
@@ -708,7 +717,9 @@ export const useActivityStore = defineStore('activity', {
       const user = auth.currentUser;
 
       if (!user) {
-        console.warn('Gerçek zamanlı etkinlik dinleyicisini başlatmak için kullanıcı oturum açmış olmalıdır.');
+        console.warn(
+          'Gerçek zamanlı etkinlik dinleyicisini başlatmak için kullanıcı oturum açmış olmalıdır.'
+        );
         return;
       }
 
@@ -727,7 +738,8 @@ export const useActivityStore = defineStore('activity', {
       if (query_options.timeperiod) {
         const startTime = moment(query_options.timeperiod.start).valueOf();
         const endTime = moment(query_options.timeperiod.end).valueOf();
-        q = query(q, 
+        q = query(
+          q,
           where('timestamp_start', '>=', startTime),
           where('timestamp_start', '<=', endTime)
         );
@@ -753,33 +765,37 @@ export const useActivityStore = defineStore('activity', {
       // Sıralama
       q = query(q, orderBy('timestamp_start', 'asc'));
 
-      this.realtimeUnsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedActivities: IEvent[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          // Firestore Timestamp objelerini JavaScript Date objelerine dönüştür
-          if (data.timestamp_start && data.timestamp_start.toDate) {
-            data.timestamp_start = data.timestamp_start.toDate().toISOString();
-          }
-          if (data.timestamp_end && data.timestamp_end.toDate) {
-            data.timestamp_end = data.timestamp_end.toDate().toISOString();
-          }
-          fetchedActivities.push(data as IEvent);
-        });
+      this.realtimeUnsubscribe = onSnapshot(
+        q,
+        snapshot => {
+          const fetchedActivities: IEvent[] = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            // Firestore Timestamp objelerini JavaScript Date objelerine dönüştür
+            if (data.timestamp_start && data.timestamp_start.toDate) {
+              data.timestamp_start = data.timestamp_start.toDate().toISOString();
+            }
+            if (data.timestamp_end && data.timestamp_end.toDate) {
+              data.timestamp_end = data.timestamp_end.toDate().toISOString();
+            }
+            fetchedActivities.push(data as IEvent);
+          });
 
-        // Etkinlikleri kategoriye göre renklendir ve skorlandır
-        const coloredAndScoredActivities = scoreCategories(colorCategories(fetchedActivities));
+          // Etkinlikleri kategoriye göre renklendir ve skorlandır
+          const coloredAndScoredActivities = scoreCategories(colorCategories(fetchedActivities));
 
-        // Mağazadaki etkinlikleri güncelle
-        this.active.events = coloredAndScoredActivities;
-        console.log('Gerçek zamanlı etkinlik güncellemeleri alındı:', this.active.events.length);
+          // Mağazadaki etkinlikleri güncelle
+          this.active.events = coloredAndScoredActivities;
+          console.log('Gerçek zamanlı etkinlik güncellemeleri alındı:', this.active.events.length);
 
-        // Ayrıca active.history'yi de güncellemeniz gerekebilir,
-        // ancak bu, timeperiod'a göre gruplandırılmış geçmiş etkinlikleri içerdiği için daha karmaşık olabilir.
-        // Basitlik adına, şimdilik sadece active.events'i güncelleyelim.
-      }, (error) => {
-        console.error('Gerçek zamanlı etkinlik dinlenirken hata oluştu:', error);
-      });
+          // Ayrıca active.history'yi de güncellemeniz gerekebilir,
+          // ancak bu, timeperiod'a göre gruplandırılmış geçmiş etkinlikleri içerdiği için daha karmaşık olabilir.
+          // Basitlik adına, şimdilik sadece active.events'i güncelleyelim.
+        },
+        error => {
+          console.error('Gerçek zamanlı etkinlik dinlenirken hata oluştu:', error);
+        }
+      );
     },
   },
 });

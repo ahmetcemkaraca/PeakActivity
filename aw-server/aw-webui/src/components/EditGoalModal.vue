@@ -25,22 +25,44 @@
         <div v-if="editedGoal.type === 'time_based'">
           <div class="form-group">
             <label for="edit-targetDuration">Hedef Süre (Saniye):</label>
-            <input type="number" id="edit-targetDuration" v-model.number="editedGoal.targetDuration" min="0" required />
+            <input
+              type="number"
+              id="edit-targetDuration"
+              v-model.number="editedGoal.targetDuration"
+              min="0"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="edit-targetDailyDuration">Günlük Hedef Süre (Saniye):</label>
-            <input type="number" id="edit-targetDailyDuration" v-model.number="editedGoal.targetDailyDuration" min="0" />
+            <input
+              type="number"
+              id="edit-targetDailyDuration"
+              v-model.number="editedGoal.targetDailyDuration"
+              min="0"
+            />
           </div>
           <div class="form-group">
             <label for="edit-targetWeeklyDuration">Haftalık Hedef Süre (Saniye):</label>
-            <input type="number" id="edit-targetWeeklyDuration" v-model.number="editedGoal.targetWeeklyDuration" min="0" />
+            <input
+              type="number"
+              id="edit-targetWeeklyDuration"
+              v-model.number="editedGoal.targetWeeklyDuration"
+              min="0"
+            />
           </div>
         </div>
 
         <div v-else-if="editedGoal.type === 'count_based'">
           <div class="form-group">
             <label for="edit-targetCount">Hedef Sayı:</label>
-            <input type="number" id="edit-targetCount" v-model.number="editedGoal.targetCount" min="0" required />
+            <input
+              type="number"
+              id="edit-targetCount"
+              v-model.number="editedGoal.targetCount"
+              min="0"
+              required
+            />
           </div>
         </div>
 
@@ -87,8 +109,12 @@ export default {
   data() {
     return {
       editedGoal: { ...this.goal },
-      appNamesInput: this.goal.targetCriteria.appNames ? this.goal.targetCriteria.appNames.join(', ') : '',
-      categoriesInput: this.goal.targetCriteria.categories ? this.goal.targetCriteria.categories.join(', ') : '',
+      appNamesInput: this.goal.targetCriteria.appNames
+        ? this.goal.targetCriteria.appNames.join(', ')
+        : '',
+      categoriesInput: this.goal.targetCriteria.categories
+        ? this.goal.targetCriteria.categories.join(', ')
+        : '',
       tagsInput: this.goal.targetCriteria.tags ? this.goal.targetCriteria.tags.join(', ') : '',
     };
   },
@@ -96,8 +122,12 @@ export default {
     goal: {
       handler(newGoal) {
         this.editedGoal = { ...newGoal };
-        this.appNamesInput = newGoal.targetCriteria.appNames ? newGoal.targetCriteria.appNames.join(', ') : '';
-        this.categoriesInput = newGoal.targetCriteria.categories ? newGoal.targetCriteria.categories.join(', ') : '';
+        this.appNamesInput = newGoal.targetCriteria.appNames
+          ? newGoal.targetCriteria.appNames.join(', ')
+          : '';
+        this.categoriesInput = newGoal.targetCriteria.categories
+          ? newGoal.targetCriteria.categories.join(', ')
+          : '';
         this.tagsInput = newGoal.targetCriteria.tags ? newGoal.targetCriteria.tags.join(', ') : '';
       },
       deep: true,
@@ -112,9 +142,18 @@ export default {
       this.editedGoal.targetCount = null;
     },
     async saveChanges() {
-      this.editedGoal.targetCriteria.appNames = this.appNamesInput.split(',').map(s => s.trim()).filter(s => s);
-      this.editedGoal.targetCriteria.categories = this.categoriesInput.split(',').map(s => s.trim()).filter(s => s);
-      this.editedGoal.targetCriteria.tags = this.tagsInput.split(',').map(s => s.trim()).filter(s => s);
+      this.editedGoal.targetCriteria.appNames = this.appNamesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
+      this.editedGoal.targetCriteria.categories = this.categoriesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
+      this.editedGoal.targetCriteria.tags = this.tagsInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
 
       const authStore = useAuthStore();
       const userId = authStore.user?.uid;
@@ -182,8 +221,8 @@ label {
   color: #555;
 }
 
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 textarea,
 select {
   width: 100%;
@@ -233,4 +272,4 @@ textarea {
 .cancel-button:hover {
   background-color: #5a6268;
 }
-</style> 
+</style>

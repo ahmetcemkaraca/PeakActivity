@@ -6,7 +6,7 @@ loads user-specific overrides.
 
 Configuration structure:
 - [server]: Production server settings
-- [server-testing]: Testing server settings  
+- [server-testing]: Testing server settings
 - [server.custom_static]: Custom static file serving (optional)
 """
 

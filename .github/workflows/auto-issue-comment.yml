@@ -20,4 +20,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Yeni bir sorun bildirdiğiniz için teşekkür ederiz! Sorununuzu en kısa sürede inceleyip geri bildirimde bulunacağız.'
-            }) 
+            })

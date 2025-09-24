@@ -6,12 +6,9 @@ const trelloJiraService = new TrelloJiraService();
 /**
  * Trello'dan bir görevin durumunu getiren Firebase İşlevi.
  */
-export const getTrelloTaskStatus = onCall(async (request) => {
+export const getTrelloTaskStatus = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { taskId } = request.data;
@@ -25,19 +22,19 @@ export const getTrelloTaskStatus = onCall(async (request) => {
     return { success: true, status };
   } catch (error: any) {
     console.error('Trello görev durumu getirilirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Trello görev durumu getirilirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Trello görev durumu getirilirken bilinmeyen bir hata oluştu.'
+    );
   }
 });
 
 /**
  * Jira'dan bir görevin durumunu getiren Firebase İşlevi.
  */
-export const getJiraTaskStatus = onCall(async (request) => {
+export const getJiraTaskStatus = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { taskId } = request.data;
@@ -51,19 +48,19 @@ export const getJiraTaskStatus = onCall(async (request) => {
     return { success: true, status };
   } catch (error: any) {
     console.error('Jira görev durumu getirilirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Jira görev durumu getirilirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Jira görev durumu getirilirken bilinmeyen bir hata oluştu.'
+    );
   }
 });
 
 /**
  * Trello'da bir görevin durumunu güncelleyen Firebase İşlevi.
  */
-export const updateTrelloTaskStatus = onCall(async (request) => {
+export const updateTrelloTaskStatus = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { cardId, updates } = request.data;
@@ -77,19 +74,19 @@ export const updateTrelloTaskStatus = onCall(async (request) => {
     return { success: true, updatedCard };
   } catch (error: any) {
     console.error('Trello görev durumu güncellenirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Trello görev durumu güncellenirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Trello görev durumu güncellenirken bilinmeyen bir hata oluştu.'
+    );
   }
 });
 
 /**
  * Jira'da bir görevin durumunu güncelleyen Firebase İşlevi.
  */
-export const updateJiraTaskStatus = onCall(async (request) => {
+export const updateJiraTaskStatus = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { issueId, updates } = request.data;
@@ -103,19 +100,19 @@ export const updateJiraTaskStatus = onCall(async (request) => {
     return { success: true, updatedIssue };
   } catch (error: any) {
     console.error('Jira görev durumu güncellenirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Jira görev durumu güncellenirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Jira görev durumu güncellenirken bilinmeyen bir hata oluştu.'
+    );
   }
 });
 
 /**
  * Trello'dan bir panonun (projenin) ilerlemesini getiren Firebase İşlevi.
  */
-export const getTrelloProjectProgress = onCall(async (request) => {
+export const getTrelloProjectProgress = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { boardId } = request.data;
@@ -129,19 +126,19 @@ export const getTrelloProjectProgress = onCall(async (request) => {
     return { success: true, progress };
   } catch (error: any) {
     console.error('Trello proje ilerlemesi getirilirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Trello proje ilerlemesi getirilirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Trello proje ilerlemesi getirilirken bilinmeyen bir hata oluştu.'
+    );
   }
 });
 
 /**
  * Jira'dan bir projenin ilerlemesini getiren Firebase İşlevi.
  */
-export const getJiraProjectProgress = onCall(async (request) => {
+export const getJiraProjectProgress = onCall(async request => {
   if (!request.auth) {
-    throw new HttpsError(
-      'unauthenticated',
-      'The function must be called while authenticated.'
-    );
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
   const userId = request.auth.uid;
   const { projectId } = request.data;
@@ -155,6 +152,9 @@ export const getJiraProjectProgress = onCall(async (request) => {
     return { success: true, progress };
   } catch (error: any) {
     console.error('Jira proje ilerlemesi getirilirken hata oluştu:', error);
-    throw new HttpsError('internal', error.message || 'Jira proje ilerlemesi getirilirken bilinmeyen bir hata oluştu.');
+    throw new HttpsError(
+      'internal',
+      error.message || 'Jira proje ilerlemesi getirilirken bilinmeyen bir hata oluştu.'
+    );
   }
-}); 
+});

@@ -10,4 +10,4 @@ export interface ActivityEvent {
   input_frequency: number;
   is_afk: boolean;
   url?: string; // URL özelliği eklendi
-} 
+}

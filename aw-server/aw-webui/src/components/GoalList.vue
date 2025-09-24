@@ -7,31 +7,54 @@
       <div v-for="goal in goals" :key="goal.id" class="goal-card">
         <h4>{{ goal.title }}</h4>
         <p v-if="goal.description">{{ goal.description }}</p>
-        <p><strong>Tür:</strong> {{ getGoalTypeDisplayName(goal.type) }}</p>
+        <p>
+          <strong>Tür:</strong>
+          {{ getGoalTypeDisplayName(goal.type) }}
+        </p>
         <div v-if="goal.type === 'time_based'">
-          <p><strong>Hedef Süre:</strong> {{ formatDuration(goal.targetDuration) }}</p>
-          <p v-if="goal.targetDailyDuration"><strong>Günlük Hedef:</strong> {{ formatDuration(goal.targetDailyDuration) }}</p>
-          <p v-if="goal.targetWeeklyDuration"><strong>Haftalık Hedef:</strong> {{ formatDuration(goal.targetWeeklyDuration) }}</p>
-          <p><strong>Mevcut Süre:</strong> {{ formatDuration(goal.progress.currentDuration) }}</p>
+          <p>
+            <strong>Hedef Süre:</strong>
+            {{ formatDuration(goal.targetDuration) }}
+          </p>
+          <p v-if="goal.targetDailyDuration">
+            <strong>Günlük Hedef:</strong>
+            {{ formatDuration(goal.targetDailyDuration) }}
+          </p>
+          <p v-if="goal.targetWeeklyDuration">
+            <strong>Haftalık Hedef:</strong>
+            {{ formatDuration(goal.targetWeeklyDuration) }}
+          </p>
+          <p>
+            <strong>Mevcut Süre:</strong>
+            {{ formatDuration(goal.progress.currentDuration) }}
+          </p>
         </div>
         <div v-else-if="goal.type === 'count_based'">
-          <p><strong>Hedef Sayı:</strong> {{ goal.targetCount }}</p>
-          <p><strong>Mevcut Sayı:</strong> {{ goal.currentCount }}</p>
+          <p>
+            <strong>Hedef Sayı:</strong>
+            {{ goal.targetCount }}
+          </p>
+          <p>
+            <strong>Mevcut Sayı:</strong>
+            {{ goal.currentCount }}
+          </p>
         </div>
-        <p><strong>Son Güncelleme:</strong> {{ formatDate(goal.progress.lastUpdated) }}</p>
+        <p>
+          <strong>Son Güncelleme:</strong>
+          {{ formatDate(goal.progress.lastUpdated) }}
+        </p>
         <button @click="editGoal(goal)">Düzenle</button>
         <button @click="deleteGoal(goal.id)">Sil</button>
         <GoalProgressBar :goal="goal" />
       </div>
     </div>
-    
-    <EditGoalModal 
-      :goal="selectedGoal" 
-      :is-visible="isModalVisible" 
-      @close="isModalVisible = false" 
-      @goal-updated="handleGoalUpdated" 
-    />
 
+    <EditGoalModal
+      :goal="selectedGoal"
+      :is-visible="isModalVisible"
+      @close="isModalVisible = false"
+      @goal-updated="handleGoalUpdated"
+    />
   </div>
 </template>
 
@@ -97,7 +120,13 @@ export default {
     formatDate(timestamp) {
       if (!timestamp) return '-';
       const date = new Date(timestamp);
-      return date.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     },
     editGoal(goal) {
       this.selectedGoal = { ...goal };
@@ -194,4 +223,4 @@ export default {
 .goal-card button:last-of-type:hover {
   background-color: #c82333;
 }
-</style> 
+</style>

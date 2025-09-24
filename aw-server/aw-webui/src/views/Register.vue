@@ -4,16 +4,21 @@
     <form @submit.prevent="handleRegister">
       <div class="form-group">
         <label for="email">E-posta:</label>
-        <input type="email" id="email" v-model="email" required>
+        <input type="email" id="email" v-model="email" required />
       </div>
       <div class="form-group">
         <label for="password">Şifre:</label>
-        <input type="password" id="password" v-model="password" required>
+        <input type="password" id="password" v-model="password" required />
       </div>
-      <button type="submit" :disabled="loading">{{ loading ? 'Kaydolunuyor...' : 'Kaydol' }}</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Kaydolunuyor...' : 'Kaydol' }}
+      </button>
       <p v-if="error" class="error-message">{{ error }}</p>
     </form>
-    <p class="auth-switch">Zaten bir hesabınız var mı? <router-link to="/login">Giriş Yapın</router-link></p>
+    <p class="auth-switch">
+      Zaten bir hesabınız var mı?
+      <router-link to="/login">Giriş Yapın</router-link>
+    </p>
   </div>
 </template>
 
@@ -79,8 +84,8 @@ export default defineComponent({
   color: #555;
 }
 
-.form-group input[type="email"],
-.form-group input[type="password"] {
+.form-group input[type='email'],
+.form-group input[type='password'] {
   width: calc(100% - 20px);
   padding: 12px 10px;
   border: 1px solid #ddd;
@@ -89,8 +94,8 @@ export default defineComponent({
   transition: border-color 0.3s ease;
 }
 
-.form-group input[type="email"]:focus,
-.form-group input[type="password"]:focus {
+.form-group input[type='email']:focus,
+.form-group input[type='password']:focus {
   border-color: #007bff;
   outline: none;
 }
@@ -137,4 +142,4 @@ button:disabled {
 .auth-switch router-link:hover {
   text-decoration: underline;
 }
-</style> 
+</style>

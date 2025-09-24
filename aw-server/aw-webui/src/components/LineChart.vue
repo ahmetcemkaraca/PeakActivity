@@ -53,17 +53,28 @@ export default defineComponent({
       }
     });
 
-    watch(() => props.chartData, () => {
-      renderChart();
-    }, { deep: true });
+    watch(
+      () => props.chartData,
+      () => {
+        renderChart();
+      },
+      { deep: true }
+    );
 
-    watch(() => props.chartOptions, () => {
-      renderChart();
-    }, { deep: true });
+    watch(
+      () => props.chartOptions,
+      () => {
+        renderChart();
+      },
+      { deep: true }
+    );
 
-    watch(() => props.chartType, () => {
-      renderChart();
-    });
+    watch(
+      () => props.chartType,
+      () => {
+        renderChart();
+      }
+    );
 
     return {
       chartCanvas,
@@ -78,4 +89,4 @@ export default defineComponent({
   height: 400px;
   width: 100%;
 }
-</style> 
+</style>

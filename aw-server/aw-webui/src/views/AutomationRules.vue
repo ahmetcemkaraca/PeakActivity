@@ -8,7 +8,7 @@
       <form @submit.prevent="addRule">
         <div class="form-group">
           <label for="ruleName">Kural Adı:</label>
-          <input type="text" id="ruleName" v-model="newRule.name" required>
+          <input type="text" id="ruleName" v-model="newRule.name" required />
         </div>
         <div class="form-group">
           <label for="ruleTrigger">Tetikleyici (JSON):</label>
@@ -18,7 +18,9 @@
         <div class="form-group">
           <label for="ruleAction">Eylem (JSON):</label>
           <textarea id="ruleAction" v-model="newRule.action" required rows="5"></textarea>
-          <small>Örnek: {"type": "send_notification", "message": "Çok fazla vscode kullandınız!"}</small>
+          <small>
+            Örnek: {"type": "send_notification", "message": "Çok fazla vscode kullandınız!"}
+          </small>
         </div>
         <button type="submit" class="btn btn-primary">Kural Ekle</button>
       </form>
@@ -33,8 +35,14 @@
         <li v-for="rule in rules" :key="rule.id" class="rule-item">
           <div v-if="editingRuleId !== rule.id">
             <h4>{{ rule.name }}</h4>
-            <p><strong>Tetikleyici:</strong> {{ JSON.stringify(rule.trigger, null, 2) }}</p>
-            <p><strong>Eylem:</strong> {{ JSON.stringify(rule.action, null, 2) }}</p>
+            <p>
+              <strong>Tetikleyici:</strong>
+              {{ JSON.stringify(rule.trigger, null, 2) }}
+            </p>
+            <p>
+              <strong>Eylem:</strong>
+              {{ JSON.stringify(rule.action, null, 2) }}
+            </p>
             <button @click="startEdit(rule)" class="btn btn-secondary">Düzenle</button>
             <button @click="deleteRule(rule.id)" class="btn btn-danger">Sil</button>
           </div>
@@ -42,15 +50,25 @@
             <h4>Kuralı Düzenle: {{ editingRule.name }}</h4>
             <div class="form-group">
               <label for="editRuleName">Kural Adı:</label>
-              <input type="text" id="editRuleName" v-model="editingRule.name" required>
+              <input type="text" id="editRuleName" v-model="editingRule.name" required />
             </div>
             <div class="form-group">
               <label for="editRuleTrigger">Tetikleyici (JSON):</label>
-              <textarea id="editRuleTrigger" v-model="editingRule.trigger" required rows="5"></textarea>
+              <textarea
+                id="editRuleTrigger"
+                v-model="editingRule.trigger"
+                required
+                rows="5"
+              ></textarea>
             </div>
             <div class="form-group">
               <label for="editRuleAction">Eylem (JSON):</label>
-              <textarea id="editRuleAction" v-model="editingRule.action" required rows="5"></textarea>
+              <textarea
+                id="editRuleAction"
+                v-model="editingRule.action"
+                required
+                rows="5"
+              ></textarea>
             </div>
             <button @click="updateRule" class="btn btn-primary">Güncelle</button>
             <button @click="cancelEdit" class="btn btn-secondary">İptal</button>
@@ -131,7 +149,7 @@ const addRule = async () => {
 };
 
 // Kuralı Düzenlemeye Başla
-const startEdit = (rule) => {
+const startEdit = rule => {
   editingRuleId.value = rule.id;
   editingRule.id = rule.id;
   editingRule.name = rule.name;
@@ -172,7 +190,7 @@ const cancelEdit = () => {
 };
 
 // Kuralı Sil
-const deleteRule = async (ruleId) => {
+const deleteRule = async ruleId => {
   if (!authStore.user) {
     alert('Kuralı silmek için giriş yapmalısınız.');
     return;
@@ -217,7 +235,8 @@ h3 {
   margin-bottom: 15px;
 }
 
-.add-rule-section, .rules-list-section {
+.add-rule-section,
+.rules-list-section {
   background-color: #f9f9f9;
   border-radius: 8px;
   padding: 20px;
@@ -235,7 +254,7 @@ h3 {
   font-weight: bold;
 }
 
-.form-group input[type="text"],
+.form-group input[type='text'],
 .form-group textarea {
   width: calc(100% - 22px);
   padding: 10px;
@@ -266,7 +285,7 @@ h3 {
 }
 
 .btn-primary {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   margin-right: 10px;
 }
@@ -330,4 +349,4 @@ h3 {
   font-weight: bold;
   text-align: center;
 }
-</style> 
+</style>

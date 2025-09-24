@@ -1,4 +1,4 @@
-import { db } from "../firebaseAdmin";
+import { db } from '../firebaseAdmin';
 
 interface ProjectDocument {
   id: string;
@@ -14,7 +14,7 @@ interface ProjectDocument {
   progress_percentage: number;
   associated_goals?: string[];
   associated_tasks?: string[];
-  activity_breakdown?: { [category: string]: number; };
+  activity_breakdown?: { [category: string]: number };
   focus_score_average?: number;
   created_at: number;
   updated_at: number;
@@ -34,7 +34,10 @@ export class ProjectPredictionService {
    * @param projectData The initial project data.
    * @returns The created ProjectDocument.
    */
-  async createProject(userId: string, projectData: Partial<ProjectDocument>): Promise<ProjectDocument> {
+  async createProject(
+    userId: string,
+    projectData: Partial<ProjectDocument>
+  ): Promise<ProjectDocument> {
     const projectRef = this.db.collection(`users/${userId}/projects`).doc();
     const newProject: ProjectDocument = {
       id: projectRef.id,
@@ -74,7 +77,11 @@ export class ProjectPredictionService {
    * @param updates The fields to update.
    * @returns The updated ProjectDocument, or null if the project was not found.
    */
-  async updateProject(userId: string, projectId: string, updates: Partial<ProjectDocument>): Promise<ProjectDocument | null> {
+  async updateProject(
+    userId: string,
+    projectId: string,
+    updates: Partial<ProjectDocument>
+  ): Promise<ProjectDocument | null> {
     const projectRef = this.db.collection(`users/${userId}/projects`).doc(projectId);
     await projectRef.update({
       ...updates,
@@ -90,7 +97,9 @@ export class ProjectPredictionService {
    */
   async getAllProjects(userId: string): Promise<ProjectDocument[]> {
     const projectsSnapshot = await this.db.collection(`users/${userId}/projects`).get();
-    return projectsSnapshot.docs.map((doc: FirebaseFirestore.QueryDocumentSnapshot) => doc.data() as ProjectDocument);
+    return projectsSnapshot.docs.map(
+      (doc: FirebaseFirestore.QueryDocumentSnapshot) => doc.data() as ProjectDocument
+    );
   }
 
   /**
@@ -101,4 +110,4 @@ export class ProjectPredictionService {
   async deleteProject(userId: string, projectId: string): Promise<void> {
     await this.db.collection(`users/${userId}/projects`).doc(projectId).delete();
   }
-} 
+}

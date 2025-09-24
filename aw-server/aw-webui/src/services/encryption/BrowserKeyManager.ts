@@ -55,4 +55,4 @@ export class BrowserKeyManager {
     this.localStorageEncryption.clear(); // Tüm şifreli local storage verilerini sil
     this.localStorageEncryption.setUserKey(''); // Anahtarı temizle
   }
-} 
+}

@@ -1,10 +1,10 @@
 /**
  * TypeScript performance optimization utilities for Firebase Functions.
- * 
+ *
  * This module provides performance optimization tools specifically designed
  * for Firebase Functions and TypeScript environments, including caching,
  * profiling, and memory management.
- * 
+ *
  * Key Features:
  * - Function execution time profiling
  * - Response caching with TTL
@@ -85,10 +85,7 @@ export class PerformanceProfiler {
   /**
    * Profile a function execution manually
    */
-  async profileFunction<T>(
-    name: string,
-    func: () => Promise<T> | T
-  ): Promise<T> {
+  async profileFunction<T>(name: string, func: () => Promise<T> | T): Promise<T> {
     if (!this.enabled) {
       return await func();
     }
@@ -117,10 +114,10 @@ export class PerformanceProfiler {
       const originalMethod = descriptor.value;
 
       descriptor.value = async function (...args: any[]) {
-        const cacheKey = keyGenerator 
+        const cacheKey = keyGenerator
           ? keyGenerator(...args)
           : `${target.constructor.name}.${propertyKey}:${JSON.stringify(args)}`;
-        
+
         // Check cache
         const cached = this.getFromCache(cacheKey);
         if (cached !== undefined) {
@@ -131,7 +128,7 @@ export class PerformanceProfiler {
         // Execute function and cache result
         const result = await originalMethod.apply(this, args);
         this.setCache(cacheKey, result, ttlSeconds);
-        
+
         return result;
       };
 
@@ -165,9 +162,9 @@ export class PerformanceProfiler {
       this.evictOldestCacheEntry();
     }
 
-    const expiry = Date.now() + (ttlSeconds * 1000);
+    const expiry = Date.now() + ttlSeconds * 1000;
     const size = this.estimateSize(value);
-    
+
     this.cache.set(key, { value, expiry, size });
   }
 
@@ -195,7 +192,7 @@ export class PerformanceProfiler {
    */
   private updateMetrics(name: string, executionTime: number, error: boolean): void {
     let metric = this.metrics.get(name);
-    
+
     if (!metric) {
       metric = {
         name,
@@ -205,7 +202,7 @@ export class PerformanceProfiler {
         minTime: Infinity,
         maxTime: 0,
         lastCallTime: 0,
-        errors: 0
+        errors: 0,
       };
       this.metrics.set(name, metric);
     }
@@ -222,7 +219,8 @@ export class PerformanceProfiler {
     }
 
     // Log slow functions
-    if (executionTime > 5000) { // 5 seconds
+    if (executionTime > 5000) {
+      // 5 seconds
       logger.warn(`Slow function execution: ${name} took ${executionTime.toFixed(2)}ms`);
     }
   }
@@ -262,12 +260,14 @@ export class PerformanceProfiler {
   generateReport(): string {
     const lines: string[] = [];
     lines.push('=== Performance Report ===');
-    
+
     const slowest = this.getTopSlowest(5);
     if (slowest.length > 0) {
       lines.push('\nSlowest Functions (by avg time):');
       slowest.forEach(metric => {
-        lines.push(`  ${metric.name}: ${metric.avgTime.toFixed(2)}ms avg (${metric.callCount} calls)`);
+        lines.push(
+          `  ${metric.name}: ${metric.avgTime.toFixed(2)}ms avg (${metric.callCount} calls)`
+        );
       });
     }
 
@@ -275,7 +275,9 @@ export class PerformanceProfiler {
     if (mostCalled.length > 0) {
       lines.push('\nMost Called Functions:');
       mostCalled.forEach(metric => {
-        lines.push(`  ${metric.name}: ${metric.callCount} calls (${metric.avgTime.toFixed(2)}ms avg)`);
+        lines.push(
+          `  ${metric.name}: ${metric.callCount} calls (${metric.avgTime.toFixed(2)}ms avg)`
+        );
       });
     }
 
@@ -283,7 +285,9 @@ export class PerformanceProfiler {
     const totalCalls = Array.from(this.metrics.values()).reduce((sum, m) => sum + m.callCount, 0);
     const totalErrors = Array.from(this.metrics.values()).reduce((sum, m) => sum + m.errors, 0);
 
-    lines.push(`\nSummary: ${totalFunctions} functions, ${totalCalls} total calls, ${totalErrors} errors`);
+    lines.push(
+      `\nSummary: ${totalFunctions} functions, ${totalCalls} total calls, ${totalErrors} errors`
+    );
     lines.push(`Cache size: ${this.cache.size}/${this.maxCacheSize}`);
 
     return lines.join('\n');
@@ -318,10 +322,7 @@ export class BatchProcessor<T, R> {
   /**
    * Process items in batches with controlled concurrency
    */
-  async processBatch(
-    items: T[],
-    processor: (item: T) => Promise<R>
-  ): Promise<R[]> {
+  async processBatch(items: T[], processor: (item: T) => Promise<R>): Promise<R[]> {
     const results: R[] = [];
     const batches: T[][] = [];
 
@@ -333,11 +334,9 @@ export class BatchProcessor<T, R> {
     // Process batches with controlled concurrency
     for (let i = 0; i < batches.length; i += this.concurrency) {
       const concurrentBatches = batches.slice(i, i + this.concurrency);
-      
-      const batchPromises = concurrentBatches.map(async (batch) => {
-        const batchResults = await Promise.all(
-          batch.map(item => processor(item))
-        );
+
+      const batchPromises = concurrentBatches.map(async batch => {
+        const batchResults = await Promise.all(batch.map(item => processor(item)));
         return batchResults;
       });
 
@@ -385,7 +384,9 @@ export class MemoryMonitor {
   checkMemoryLimit(): boolean {
     const usage = this.getCurrentUsage();
     if (usage.heapUsed > this.maxMemory) {
-      logger.warn(`Memory usage exceeded limit: ${usage.heapUsed / 1024 / 1024}MB > ${this.maxMemory / 1024 / 1024}MB`);
+      logger.warn(
+        `Memory usage exceeded limit: ${usage.heapUsed / 1024 / 1024}MB > ${this.maxMemory / 1024 / 1024}MB`
+      );
       return false;
     }
     return true;
@@ -406,7 +407,7 @@ export const globalProfiler = new PerformanceProfiler();
 
 // Convenience decorators
 export const profile = (name?: string) => globalProfiler.profile(name);
-export const cache = (ttlSeconds = 300, keyGenerator?: (...args: any[]) => string) => 
+export const cache = (ttlSeconds = 300, keyGenerator?: (...args: any[]) => string) =>
   globalProfiler.cache(ttlSeconds, keyGenerator);
 
 // Utility functions
@@ -439,12 +440,12 @@ export class RateLimiter {
   isAllowed(key: string): boolean {
     const now = Date.now();
     const windowStart = now - this.windowMs;
-    
+
     let requests = this.requests.get(key) || [];
-    
+
     // Remove old requests outside the window
     requests = requests.filter(time => time > windowStart);
-    
+
     if (requests.length >= this.maxRequests) {
       return false;
     }
@@ -462,7 +463,7 @@ export class RateLimiter {
     const now = Date.now();
     const windowStart = now - this.windowMs;
     const validRequests = requests.filter(time => time > windowStart);
-    
+
     return Math.max(0, this.maxRequests - validRequests.length);
   }
 }

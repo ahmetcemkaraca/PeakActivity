@@ -1,6 +1,6 @@
 /**
  * Error Handler Composable
- * 
+ *
  * Bu composable merkezi error handling sağlar.
  */
 
@@ -70,7 +70,7 @@ export function useErrorHandler(): UseErrorHandlerReturn {
   const handleError = (error: unknown, context?: string): void => {
     const errorInfo: ErrorInfo = {
       message: getErrorMessage(error),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     if (context) {
@@ -126,6 +126,6 @@ export function useErrorHandler(): UseErrorHandlerReturn {
     handleError,
     clearError,
     clearAllErrors,
-    getErrorMessage
+    getErrorMessage,
   };
 }

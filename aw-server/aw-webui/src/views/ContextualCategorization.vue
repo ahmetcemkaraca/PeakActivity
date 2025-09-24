@@ -15,14 +15,20 @@
               required
             ></b-form-input>
           </b-form-group>
-          <b-form-group label="Bağlam Deseni (Regex):" label-for="input-contextPattern" class="mt-3">
+          <b-form-group
+            label="Bağlam Deseni (Regex):"
+            label-for="input-contextPattern"
+            class="mt-3"
+          >
             <b-form-input
               id="input-contextPattern"
               v-model="newRule.contextPattern"
               placeholder=".*toplantı notları.*|.*meeting notes.*"
               required
             ></b-form-input>
-            <small class="form-text text-muted">Örnek: `.*toplantı notları.*` veya `.*raporlama.*`</small>
+            <small class="form-text text-muted">
+              Örnek: `.*toplantı notları.*` veya `.*raporlama.*`
+            </small>
           </b-form-group>
           <b-form-group label="Hedef Kategori:" label-for="input-category" class="mt-3">
             <b-form-input
@@ -33,7 +39,11 @@
             ></b-form-input>
             <small class="form-text text-muted">Örnek: `İş`, `Eğitim`, `Geliştirme`</small>
           </b-form-group>
-          <b-form-group label="Güven Seviyesi (0.0 - 1.0):" label-for="input-confidence" class="mt-3">
+          <b-form-group
+            label="Güven Seviyesi (0.0 - 1.0):"
+            label-for="input-confidence"
+            class="mt-3"
+          >
             <b-form-input
               id="input-confidence"
               v-model.number="newRule.confidence"
@@ -48,8 +58,12 @@
             <span v-if="addingRule">Ekleniyor...</span>
             <span v-else>Kural Ekle</span>
           </b-button>
-          <b-alert v-if="addRuleSuccess" show variant="success" class="mt-3">Kural başarıyla eklendi!</b-alert>
-          <b-alert v-if="addRuleError" show variant="danger" class="mt-3">Hata: {{ addRuleError }}</b-alert>
+          <b-alert v-if="addRuleSuccess" show variant="success" class="mt-3">
+            Kural başarıyla eklendi!
+          </b-alert>
+          <b-alert v-if="addRuleError" show variant="danger" class="mt-3">
+            Hata: {{ addRuleError }}
+          </b-alert>
         </b-form>
       </div>
     </div>
@@ -67,11 +81,22 @@
           <li v-for="rule in rules" :key="rule.id" class="list-group-item">
             <div v-if="editingRuleId !== rule.id">
               <h6>{{ rule.name }}</h6>
-              <p><strong>Desen:</strong> <code>{{ rule.contextPattern }}</code></p>
-              <p><strong>Kategori:</strong> {{ rule.category }}</p>
-              <p><strong>Güven:</strong> %{{ (rule.confidence * 100).toFixed(2) }}</p>
+              <p>
+                <strong>Desen:</strong>
+                <code>{{ rule.contextPattern }}</code>
+              </p>
+              <p>
+                <strong>Kategori:</strong>
+                {{ rule.category }}
+              </p>
+              <p>
+                <strong>Güven:</strong>
+                %{{ (rule.confidence * 100).toFixed(2) }}
+              </p>
               <div class="d-flex justify-content-end">
-                <b-button size="sm" variant="secondary" class="mr-2" @click="startEdit(rule)">Düzenle</b-button>
+                <b-button size="sm" variant="secondary" class="mr-2" @click="startEdit(rule)">
+                  Düzenle
+                </b-button>
                 <b-button size="sm" variant="danger" @click="deleteRule(rule.id)">Sil</b-button>
               </div>
             </div>
@@ -80,20 +105,54 @@
               <b-form-group label="Kural Adı:" label-for="edit-ruleName">
                 <b-form-input id="edit-ruleName" v-model="editingRule.name" required></b-form-input>
               </b-form-group>
-              <b-form-group label="Bağlam Deseni (Regex):" label-for="edit-contextPattern" class="mt-3">
-                <b-form-input id="edit-contextPattern" v-model="editingRule.contextPattern" required></b-form-input>
+              <b-form-group
+                label="Bağlam Deseni (Regex):"
+                label-for="edit-contextPattern"
+                class="mt-3"
+              >
+                <b-form-input
+                  id="edit-contextPattern"
+                  v-model="editingRule.contextPattern"
+                  required
+                ></b-form-input>
               </b-form-group>
               <b-form-group label="Hedef Kategori:" label-for="edit-category" class="mt-3">
-                <b-form-input id="edit-category" v-model="editingRule.category" required></b-form-input>
+                <b-form-input
+                  id="edit-category"
+                  v-model="editingRule.category"
+                  required
+                ></b-form-input>
               </b-form-group>
-              <b-form-group label="Güven Seviyesi (0.0 - 1.0):" label-for="edit-confidence" class="mt-3">
-                <b-form-input id="edit-confidence" v-model.number="editingRule.confidence" type="number" step="0.01" min="0" max="1" required></b-form-input>
+              <b-form-group
+                label="Güven Seviyesi (0.0 - 1.0):"
+                label-for="edit-confidence"
+                class="mt-3"
+              >
+                <b-form-input
+                  id="edit-confidence"
+                  v-model.number="editingRule.confidence"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  required
+                ></b-form-input>
               </b-form-group>
               <div class="d-flex justify-content-end">
-                <b-button size="sm" variant="primary" class="mr-2" @click="updateRule" :disabled="updatingRule">Güncelle</b-button>
+                <b-button
+                  size="sm"
+                  variant="primary"
+                  class="mr-2"
+                  @click="updateRule"
+                  :disabled="updatingRule"
+                >
+                  Güncelle
+                </b-button>
                 <b-button size="sm" variant="secondary" @click="cancelEdit">İptal</b-button>
               </div>
-              <b-alert v-if="updateRuleError" show variant="danger" class="mt-3">Hata: {{ updateRuleError }}</b-alert>
+              <b-alert v-if="updateRuleError" show variant="danger" class="mt-3">
+                Hata: {{ updateRuleError }}
+              </b-alert>
             </div>
           </li>
         </ul>
@@ -120,15 +179,28 @@
               placeholder="tr veya en"
             ></b-form-input>
           </b-form-group>
-          <b-button type="submit" variant="info" class="mt-4" :disabled="testing">Kategorize Et</b-button>
+          <b-button type="submit" variant="info" class="mt-4" :disabled="testing">
+            Kategorize Et
+          </b-button>
 
           <div v-if="categorizationResult" class="mt-3">
             <h6>Kategorizasyon Sonucu:</h6>
-            <p><strong>Kategori:</strong> {{ categorizationResult.category }}</p>
-            <p><strong>Güven Seviyesi:</strong> %{{ (categorizationResult.confidence * 100).toFixed(2) }}</p>
-            <p><strong>Gerekçe:</strong> {{ categorizationResult.rationale }}</p>
+            <p>
+              <strong>Kategori:</strong>
+              {{ categorizationResult.category }}
+            </p>
+            <p>
+              <strong>Güven Seviyesi:</strong>
+              %{{ (categorizationResult.confidence * 100).toFixed(2) }}
+            </p>
+            <p>
+              <strong>Gerekçe:</strong>
+              {{ categorizationResult.rationale }}
+            </p>
           </div>
-          <b-alert v-if="categorizationError" show variant="danger" class="mt-3">Hata: {{ categorizationError }}</b-alert>
+          <b-alert v-if="categorizationError" show variant="danger" class="mt-3">
+            Hata: {{ categorizationError }}
+          </b-alert>
         </b-form>
       </div>
     </div>
@@ -164,13 +236,23 @@ export default defineComponent({
     const loadingRules = ref(true);
     const rulesError = ref<string | null>(null);
 
-    const newRule = ref<ContextualRule>({ name: '', contextPattern: '', category: '', confidence: 0.8 });
+    const newRule = ref<ContextualRule>({
+      name: '',
+      contextPattern: '',
+      category: '',
+      confidence: 0.8,
+    });
     const addingRule = ref(false);
     const addRuleSuccess = ref(false);
     const addRuleError = ref<string | null>(null);
 
     const editingRuleId = ref<string | null>(null);
-    const editingRule = ref<ContextualRule>({ name: '', contextPattern: '', category: '', confidence: 0 });
+    const editingRule = ref<ContextualRule>({
+      name: '',
+      contextPattern: '',
+      category: '',
+      confidence: 0,
+    });
     const updatingRule = ref(false);
     const updateRuleError = ref<string | null>(null);
 
@@ -182,9 +264,18 @@ export default defineComponent({
 
     // Firebase Cloud Functions references
     const getCustomContextualRulesCallable = httpsCallable(functions, 'getCustomContextualRules');
-    const createCustomContextualRuleCallable = httpsCallable(functions, 'createCustomContextualRule');
-    const updateCustomContextualRuleCallable = httpsCallable(functions, 'updateCustomContextualRule');
-    const deleteCustomContextualRuleCallable = httpsCallable(functions, 'deleteCustomContextualRule');
+    const createCustomContextualRuleCallable = httpsCallable(
+      functions,
+      'createCustomContextualRule'
+    );
+    const updateCustomContextualRuleCallable = httpsCallable(
+      functions,
+      'updateCustomContextualRule'
+    );
+    const deleteCustomContextualRuleCallable = httpsCallable(
+      functions,
+      'deleteCustomContextualRule'
+    );
     const categorizeContextCallable = httpsCallable(functions, 'categorizeContext');
 
     const fetchRules = async () => {
@@ -344,7 +435,10 @@ export default defineComponent({
   background-color: var(--background-color);
   border: 1px solid var(--light-border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .card-title {
@@ -428,4 +522,4 @@ code {
   border-radius: 4px;
   color: #c7254e;
 }
-</style> 
+</style>

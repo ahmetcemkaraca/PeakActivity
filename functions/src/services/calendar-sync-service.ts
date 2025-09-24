@@ -1,4 +1,4 @@
-import { db, admin } from "../firebaseAdmin";
+import { db, admin } from '../firebaseAdmin';
 import { google } from 'googleapis';
 import { GoogleCalendarService } from './google-calendar-service';
 
@@ -37,7 +37,7 @@ export class CalendarSyncService {
         existingEventsMap.set(doc.id, doc.data());
       });
 
-      for (const event of (events || [])) {
+      for (const event of events || []) {
         if (event.id) {
           const existingEvent = existingEventsMap.get(event.id);
           if (!existingEvent || JSON.stringify(existingEvent) !== JSON.stringify(event)) {
@@ -53,7 +53,10 @@ export class CalendarSyncService {
       for (const eventId of existingEventsMap.keys()) {
         // batch.delete(userCalendarRef.doc(eventId));
         // Soft delete: Etkinliği silmek yerine 'deleted' flag'ini true olarak ayarla
-        batch.update(userCalendarRef.doc(eventId), { deleted: true, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        batch.update(userCalendarRef.doc(eventId), {
+          deleted: true,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
         console.log(`Etkinlik ${eventId} Google Takvim'de bulunamadı. Yerel olarak soft-silindi.`);
       }
 
@@ -68,8 +71,11 @@ export class CalendarSyncService {
    * Tüm yetkilendirilmiş kullanıcılar için Google Takvim senkronizasyonunu tetikler.
    */
   async syncAllUsersCalendars() {
-    const usersSnapshot = await this.db.collection('users').where('googleCalendarTokens', '!=', null).get();
-    
+    const usersSnapshot = await this.db
+      .collection('users')
+      .where('googleCalendarTokens', '!=', null)
+      .get();
+
     const syncPromises: Promise<void>[] = [];
 
     usersSnapshot.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot) => {
@@ -80,4 +86,4 @@ export class CalendarSyncService {
     await Promise.all(syncPromises);
     console.log('Tüm kullanıcılar için takvim senkronizasyonu tamamlandı.');
   }
-} 
+}

@@ -17,7 +17,7 @@ export class WebCryptoService extends BaseEncryptionService {
 
     const encrypted = await crypto.subtle.encrypt(
       {
-        name: "AES-GCM",
+        name: 'AES-GCM',
         iv: ivBytes,
       },
       importedKey,
@@ -33,7 +33,7 @@ export class WebCryptoService extends BaseEncryptionService {
 
     const decrypted = await crypto.subtle.decrypt(
       {
-        name: "AES-GCM",
+        name: 'AES-GCM',
         iv: ivBytes,
       },
       importedKey,
@@ -45,14 +45,14 @@ export class WebCryptoService extends BaseEncryptionService {
   private async importKey(base64Key: string): Promise<CryptoKey> {
     const keyBytes = CryptoUtils.base64ToBytes(base64Key);
     return crypto.subtle.importKey(
-      "raw",
+      'raw',
       keyBytes,
       {
-        name: "AES-GCM",
+        name: 'AES-GCM',
         length: 256,
       },
       true,
-      ["encrypt", "decrypt"]
+      ['encrypt', 'decrypt']
     );
   }
 
@@ -60,4 +60,4 @@ export class WebCryptoService extends BaseEncryptionService {
     const iv = CryptoUtils.generateRandomBytes(16); // AES-GCM için 16 bayt IV (nonce)
     return CryptoUtils.bytesToBase64(iv);
   }
-} 
+}

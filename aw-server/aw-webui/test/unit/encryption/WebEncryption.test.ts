@@ -10,7 +10,10 @@ import EncryptionSettings from '../../../src/views/settings/EncryptionSettings.v
 
 // Mocking dependencies
 const mockKeyDerivationService = {
-  deriveKey: jest.fn(async (password, salt) => ({ key: 'mockDerivedKey', salt: salt || new Uint8Array() })),
+  deriveKey: jest.fn(async (password, salt) => ({
+    key: 'mockDerivedKey',
+    salt: salt || new Uint8Array(),
+  })),
   verifyKey: jest.fn(async (password, hash, salt) => true),
   generateSalt: jest.fn(async () => new Uint8Array(16)),
 };
@@ -20,9 +23,15 @@ const localStorageMock = (() => {
   let store: { [key: string]: string } = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
@@ -40,17 +49,17 @@ const indexedDBMock = (() => {
           objectStoreNames: { contains: jest.fn(() => true) },
           createObjectStore: jest.fn(() => ({})),
           transaction: jest.fn((storeNames, mode) => ({
-            objectStore: jest.fn((storeName) => ({
-              put: jest.fn((value) => ({
+            objectStore: jest.fn(storeName => ({
+              put: jest.fn(value => ({
                 onsuccess: jest.fn(),
                 onerror: jest.fn(),
               })),
-              get: jest.fn((id) => ({
+              get: jest.fn(id => ({
                 onsuccess: jest.fn(),
                 onerror: jest.fn(),
                 result: stores[dbName]?.[storeNames[0]]?.[id] || null,
               })),
-              delete: jest.fn((id) => ({
+              delete: jest.fn(id => ({
                 onsuccess: jest.fn(),
                 onerror: jest.fn(),
               })),
@@ -76,7 +85,6 @@ const indexedDBMock = (() => {
   };
 })();
 Object.defineProperty(window, 'indexedDB', { value: indexedDBMock });
-
 
 describe('Encryption Services Unit Tests', () => {
   const testData = 'This is a secret message.';
@@ -140,25 +148,36 @@ describe('Encryption Services Unit Tests', () => {
 
     beforeEach(() => {
       webCryptoService = new WebCryptoService();
-      clientSideEncryption = new ClientSideEncryption(webCryptoService, mockKeyDerivationService as any);
+      clientSideEncryption = new ClientSideEncryption(
+        webCryptoService,
+        mockKeyDerivationService as any
+      );
     });
 
     it('should encrypt and decrypt activity data with metadata', async () => {
-      const { encryptedData, metadata } = await clientSideEncryption.encryptActivityData(testData, testUserKey);
+      const { encryptedData, metadata } = await clientSideEncryption.encryptActivityData(
+        testData,
+        testUserKey
+      );
       expect(encryptedData).toBeDefined();
       expect(metadata).toBeDefined();
       expect(metadata.algorithm).toEqual('AES-256-GCM');
       expect(metadata.iv).toBeDefined();
       expect(metadata.version).toEqual('1.0');
 
-      const decryptedData = await clientSideEncryption.decryptActivityData(encryptedData, metadata, testUserKey);
+      const decryptedData = await clientSideEncryption.decryptActivityData(
+        encryptedData,
+        metadata,
+        testUserKey
+      );
       expect(decryptedData).toEqual(testData);
     });
 
     it('should throw error for unsupported algorithm', async () => {
       const metadata: any = { algorithm: 'UNSUPPORTED_ALG', iv: testIv, version: '1.0' };
-      await expect(clientSideEncryption.decryptActivityData('fakeEncryptedData', metadata, testUserKey))
-        .rejects.toThrow('Desteklenmeyen şifreleme algoritması');
+      await expect(
+        clientSideEncryption.decryptActivityData('fakeEncryptedData', metadata, testUserKey)
+      ).rejects.toThrow('Desteklenmeyen şifreleme algoritması');
     });
   });
 
@@ -169,7 +188,10 @@ describe('Encryption Services Unit Tests', () => {
 
     beforeEach(() => {
       localStorageMock.clear(); // Clear local storage before each test
-      clientSideEnc = new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any);
+      clientSideEnc = new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      );
       localStorageEnc = new LocalStorageEncryption(clientSideEnc);
       localStorageEnc.setUserKey(testUserKey);
     });
@@ -205,8 +227,12 @@ describe('Encryption Services Unit Tests', () => {
 
     it('should throw error if user key is not set', async () => {
       localStorageEnc = new LocalStorageEncryption(clientSideEnc);
-      await expect(localStorageEnc.setItem('key', 'value')).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
-      await expect(localStorageEnc.getItem('key')).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
+      await expect(localStorageEnc.setItem('key', 'value')).rejects.toThrow(
+        'Kullanıcı anahtarı ayarlanmamış'
+      );
+      await expect(localStorageEnc.getItem('key')).rejects.toThrow(
+        'Kullanıcı anahtarı ayarlanmamış'
+      );
     });
   });
 
@@ -222,44 +248,53 @@ describe('Encryption Services Unit Tests', () => {
           indexedDBMock.stores[dbName][storeName] = {};
         });
       });
-      clientSideEnc = new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any);
+      clientSideEnc = new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      );
       indexedDBEnc = new IndexedDBEncryption(clientSideEnc);
       indexedDBEnc.setUserKey(testUserKey);
 
       // Mock the put and get operations for IndexedDB to store/retrieve from our internal mock store
       indexedDBMock.open.mockImplementation((dbName, version) => {
-        const request = { onsuccess: jest.fn(), onupgradeneeded: jest.fn(), onerror: jest.fn(), result: { 
-          objectStoreNames: { contains: jest.fn(() => true) },
-          createObjectStore: jest.fn(() => ({})),
-          transaction: jest.fn((storeNames, mode) => ({
-            objectStore: jest.fn((storeName) => ({
-              put: jest.fn((value) => {
-                if (!indexedDBMock.stores[dbName]) indexedDBMock.stores[dbName] = {};
-                if (!indexedDBMock.stores[dbName][storeName]) indexedDBMock.stores[dbName][storeName] = {};
-                indexedDBMock.stores[dbName][storeName][value.id] = value;
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
-              get: jest.fn((id) => ({
-                onsuccess: jest.fn(),
-                onerror: jest.fn(),
-                result: indexedDBMock.stores[dbName]?.[storeName]?.[id] || null,
+        const request = {
+          onsuccess: jest.fn(),
+          onupgradeneeded: jest.fn(),
+          onerror: jest.fn(),
+          result: {
+            objectStoreNames: { contains: jest.fn(() => true) },
+            createObjectStore: jest.fn(() => ({})),
+            transaction: jest.fn((storeNames, mode) => ({
+              objectStore: jest.fn(storeName => ({
+                put: jest.fn(value => {
+                  if (!indexedDBMock.stores[dbName]) indexedDBMock.stores[dbName] = {};
+                  if (!indexedDBMock.stores[dbName][storeName])
+                    indexedDBMock.stores[dbName][storeName] = {};
+                  indexedDBMock.stores[dbName][storeName][value.id] = value;
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
+                get: jest.fn(id => ({
+                  onsuccess: jest.fn(),
+                  onerror: jest.fn(),
+                  result: indexedDBMock.stores[dbName]?.[storeName]?.[id] || null,
+                })),
+                delete: jest.fn(id => {
+                  if (indexedDBMock.stores[dbName]?.[storeName]) {
+                    delete indexedDBMock.stores[dbName][storeName][id];
+                  }
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
+                clear: jest.fn(() => {
+                  if (indexedDBMock.stores[dbName]?.[storeName]) {
+                    indexedDBMock.stores[dbName][storeName] = {};
+                  }
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
               })),
-              delete: jest.fn((id) => {
-                if (indexedDBMock.stores[dbName]?.[storeName]) {
-                  delete indexedDBMock.stores[dbName][storeName][id];
-                }
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
-              clear: jest.fn(() => {
-                if (indexedDBMock.stores[dbName]?.[storeName]) {
-                  indexedDBMock.stores[dbName][storeName] = {};
-                }
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
             })),
-          })),
-          close: jest.fn(),
-        } };
+            close: jest.fn(),
+          },
+        };
 
         setTimeout(() => {
           if (!indexedDBMock.stores[dbName]) {
@@ -317,7 +352,9 @@ describe('Encryption Services Unit Tests', () => {
 
     it('should throw error if user key is not set', async () => {
       indexedDBEnc = new IndexedDBEncryption(clientSideEnc);
-      await expect(indexedDBEnc.setItem('key', 'value')).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
+      await expect(indexedDBEnc.setItem('key', 'value')).rejects.toThrow(
+        'Kullanıcı anahtarı ayarlanmamış'
+      );
       await expect(indexedDBEnc.getItem('key')).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
     });
   });
@@ -337,7 +374,10 @@ describe('Encryption Services Unit Tests', () => {
         });
       });
 
-      const clientSideEnc = new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any);
+      const clientSideEnc = new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      );
       localStorageEnc = new LocalStorageEncryption(clientSideEnc);
       indexedDBEnc = new IndexedDBEncryption(clientSideEnc);
       browserKeyManager = new BrowserKeyManager(mockKeyDerivationService as any, localStorageEnc);
@@ -391,45 +431,54 @@ describe('Encryption Services Unit Tests', () => {
         });
       });
 
-      const clientSideEnc = new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any);
+      const clientSideEnc = new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      );
       indexedDBEnc = new IndexedDBEncryption(clientSideEnc);
       cacheService = new OfflineEncryptionCache(indexedDBEnc);
       cacheService.setUserKey(testUserKey);
 
       // Manually set up the mock IndexedDB's put/get behavior for this specific test suite
       indexedDBMock.open.mockImplementation((dbName, version) => {
-        const request = { onsuccess: jest.fn(), onupgradeneeded: jest.fn(), onerror: jest.fn(), result: { 
-          objectStoreNames: { contains: jest.fn(() => true) },
-          createObjectStore: jest.fn(() => ({})),
-          transaction: jest.fn((storeNames, mode) => ({
-            objectStore: jest.fn((storeName) => ({
-              put: jest.fn((value) => {
-                if (!indexedDBMock.stores[dbName]) indexedDBMock.stores[dbName] = {};
-                if (!indexedDBMock.stores[dbName][storeName]) indexedDBMock.stores[dbName][storeName] = {};
-                indexedDBMock.stores[dbName][storeName][value.id] = value;
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
-              get: jest.fn((id) => ({
-                onsuccess: jest.fn(),
-                onerror: jest.fn(),
-                result: indexedDBMock.stores[dbName]?.[storeName]?.[id] || null,
+        const request = {
+          onsuccess: jest.fn(),
+          onupgradeneeded: jest.fn(),
+          onerror: jest.fn(),
+          result: {
+            objectStoreNames: { contains: jest.fn(() => true) },
+            createObjectStore: jest.fn(() => ({})),
+            transaction: jest.fn((storeNames, mode) => ({
+              objectStore: jest.fn(storeName => ({
+                put: jest.fn(value => {
+                  if (!indexedDBMock.stores[dbName]) indexedDBMock.stores[dbName] = {};
+                  if (!indexedDBMock.stores[dbName][storeName])
+                    indexedDBMock.stores[dbName][storeName] = {};
+                  indexedDBMock.stores[dbName][storeName][value.id] = value;
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
+                get: jest.fn(id => ({
+                  onsuccess: jest.fn(),
+                  onerror: jest.fn(),
+                  result: indexedDBMock.stores[dbName]?.[storeName]?.[id] || null,
+                })),
+                delete: jest.fn(id => {
+                  if (indexedDBMock.stores[dbName]?.[storeName]) {
+                    delete indexedDBMock.stores[dbName][storeName][id];
+                  }
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
+                clear: jest.fn(() => {
+                  if (indexedDBMock.stores[dbName]?.[storeName]) {
+                    indexedDBMock.stores[dbName][storeName] = {};
+                  }
+                  return { onsuccess: jest.fn(), onerror: jest.fn() };
+                }),
               })),
-              delete: jest.fn((id) => {
-                if (indexedDBMock.stores[dbName]?.[storeName]) {
-                  delete indexedDBMock.stores[dbName][storeName][id];
-                }
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
-              clear: jest.fn(() => {
-                if (indexedDBMock.stores[dbName]?.[storeName]) {
-                  indexedDBMock.stores[dbName][storeName] = {};
-                }
-                return { onsuccess: jest.fn(), onerror: jest.fn() };
-              }),
             })),
-          })),
-          close: jest.fn(),
-        } };
+            close: jest.fn(),
+          },
+        };
 
         setTimeout(() => {
           if (!indexedDBMock.stores[dbName]) {
@@ -446,8 +495,10 @@ describe('Encryption Services Unit Tests', () => {
 
     it('should cache and retrieve encrypted data', async () => {
       // Mock the underlying indexedDBEnc.setItem to store the raw encryptedData and metadata
-      const mockEncryptedResult = await new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any)
-        .encryptActivityData(testData, testUserKey);
+      const mockEncryptedResult = await new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      ).encryptActivityData(testData, testUserKey);
 
       jest.spyOn(indexedDBEnc, 'setItem').mockImplementation(async (key, value) => {
         const parsed = JSON.parse(value);
@@ -455,48 +506,69 @@ describe('Encryption Services Unit Tests', () => {
         return Promise.resolve();
       });
 
-      jest.spyOn(indexedDBEnc, 'getItem').mockImplementation(async (key) => {
+      jest.spyOn(indexedDBEnc, 'getItem').mockImplementation(async key => {
         const stored = indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData'][key];
         if (stored) {
           // Simulate IndexedDBEncryption's getItem returning decrypted data
-          return new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any).decryptActivityData(stored.encryptedData, stored.metadata, testUserKey);
+          return new ClientSideEncryption(
+            new WebCryptoService(),
+            mockKeyDerivationService as any
+          ).decryptActivityData(stored.encryptedData, stored.metadata, testUserKey);
         }
         return null;
       });
 
-      await cacheService.cacheEncryptedData('cacheKey1', mockEncryptedResult.encryptedData, mockEncryptedResult.metadata);
+      await cacheService.cacheEncryptedData(
+        'cacheKey1',
+        mockEncryptedResult.encryptedData,
+        mockEncryptedResult.metadata
+      );
 
       const retrievedData = await cacheService.retrieveCachedData('cacheKey1');
       expect(retrievedData).toEqual(testData);
     });
 
     it('should remove cached data', async () => {
-      const mockEncryptedResult = await new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any)
-        .encryptActivityData(testData, testUserKey);
-      
+      const mockEncryptedResult = await new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      ).encryptActivityData(testData, testUserKey);
+
       jest.spyOn(indexedDBEnc, 'setItem').mockImplementation(async (key, value) => {
         const parsed = JSON.parse(value);
         indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData'][key] = parsed; // Simulate IndexedDB storage
         return Promise.resolve();
       });
 
-      jest.spyOn(indexedDBEnc, 'removeItem').mockImplementation(async (key) => {
+      jest.spyOn(indexedDBEnc, 'removeItem').mockImplementation(async key => {
         delete indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData'][key];
         return Promise.resolve();
       });
 
-      await cacheService.cacheEncryptedData('cacheKey2', mockEncryptedResult.encryptedData, mockEncryptedResult.metadata);
+      await cacheService.cacheEncryptedData(
+        'cacheKey2',
+        mockEncryptedResult.encryptedData,
+        mockEncryptedResult.metadata
+      );
       await cacheService.removeCachedData('cacheKey2');
 
       // Verify by checking the mock IndexedDB's internal state
-      expect(indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData']['activity-data-cache_cacheKey2']).toBeUndefined();
+      expect(
+        indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData'][
+          'activity-data-cache_cacheKey2'
+        ]
+      ).toBeUndefined();
     });
 
     it('should clear all cached data', async () => {
-      const mockEncryptedResult1 = await new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any)
-        .encryptActivityData(testData + '1', testUserKey);
-      const mockEncryptedResult2 = await new ClientSideEncryption(new WebCryptoService(), mockKeyDerivationService as any)
-        .encryptActivityData(testData + '2', testUserKey);
+      const mockEncryptedResult1 = await new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      ).encryptActivityData(testData + '1', testUserKey);
+      const mockEncryptedResult2 = await new ClientSideEncryption(
+        new WebCryptoService(),
+        mockKeyDerivationService as any
+      ).encryptActivityData(testData + '2', testUserKey);
 
       jest.spyOn(indexedDBEnc, 'setItem').mockImplementation(async (key, value) => {
         const parsed = JSON.parse(value);
@@ -508,26 +580,46 @@ describe('Encryption Services Unit Tests', () => {
         return Promise.resolve();
       });
 
-      await cacheService.cacheEncryptedData('cacheKey1', mockEncryptedResult1.encryptedData, mockEncryptedResult1.metadata);
-      await cacheService.cacheEncryptedData('cacheKey2', mockEncryptedResult2.encryptedData, mockEncryptedResult2.metadata);
+      await cacheService.cacheEncryptedData(
+        'cacheKey1',
+        mockEncryptedResult1.encryptedData,
+        mockEncryptedResult1.metadata
+      );
+      await cacheService.cacheEncryptedData(
+        'cacheKey2',
+        mockEncryptedResult2.encryptedData,
+        mockEncryptedResult2.metadata
+      );
       await cacheService.clearCache();
 
       // Verify by checking the mock IndexedDB's internal state
-      expect(Object.keys(indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData']).length).toEqual(0);
+      expect(
+        Object.keys(indexedDBMock.stores['PeakActivityEncryptedDB']['encryptedData']).length
+      ).toEqual(0);
     });
 
     it('should throw error if user key is not set when caching', async () => {
       cacheService = new OfflineEncryptionCache(indexedDBEnc);
       cacheService.setUserKey(''); // Unset the key
-      const mockEncryptedResult = { encryptedData: 'fake', metadata: { algorithm: 'AES-256-GCM', iv: 'fake', version: '1.0' } };
-      await expect(cacheService.cacheEncryptedData('key', mockEncryptedResult.encryptedData, mockEncryptedResult.metadata))
-        .rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
+      const mockEncryptedResult = {
+        encryptedData: 'fake',
+        metadata: { algorithm: 'AES-256-GCM', iv: 'fake', version: '1.0' },
+      };
+      await expect(
+        cacheService.cacheEncryptedData(
+          'key',
+          mockEncryptedResult.encryptedData,
+          mockEncryptedResult.metadata
+        )
+      ).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
     });
 
     it('should throw error if user key is not set when retrieving', async () => {
       cacheService = new OfflineEncryptionCache(indexedDBEnc);
       cacheService.setUserKey(''); // Unset the key
-      await expect(cacheService.retrieveCachedData('key')).rejects.toThrow('Kullanıcı anahtarı ayarlanmamış');
+      await expect(cacheService.retrieveCachedData('key')).rejects.toThrow(
+        'Kullanıcı anahtarı ayarlanmamış'
+      );
     });
   });
 
@@ -546,7 +638,7 @@ describe('Encryption Services Unit Tests', () => {
           autoEncryption: true,
           encryptionAlgorithm: 'AES-256-GCM',
         })),
-        saveEncryptionSettings: jest.fn(async (settings) => {
+        saveEncryptionSettings: jest.fn(async settings => {
           return { success: true, settings };
         }),
       };
@@ -569,13 +661,21 @@ describe('Encryption Services Unit Tests', () => {
 
     it('should display current encryption settings upon creation', async () => {
       await wrapper.vm.$nextTick(); // Wait for component to update
-      expect(wrapper.find('input[type="checkbox"][data-test="encryption-enabled"]').element.checked).toBe(true);
-      expect(wrapper.find('input[type="checkbox"][data-test="auto-encryption"]').element.checked).toBe(true);
-      expect(wrapper.find('select[data-test="encryption-algorithm"]').element.value).toBe('AES-256-GCM');
+      expect(
+        wrapper.find('input[type="checkbox"][data-test="encryption-enabled"]').element.checked
+      ).toBe(true);
+      expect(
+        wrapper.find('input[type="checkbox"][data-test="auto-encryption"]').element.checked
+      ).toBe(true);
+      expect(wrapper.find('select[data-test="encryption-algorithm"]').element.value).toBe(
+        'AES-256-GCM'
+      );
     });
 
     it('should update encryption enabled setting', async () => {
-      const encryptionEnabledCheckbox = wrapper.find('input[type="checkbox"][data-test="encryption-enabled"]');
+      const encryptionEnabledCheckbox = wrapper.find(
+        'input[type="checkbox"][data-test="encryption-enabled"]'
+      );
       await encryptionEnabledCheckbox.setValue(false);
       expect(wrapper.vm.encryptionEnabled).toBe(false);
       // Simulate save button click
@@ -587,7 +687,9 @@ describe('Encryption Services Unit Tests', () => {
     });
 
     it('should update auto encryption setting', async () => {
-      const autoEncryptionCheckbox = wrapper.find('input[type="checkbox"][data-test="auto-encryption"]');
+      const autoEncryptionCheckbox = wrapper.find(
+        'input[type="checkbox"][data-test="auto-encryption"]'
+      );
       await autoEncryptionCheckbox.setValue(false);
       expect(wrapper.vm.autoEncryption).toBe(false);
       // Simulate save button click
@@ -613,4 +715,4 @@ describe('Encryption Services Unit Tests', () => {
 
     // Add more tests for error handling, validation, etc.
   });
-}); 
+});

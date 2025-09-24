@@ -68,7 +68,10 @@ export async function applyCommunityRules(event: any, community_rules: any[]): P
 }
 
 // New function for Contextual Categorization (Title/Content Analysis)
-export async function getContextualCategorization(context: string, language?: string): Promise<any> {
+export async function getContextualCategorization(
+  context: string,
+  language?: string
+): Promise<any> {
   const client = getClient();
   const payload: { context: string; language?: string } = { context };
   if (language) {
