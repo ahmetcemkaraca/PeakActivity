@@ -66,24 +66,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../../firebase'; // Firebase fonksiyonları instance'ını içe aktarın
+import { ref, toRefs } from 'vue'; // toRefs eklendi
+// import { httpsCallable } from 'firebase/functions'; // Kaldırıldı
+// import { functions } from '../../../firebase'; // Kaldırıldı
 import { useAgentStore } from '../../stores/agent'; // Yeni Pinia store'u içe aktarın
+import axios from 'axios'; // axios eklendi
 
 const agentStore = useAgentStore();
 
 // Pinia store'dan durumları doğrudan kullan
-const agentConfigYaml = agentStore.agentConfigYaml;
-const topic = agentStore.topic;
-const output = agentStore.output;
-const error = agentStore.error;
-const isLoading = agentStore.isLoading;
-const configError = agentStore.configError;
-const topicError = agentStore.topicError;
+const { agentConfigYaml, topic, output, error, isLoading, configError, topicError } = toRefs(agentStore); // toRefs ile sarmalandı
 
 // Firebase Callable Function'ı tanımlayın
-const generateAgentCallable = httpsCallable(functions, 'generateAgent');
+// const generateAgentCallable = httpsCallable(functions, 'generateAgent'); // Kaldırıldı
 
 const generateAgent = async () => {
   // Hataları sıfırla (store üzerinden)
@@ -94,29 +89,33 @@ const generateAgent = async () => {
 
   // Giriş doğrulama
   if (!agentConfigYaml.value) {
-    agentStore.configError = 'Ajan yapılandırma YAML\'ı boş olamaz.';
+    configError.value = 'Ajan yapılandırma YAML\'ı boş olamaz.'; // Doğrudan kullan
     return;
   }
   if (!topic.value) {
-    agentStore.topicError = 'Görev konusu boş olamaz.';
+    topicError.value = 'Görev konusu boş olamaz.'; // Doğrudan kullan
     return;
   }
 
-  agentStore.isLoading = true;
+  isLoading.value = true;
   try {
-    const result = await generateAgentCallable({
+    // const result = await generateAgentCallable({
+    //   agent_config_data: agentConfigYaml.value,
+    //   topic: topic.value,
+    // });
+    const response = await axios.post('/api/generate-agent', {
       agent_config_data: agentConfigYaml.value,
       topic: topic.value,
     });
-    agentStore.output = result.data;
+    output.value = response.data;
   } catch (err: any) {
     console.error("Ajan oluşturma hatası:", err);
-    agentStore.error = err.message || 'Ajan oluşturma sırasında bir hata oluştu.';
+    error.value = err.message || 'Ajan oluşturma sırasında bir hata oluştu.';
     if (err.details) {
-      agentStore.error += ` Detaylar: ${JSON.stringify(err.details)}`;
+      error.value += ` Detaylar: ${JSON.stringify(err.details)}`;
     }
   } finally {
-    agentStore.isLoading = false;
+    isLoading.value = false;
   }
 };
 </script>

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from time import sleep
 
 from aw_client import ActivityWatchClient
+from aw_core.constants import AFKStatus, BucketType
 from aw_core.models import Event
 
 from .config import load_config
@@ -68,7 +69,7 @@ class AFKWatcher:
         # Initialization
         self.client.wait_for_start()
 
-        eventtype = "afkstatus"
+        eventtype = BucketType.AFK_WATCHER.value
         self.client.create_bucket(self.bucketname, eventtype, queued=True)
 
         # Start afk checking loop
@@ -76,7 +77,7 @@ class AFKWatcher:
             self.heartbeat_loop()
 
     def heartbeat_loop(self):
-        current_status = "not-afk"
+        current_status = AFKStatus.NOT_AFK.value
         while True:
             try:
                 if system in ["Darwin", "Linux"] and os.getppid() == 1:
@@ -91,9 +92,9 @@ class AFKWatcher:
                 last_input = now - timedelta(seconds=seconds_since_input)
                 logger.debug(f"Seconds since last input: {seconds_since_input}")
 
-                new_status = "not-afk"
+                new_status = AFKStatus.NOT_AFK.value
                 if seconds_since_input >= self.settings.timeout:
-                    new_status = "afk"
+                    new_status = AFKStatus.AFK.value
                 elif seconds_since_input >= self.settings.thinking_timeout:
                     new_status = "thinking-time"
 

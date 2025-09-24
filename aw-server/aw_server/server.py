@@ -2,17 +2,12 @@ import logging
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List
-import asyncio # asyncio'yu içe aktar
 
 import aw_datastore
 import flask.json.provider
 from aw_datastore import Datastore
-from flask import (
-    Blueprint,
-    Flask,
-    current_app,
-    send_from_directory,
-)
+from flask import Blueprint, Flask, current_app, send_from_directory
+from flask_apscheduler import APScheduler
 from flask_cors import CORS
 
 from . import rest
@@ -29,6 +24,12 @@ root = Blueprint("root", __name__, url_prefix="/")
 
 
 class AWFlask(Flask):
+    """ActivityWatch Flask Application.
+    
+    Custom Flask application class that initializes and configures the ActivityWatch server
+    with datastore, API endpoints, CORS, and background synchronization tasks.
+    """
+    
     def __init__(
         self,
         host: str,
@@ -41,44 +42,55 @@ class AWFlask(Flask):
         user_id: str = "default_user_id", # user_id parametresi eklendi
     ):
         name = "aw-server"
+        
+        # Configure JSON provider for custom datetime/timedelta serialization
+        # Pretty-print JSON only in testing mode for better performance in production
         self.json_provider_class = CustomJSONProvider
-        # only prettyprint JSON if testing (due to perf)
         self.json_provider_class.compact = not testing
 
-        # Initialize Flask
+        # Initialize Flask with static file serving configuration
         Flask.__init__(
             self,
             name,
             static_folder=static_folder,
             static_url_path=static_url_path,
         )
+        
+        # Store host configuration for DNS rebinding protection
         self.config["HOST"] = host  # needed for host-header check
+        
+        # Configure CORS (Cross-Origin Resource Sharing) within app context
         with self.app_context():
             _config_cors(cors_origins, testing)
 
-        # Initialize datastore and API
+        # Initialize datastore backend - defaults to memory storage if not specified
         if storage_method is None:
             storage_method = aw_datastore.get_storage_methods()["memory"]
         db = Datastore(storage_method, testing=testing)
+        
+        # Initialize ServerAPI with configured datastore
         self.api = ServerAPI(db=db, testing=testing)
 
-        self.register_blueprint(root)
-        self.register_blueprint(rest.blueprint)
-        self.register_blueprint(get_custom_static_blueprint(custom_static))
+        # Register Flask blueprints for different URL namespaces
+        self.register_blueprint(root)  # Root routes (/)
+        self.register_blueprint(rest.blueprint)  # REST API routes (/api)
+        self.register_blueprint(get_custom_static_blueprint(custom_static))  # Custom static files
 
-        # Firebase senkronizasyonunu arka planda başlat
-        self.loop = asyncio.get_event_loop()
-        self.loop.create_task(self.api.synchronizer.full_sync())
+        # Configure background task scheduler for periodic operations
+        scheduler = APScheduler()
+        scheduler.init_app(self)
+        scheduler.start()
 
-        # Her 4 saatte bir tam senkronizasyon görevi
-        self.sync_interval_seconds = 4 * 60 * 60 # 4 saat
-        self.loop.create_task(self._periodic_sync())
-
-    async def _periodic_sync(self):
-        while True:
-            await asyncio.sleep(self.sync_interval_seconds)
-            logger.info(f"Periyodik Firebase senkronizasyonu başlatılıyor ({self.sync_interval_seconds / 3600} saat aralıklarla)...")
-            await self.api.synchronizer.full_sync()
+        # Schedule periodic Firebase synchronization every 4 hours
+        @scheduler.task('interval', id='full_sync_job', hours=4)
+        def periodic_sync_job():
+            """Background task for periodic Firebase data synchronization."""
+            with self.app_context():
+                logger.info("Periyodik Firebase senkronizasyonu başlatılıyor...")
+                # Run async sync in new event loop since APScheduler uses its own thread
+                import asyncio
+                asyncio.run(self.api.sync_data("full"))
+                logger.info("Periyodik Firebase senkronizasyonu tamamlandı.")
 
 
 class CustomJSONProvider(flask.json.provider.DefaultJSONProvider):

@@ -1,28 +1,24 @@
 import json
+import logging
 import traceback
 from functools import wraps
 from threading import Lock
 from typing import Dict
 
 import iso8601
+import requests
+import yaml
 from aw_core import schema
 from aw_core.models import Event
+from aw_core.exceptions import AWNetworkException, AWValidationException, AWFirebaseException
 from aw_query.exceptions import QueryException
-from flask import (
-    Blueprint,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_restx import Api, Resource, fields
-import requests # Yeni eklenen import
-import yaml # Yeni eklenen import
-from ..praisonai_integration.agent_service import AgentsGenerator # Yeni eklenen import
 
 from . import logger
 from .api import ServerAPI
 from .exceptions import BadRequest, Unauthorized
+from praisonai_integration.agent_service import AgentsGenerator
 
 
 def host_header_check(f):
@@ -50,11 +46,15 @@ def host_header_check(f):
     return decorator
 
 
+# Flask Blueprint for API routes with /api prefix
 blueprint = Blueprint("api", __name__, url_prefix="/api")
+
+# Flask-RESTX API object with Swagger documentation at root and DNS rebinding protection
 api = Api(blueprint, doc="/", decorators=[host_header_check])
 
 
-# Loads event and bucket schema from JSONSchema in aw_core
+# Schema models loaded from JSONSchema definitions in aw_core
+# These define the structure for API request/response validation and documentation
 event = api.schema_model("Event", schema.get_json_schema("event"))
 bucket = api.schema_model("Bucket", schema.get_json_schema("bucket"))
 buckets_export = api.schema_model("Export", schema.get_json_schema("export"))
@@ -62,6 +62,8 @@ buckets_export = api.schema_model("Export", schema.get_json_schema("export"))
 # TODO: Construct all the models from JSONSchema?
 #       A downside to contructing from JSONSchema: flask-restplus does not have marshalling support
 
+# Server information model for /info endpoint
+# Contains basic server metadata including hostname, version, and testing mode
 info = api.model(
     "Info",
     {
@@ -72,6 +74,8 @@ info = api.model(
     },
 )
 
+# Request model for bucket creation endpoint
+# Defines required fields for creating new data buckets
 create_bucket = api.model(
     "CreateBucket",
     {
@@ -81,6 +85,8 @@ create_bucket = api.model(
     },
 )
 
+# Request model for bucket update endpoint
+# All fields are optional for partial updates
 update_bucket = api.model(
     "UpdateBucket",
     {
@@ -91,6 +97,8 @@ update_bucket = api.model(
     },
 )
 
+# Query request model for ActivityWatch query language
+# Defines structure for time-based data queries with custom query strings
 query = api.model(
     "Query",
     {
@@ -201,9 +209,13 @@ class EventsResource(Resource):
     @copy_doc(ServerAPI.get_events)
     def get(self, bucket_id):
         args = request.args
-        limit = int(args["limit"]) if "limit" in args else -1
+        limit = int(args["limit"]) if "limit" in args else 500
         start = iso8601.parse_date(args["start"]) if "start" in args else None
         end = iso8601.parse_date(args["end"]) if "end" in args else None
+
+        # API katmanındaki üst limiti burada da zorunlu kıl
+        if limit > 5000:
+            limit = 5000
 
         events = current_app.api.get_events(
             bucket_id, limit=limit, start=start, end=end
@@ -229,6 +241,89 @@ class EventsResource(Resource):
             raise BadRequest("Invalid POST data", "")
 
         event = current_app.api.create_events(bucket_id, events)
+        return event.to_json_dict() if event else None, 200
+
+
+@api.route("/0/buckets/<string:bucket_id>/events/raw")
+class EventsRawResource(Resource):
+    @api.expect(event)
+    @copy_doc(ServerAPI.create_raw_events)
+    def post(self, bucket_id):
+        data = request.get_json()
+        logger.debug(
+            "Received POST request for raw events in bucket '{}' and data: {}".format(
+                bucket_id, data
+            )
+        )
+
+        if isinstance(data, dict):
+            events_data = [data]
+        elif isinstance(data, list):
+            events_data = data
+        else:
+            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries.")
+
+        validated_events = []
+        for event_data in events_data:
+            try:
+                # Attempt to create an Event object to validate its structure
+                # This leverages the validation logic within aw_core.models.Event
+                event_obj = Event(**event_data)
+                validated_events.append(event_obj)
+            except Exception as e:
+                raise BadRequest(f"Invalid event data format: {e}", str(e)) from e
+
+        event = current_app.api.create_raw_events(bucket_id, validated_events)
+        return event.to_json_dict() if event else None, 200
+
+
+@api.route("/0/buckets/<string:bucket_id>/events/encrypted-ai")
+class EventsEncryptedAIResource(Resource):
+    @api.expect(event) # TODO: Define a proper model for encrypted events
+    @copy_doc(ServerAPI.create_encrypted_ai_events)
+    def post(self, bucket_id):
+        data = request.get_json()
+        logger.debug(
+            "Received POST request for encrypted AI events in bucket '{}' and data: {}".format(
+                bucket_id, data
+            )
+        )
+
+        if isinstance(data, dict):
+            encrypted_events_data = [data]
+        elif isinstance(data, list):
+            encrypted_events_data = data
+        else:
+            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries for encrypted events.")
+
+        # TODO: Add more robust validation for encrypted data structure (payload, metadata)
+        
+        event = current_app.api.create_encrypted_ai_events(bucket_id, encrypted_events_data)
+        return event.to_json_dict() if event else None, 200
+
+
+@api.route("/0/buckets/<string:bucket_id>/events/encrypted-noai")
+class EventsEncryptedNoAIResource(Resource):
+    @api.expect(event) # TODO: Define a proper model for encrypted events
+    @copy_doc(ServerAPI.create_encrypted_noai_events)
+    def post(self, bucket_id):
+        data = request.get_json()
+        logger.debug(
+            "Received POST request for encrypted non-AI events in bucket '{}' and data: {}".format(
+                bucket_id, data
+            )
+        )
+
+        if isinstance(data, dict):
+            encrypted_events_data = [data]
+        elif isinstance(data, list):
+            encrypted_events_data = data
+        else:
+            raise BadRequest("Invalid POST data", "Expected a dictionary or a list of dictionaries for encrypted events.")
+
+        # TODO: Add more robust validation for encrypted data structure (payload, metadata)
+        
+        event = current_app.api.create_encrypted_noai_events(bucket_id, encrypted_events_data)
         return event.to_json_dict() if event else None, 200
 
 
@@ -475,15 +570,24 @@ class FocusQualityScoreResource(Resource):
             # Firebase Fonksiyonunun URL'sini buradan çağırın
             # Fonksiyonun URL'si dağıtıldıktan sonra edinilmelidir
             firebase_function_url = "YOUR_FIREBASE_FUNCTION_URL_HERE"
-            response = requests.post(firebase_function_url, json=data)
+            response = requests.post(firebase_function_url, json=data, timeout=30)
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Firebase Function call failed: {e}")
-            raise BadRequest("Firebase Function Error", str(e))
-        except Exception as e:
-            logger.error(f"An unexpected error occurred: {e}")
-            raise BadRequest("Internal Server Error", str(e))
+        except requests.exceptions.Timeout as timeout_e:
+            logger.error("Firebase Function call timed out: %s", timeout_e)
+            raise BadRequest("Request Timeout", "Firebase Function call timed out") from timeout_e
+        except requests.exceptions.ConnectionError as conn_e:
+            logger.error("Firebase Function connection failed: %s", conn_e)
+            raise BadRequest("Connection Error", "Unable to connect to Firebase Function") from conn_e
+        except requests.exceptions.HTTPError as http_e:
+            logger.error("Firebase Function HTTP error: %s", http_e)
+            raise BadRequest("HTTP Error", f"Firebase Function returned error: {http_e}") from http_e
+        except requests.exceptions.RequestException as req_e:
+            logger.error("Firebase Function request failed: %s", req_e)
+            raise BadRequest("Request Error", f"Firebase Function request failed: {req_e}") from req_e
+        except (json.JSONDecodeError, ValueError) as json_e:
+            logger.error("Firebase Function response parsing failed: %s", json_e)
+            raise BadRequest("Response Format Error", "Invalid response from Firebase Function") from json_e
 
 behavioral_trends_input = api.model(
     "BehavioralTrendsInput",
@@ -518,15 +622,24 @@ class BehavioralTrendsResource(Resource):
             # Firebase Fonksiyonunun URL'sini buradan çağırın
             # Fonksiyonun URL'si dağıtıldıktan sonra edinilmelidir
             firebase_function_url = "YOUR_FIREBASE_BEHAVIORAL_TRENDS_FUNCTION_URL_HERE"
-            response = requests.post(firebase_function_url, json=data)
+            response = requests.post(firebase_function_url, json=data, timeout=30)
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Firebase Function call failed: {e}")
-            raise BadRequest("Firebase Function Error", str(e))
-        except Exception as e:
-            logger.error(f"An unexpected error occurred: {e}")
-            raise BadRequest("Internal Server Error", str(e))
+        except requests.exceptions.Timeout as timeout_e:
+            logger.error("Behavioral trends Firebase Function call timed out: %s", timeout_e)
+            raise BadRequest("Request Timeout", "Behavioral trends analysis timed out") from timeout_e
+        except requests.exceptions.ConnectionError as conn_e:
+            logger.error("Behavioral trends Firebase Function connection failed: %s", conn_e)
+            raise BadRequest("Connection Error", "Unable to connect to behavioral trends service") from conn_e
+        except requests.exceptions.HTTPError as http_e:
+            logger.error("Behavioral trends Firebase Function HTTP error: %s", http_e)
+            raise BadRequest("HTTP Error", f"Behavioral trends service error: {http_e}") from http_e
+        except requests.exceptions.RequestException as req_e:
+            logger.error("Behavioral trends Firebase Function request failed: %s", req_e)
+            raise BadRequest("Request Error", f"Behavioral trends request failed: {req_e}") from req_e
+        except (json.JSONDecodeError, ValueError) as json_e:
+            logger.error("Behavioral trends response parsing failed: %s", json_e)
+            raise BadRequest("Response Format Error", "Invalid response from behavioral trends service") from json_e
 
 # Anomaly Detection Endpoints
 
@@ -562,15 +675,24 @@ class AnomalyDetectionResource(Resource):
             # Firebase Fonksiyonunun URL'sini buradan çağırın
             # Fonksiyonun URL'si dağıtıldıktan sonra edinilmelidir
             firebase_function_url = "YOUR_FIREBASE_ANOMALY_DETECTION_FUNCTION_URL_HERE"
-            response = requests.post(firebase_function_url, json=data)
+            response = requests.post(firebase_function_url, json=data, timeout=30)
             response.raise_for_status()  # HTTP hataları için hata fırlat
             return response.json(), 200
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Firebase Function call failed: {e}")
-            raise BadRequest("Firebase Function Error", str(e))
-        except Exception as e:
-            logger.error(f"An unexpected error occurred: {e}")
-            raise BadRequest("Internal Server Error", str(e))
+        except requests.exceptions.Timeout as timeout_e:
+            logger.error("Anomaly detection Firebase Function call timed out: %s", timeout_e)
+            raise BadRequest("Request Timeout", "Anomaly detection analysis timed out") from timeout_e
+        except requests.exceptions.ConnectionError as conn_e:
+            logger.error("Anomaly detection Firebase Function connection failed: %s", conn_e)
+            raise BadRequest("Connection Error", "Unable to connect to anomaly detection service") from conn_e
+        except requests.exceptions.HTTPError as http_e:
+            logger.error("Anomaly detection Firebase Function HTTP error: %s", http_e)
+            raise BadRequest("HTTP Error", f"Anomaly detection service error: {http_e}") from http_e
+        except requests.exceptions.RequestException as req_e:
+            logger.error("Anomaly detection Firebase Function request failed: %s", req_e)
+            raise BadRequest("Request Error", f"Anomaly detection request failed: {req_e}") from req_e
+        except (json.JSONDecodeError, ValueError) as json_e:
+            logger.error("Anomaly detection response parsing failed: %s", json_e)
+            raise BadRequest("Response Format Error", "Invalid response from anomaly detection service") from json_e
 
 # Automatic Categorization / Labeling Endpoints
 

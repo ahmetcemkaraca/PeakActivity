@@ -1,0 +1,91 @@
+# Prettier ignore file
+# Exclude build outputs and generated files
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+lib/
+build/
+coverage/
+.nyc_output/
+
+# Generated files
+*.min.js
+*.min.css
+*.map
+
+# Package files
+*.tgz
+*.tar.gz
+
+# Logs
+*.log
+logs/
+
+# ActivityWatch specific
+aw-core/
+static/
+public/
+
+# Database files
+*.db
+*.sqlite
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.venv/
+venv/
+.pytest_cache/
+
+# Documentation (keep source formatting)
+CHANGELOG.md
+LICENSE.md
+README.md
+docs/**/*.md
+
+# Configuration files that should keep their format
+*.config.js
+*.config.ts
+webpack.config.js
+vite.config.js
+vue.config.js
+jest.config.js
+babel.config.js
+
+# Lock files
+package-lock.json
+yarn.lock
+poetry.lock
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

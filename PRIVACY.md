@@ -1,233 +1,92 @@
-# PeakActivity Gizlilik Politikası
+# Privacy Policy (Gizlilik Politikası)
 
-**Son Güncelleme:** 2024-12-28  
-**Versiyon:** 0.4.0
+**Effective Date (Yürürlük Tarihi):** 2024-05-20
 
-## 📋 Genel Bakış
+## 1. Introduction (Giriş)
 
-PeakActivity, kullanıcı gizliliğini en üst öncelik olarak kabul eder. Bu belge, uygulamamızın nasıl veri topladığını, kullandığını, koruduğunu ve paylaştığını açıklar.
+PeakActivity, kişisel verilerinizin gizliliğini ve korunmasını taahhüt eder. Bu Gizlilik Politikası, AB Genel Veri Koruma Tüzüğü (GDPR) ve diğer ilgili veri koruma yasalarına uygun olarak, verilerinizi nasıl topladığımızı, kullandığımızı, işlediğimizi, sakladığımızı ve paylaştığımızı açıklamaktadır. Uygulamamızı kullanarak bu politikadaki uygulamaları kabul etmiş olursunuz.
 
-## 🔐 Veri Şifreleme ve Güvenlik
+## 2. Data Controller (Veri Sorumlusu)
 
-### Yerel Şifreleme
-- **Veritabanı:** SQLCipher ile AES-256 şifreleme
-- **Anahtar Yönetimi:** Kullanıcıya özel Argon2id anahtar türetme
-- **Dosya Şifreleme:** Ayarlar ve loglar AES-256-GCM ile şifrelenir
-- **Bellek Koruması:** Hassas veriler için güvenli bellek kullanımı
+PeakActivity Ekibi
+İletişim: [privacy@peakactivity.com](mailto:privacy@peakactivity.com)
 
-### Bulut Şifreleme
-- **Transit:** TLS 1.3 ile end-to-end şifreleme
-- **Rest:** Firestore'da şifreli veri depolama
-- **Anahtarlar:** Google Secret Manager ile korumalı
-- **Backup:** Şifreli yedekleme sistemi
+## 3. Data We Collect (Topladığımız Veriler)
 
-## 📊 Veri Sınıflandırması
+Veri toplamamız, size sunduğumuz hizmetlere ve onaylarınıza bağlı olarak üç ana seviyede gerçekleşir:
 
-### 1. Ham Veri (RAW)
-**Ne toplarız:**
-- Pencere başlıkları ve uygulama adları
-- Etkinlik süreleri ve zaman damgaları
-- Klavye ve fare aktivite verileri
-- Ekran görüntüleri (opsiyonel)
+### 3.1. Level 1 - Anonymous System Data (Anonim Sistem Verileri)
 
-**Nasıl kullanırız:**
-- AI destekli analiz ve öneriler
-- Verimlilik raporları oluşturma
-- Uygulama geliştirme ve iyileştirme
-- İstatistiksel analiz
+- **What we collect:** Anonymous technical data, such as application performance metrics, crash reports, and basic usage statistics (e.g., app uptime, feature usage frequency without personal identifiers).
+- **Purpose:** To improve the stability, performance, and overall user experience of the application. This data helps us identify bugs and optimize features.
+- **Legal Basis (Hukuki Dayanak):** Legitimate interest (Meşru Menfaat).
+- **Consent:** Collected by default, but you have the option to opt-out in settings.
 
-**Güvenlik:**
-- Açık kullanıcı onayı gerekli
-- Dilediğiniz zaman durdurabilirsiniz
-- Veri minimizasyon ilkeleri uygulanır
+### 3.2. Level 2 - Anonymized Usage Data (Anonimleştirilmiş Kullanım Verileri)
 
-### 2. Şifrelenmiş + AI Destekli Veri
-**Ne toplarız:**
-- Client-side şifrelenmiş aktivite verileri
-- Anonimleştirilmiş kullanım istatistikleri
-- AI işleme sonuçları
+- **What we collect:** More detailed usage data that has undergone anonymization. This may include time spent on specific applications or categories (e.g., "browsing," "work"), but personally identifiable information like exact window titles or URLs are removed or generalized.
+- **Purpose:** To analyze general usage trends, provide aggregated insights, and train AI models for features that do not require sensitive personal data. This data helps us understand user behavior patterns at a macro level.
+- **Legal Basis (Hukuki Dayanak):** Consent (Onay).
+- **Consent:** Collected only with your explicit consent. You can withdraw your consent at any time through the application settings.
 
-**Nasıl işleriz:**
-- Veriler sadece cihazınızda çözülür
-- AI işleme yerel olarak yapılır
-- İşlenmiş sonuçlar şifreli olarak saklanır
+### 3.3. Level 3 - Sensitive Personal Data (Hassas Kişisel Veriler)
 
-**Güvenlik:**
-- AES-256-GCM şifreleme
-- API kötüye kullanım koruması
-- Sıkı rate limiting
-- Zararlı kod taraması
+- **What we collect:** Raw, detailed activity logs including window titles, full URLs, and other potentially sensitive text data that is processed by advanced AI features. This data is collected **only with your explicit consent and is client-side encrypted**.
+- **Purpose:** To provide highly personalized insights, advanced AI-driven recommendations, and detailed productivity analysis based on your unique activity patterns.
+- **Legal Basis (Hukuki Dayanak):** Explicit Consent (Açık Onay).
+- **Consent:** Collected only with your explicit, granular consent. This data is **encrypted on your device before being sent to our servers**, ensuring that we never have access to it in plaintext without your master password. You can revoke this consent at any time.
 
-### 3. Şifrelenmiş + AI Desteksiz Veri
-**Ne toplarız:**
-- Sadece yedekleme amaçlı şifreli veriler
-- Hiçbir AI işlem yapılmaz
+## 4. How We Use Your Data (Verilerinizi Nasıl Kullanıyoruz)
 
-**Nasıl kullanırız:**
-- Sadece güvenli yedekleme
-- Cihaz değişikliklerinde veri geri yükleme
-- Senkronizasyon hizmeti
+We use the collected data for the following purposes:
+- To provide and maintain our services.
+- To improve, personalize, and expand our services.
+- To understand and analyze how you use our services.
+- To develop new products, services, features, and functionality.
+- To communicate with you, either directly or through one of our partners, for customer service, to provide you with updates and other information relating to the service, and for marketing and promotional purposes.
+- For security purposes, including detecting and preventing fraud.
 
-**Güvenlik:**
-- En yüksek gizlilik seviyesi
-- Zero-knowledge architecture
-- Sadece siz verilerinizi görebilirsiniz
+## 5. Data Encryption and Security (Veri Şifreleme ve Güvenlik)
 
-## 🎯 Veri Toplama Amaçları
+PeakActivity employs robust encryption and security measures to protect your data:
+- **Client-Side Encryption:** Sensitive personal data (Level 3) is encrypted on your device using AES-256-GCM before it is transmitted or stored. Our servers operate under a zero-knowledge principle for this data, meaning we cannot decrypt it.
+- **Secure Key Management:** Encryption keys are securely derived from your master password using Argon2id and stored in your operating system's native keychain.
+- **Data in Transit:** All communications between your device and our servers are secured using industry-standard TLS/SSL encryption.
+- **Data at Rest:** Encrypted data stored on our cloud infrastructure (Firestore, Storage) is protected by Google Cloud's advanced security features.
+- **Regular Security Audits:** Our systems and code undergo regular security audits and penetration testing.
 
-### Zorunlu Veri Toplama
-**Sistem Verileri:**
-- Uygulama çökme raporları
-- Performans metrikleri
-- API kullanım istatistikleri
-- Güvenlik olayları
+## 6. Data Sharing and Disclosure (Veri Paylaşımı ve İfşa)
 
-**Hukuki Dayanağı:** Meşru menfaat (uygulama güvenilirliği)
+We do not share your personal data with third parties except in the following limited circumstances:
+- **With Your Consent:** We may share your data when we have your explicit consent to do so, especially for Level 2 and Level 3 data.
+- **For External Service Integrations:** If you enable integrations with third-party services (e.g., Google Calendar, Trello), we will securely transmit only the necessary encrypted credentials and data to facilitate these integrations.
+- **Legal Requirements:** We may disclose your data if required by law or in response to valid requests by public authorities (e.g., a court order).
+- **Business Transfers:** In connection with any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.
+- **Aggregated or Anonymized Data:** We may share aggregated or anonymized data that cannot reasonably be used to identify you.
 
-### Opsiyonel Veri Toplama
-**Kullanım Verileri:**
-- Kategori bazlı ekran süreleri
-- Uygulama kullanım süreleri
-- AI önerilerine verilen tepkiler
-- Özellik kullanım istatistikleri
+## 7. International Data Transfers (Uluslararası Veri Transferleri)
 
-**Hukuki Dayanağı:** Açık kullanıcı onayı
+Your data may be transferred to, and processed in, countries other than the country in which you are resident. These countries may have data protection laws that are different from the laws of your country. Specifically, our servers are primarily located in `us-central1`. We ensure that your data is protected by implementing appropriate safeguards, such as standard contractual clauses approved by the European Commission, where required by GDPR.
 
-## 🛡️ Veri Koruma Hakları
+## 8. Your Data Protection Rights (Veri Koruma Haklarınız)
 
-### GDPR Kapsamında Haklarınız
-1. **Bilgi Alma Hakkı:** Hangi verilerinizin toplandığını öğrenme
-2. **Erişim Hakkı:** Kişisel verilerinizin kopyasını alma
-3. **Düzeltme Hakkı:** Yanlış bilgilerin düzeltilmesi
-4. **Silme Hakkı:** "Unutulma hakkı" - verilerinizin silinmesi
-5. **Taşınabilirlik Hakkı:** Verilerinizi başka servise aktarma
-6. **İtiraz Hakkı:** Veri işlemeye itiraz etme
+Under GDPR and other applicable data protection laws, you have the following rights regarding your personal data:
 
-### Haklarınızı Kullanma
-- **Uygulama içi:** Ayarlar > Gizlilik > Veri Hakları
-- **E-posta:** privacy@peakactivity.app
-- **Yanıt süresi:** 30 gün içinde
+- **Right to Access (Erişim Hakkı):** You have the right to request copies of your personal data.
+- **Right to Rectification (Düzeltme Hakkı):** You have the right to request that we correct any information you believe is inaccurate or complete information you believe is incomplete.
+- **Right to Erasure (Silme Hakkı / Unutulma Hakkı):** You have the right to request that we erase your personal data, under certain conditions.
+- **Right to Restrict Processing (İşlemeyi Kısıtlama Hakkı):** You have the right to request that we restrict the processing of your personal data, under certain conditions.
+- **Right to Object to Processing (İşlemeye İtiraz Hakkı):** You have the right to object to our processing of your personal data, under certain conditions.
+- **Right to Data Portability (Veri Taşınabilirliği Hakkı):** You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.
+- **Right to Withdraw Consent (Onayı Geri Çekme Hakkı):** Where we process your personal data based on your consent, you have the right to withdraw that consent at any time.
 
-## 🔄 Veri Saklama Süreleri
+To exercise any of these rights, please contact us at [privacy@peakactivity.com](mailto:privacy@peakactivity.com). We will respond to your request within one month.
 
-| Veri Türü | Saklama Süresi | Silme Koşulu |
-|-----------|----------------|---------------|
-| Ham aktivite verileri | Maksimum 2 yıl | Kullanıcı talebi veya hesap silme |
-| Şifrelenmiş veriler | Kullanıcı kontrolünde | Kullanıcı talebi |
-| Sistem logları | 90 gün | Otomatik |
-| Güvenlik olayları | 1 yıl | Yasal gereklilik |
-| Analytics verileri | 13 ay | GDPR uyumluluğu |
+## 9. Changes to This Privacy Policy (Bu Gizlilik Politikasında Yapılan Değişiklikler)
 
-## 🤝 Veri Paylaşımı
+We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" at the top. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
 
-### Üçüncü Taraflarla Paylaşım
-**Paylaşmadığımız veriler:**
-- Kişisel aktivite detayları
-- Şifreli kullanıcı verileri
-- Kimlik bilgileri
-- Hassas kişisel bilgiler
+## 10. Contact Us (Bize Ulaşın)
 
-**Sınırlı paylaşım:**
-- **Analytics sağlayıcıları:** Anonimleştirilmiş istatistikler
-- **Bulut altyapı:** Şifrelenmiş veriler (Google Cloud)
-- **Güvenlik servisleri:** Tehdit tespiti için
-
-### Yasal Gereklilikler
-Sadece aşağıdaki durumlarda veri paylaşırız:
-- Yasal zorunluluk
-- Mahkeme kararı
-- Ulusal güvenlik
-- Kullanıcı güvenliğini koruma
-
-## 🎛️ Gizlilik Kontrolü
-
-### Kullanıcı Ayarları
-**Temel Ayarlar:**
-- Veri toplama seviyesi seçimi
-- AI işleme tercihleri
-- Paylaşım izinleri
-- Otomatik silme ayarları
-
-**Gelişmiş Ayarlar:**
-- Şifreleme algoritması seçimi
-- Anahtar yönetimi
-- Yedekleme ayarları
-- 2FA ve güvenlik
-
-### Onay Yönetimi
-- **Granüler kontrol:** Her veri türü için ayrı onay
-- **Kolay geri çekme:** Tek tıkla onay iptal etme
-- **Geçmiş görüntüleme:** Onay değişiklik geçmişi
-- **Düzenli hatırlatma:** Yılda bir onay yenileme
-
-## 🔐 Anahtar Yönetimi ve Kurtarma
-
-### Master Password
-- Tüm verilerinizi koruyan ana şifre
-- Argon2id ile güçlendirilmiş türetme
-- Asla sunucularımızda saklanmaz
-
-### Kurtarma Yöntemleri
-1. **Güvenlik Soruları:** 3 adet güvenlik sorusu
-2. **2FA Backup Kodları:** One-time kullanım kodları
-3. **E-posta Kurtarma:** Güvenli token ile
-4. **Biometric/WebAuthn:** FIDO2 destekli
-
-### Anahtar Kaybı
-⚠️ **Önemli:** Anahtarınızı kaybederseniz verilerinizi kurtaramayız. Bu, güvenliğiniz için tasarlanmış bir özelliktir.
-
-## 🌍 Uluslararası Veri Aktarımları
-
-### Veri Konumları
-- **Birincil:** Avrupa (Google Cloud Europe)
-- **Yedek:** ABD (şifrelenmiş)
-- **İşleme:** Kullanıcı cihazı (lokal)
-
-### Güvenlik Önlemleri
-- Standart Sözleşmeli Maddeler (SCC)
-- Adequacy kararları
-- GDPR Article 46 uyumluluğu
-- Ek güvenlik önlemleri
-
-## 📞 İletişim
-
-### Gizlilik Sorularınız
-- **E-posta:** privacy@peakactivity.app
-- **Adres:** [Şirket Adresi]
-- **Telefon:** [Telefon Numarası]
-
-### Veri Koruma Sorumlusu
-- **E-posta:** dpo@peakactivity.app
-- **Görev:** GDPR uyumluluk ve veri koruma
-
-### Şikayet Hakkı
-AB vatandaşları için:
-- Yerel veri koruma otoritesine şikayet hakkı
-- [Ülkenize göre DPA iletişim bilgileri]
-
-## 📝 Değişiklikler
-
-### Politika Güncellemeleri
-- Önemli değişiklikler 30 gün önceden bildirilir
-- E-posta ve uygulama içi bildirim
-- Eski versiyon geçmişi mevcut
-
-### Versiyon Geçmişi
-- **v0.4.0 (2024-12-28):** İlk kapsamlı gizlilik politikası
-- Gelecek güncellemeler burada listelenecek
-
-## ✅ Sertifikalar ve Uyumluluk
-
-### Güvenlik Standartları
-- SOC 2 Type II uyumluluğu (hedef)
-- ISO 27001 sertifikasyonu (planlanan)
-- OWASP Top 10 uyumluluğu
-
-### Gizlilik Sertifikaları
-- GDPR uyumluluğu
-- CCPA uyumluluğu (Kaliforniya)
-- Privacy Shield (varsa)
-
----
-
-**Son Not:** Bu gizlilik politikası yaşayan bir belgedir ve teknolojik gelişmeler ile yasal değişikliklere göre güncellenebilir. Güncel versiyonu her zaman uygulama içinde bulabilirsiniz. 
+If you have any questions about this Privacy Policy, please contact us:
+- By email: [privacy@peakactivity.com](mailto:privacy@peakactivity.com) 

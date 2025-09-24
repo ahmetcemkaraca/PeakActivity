@@ -21,6 +21,8 @@ werkzeug = "^2.3.3"
 firebase-admin = "^6.0.0" # Firestore entegrasyonu için gerekli
 google-cloud-secret-manager = "^2.17.0"
 google-cloud-logging = "^3.8.0"
+cachetools = "^5.3.3"
+Flask-APScheduler = "^1.12.4"
 
 [tool.poetry.dev-dependencies]
 mypy = "*"

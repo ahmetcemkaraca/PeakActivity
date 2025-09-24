@@ -2,12 +2,16 @@ import pytest
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os
+from unittest.mock import patch, MagicMock
 
-# Firebase Admin SDK'sını test ortamında başlat
-# Bu, pytest fixture'ı veya conftest.py içinde daha iyi yönetilebilir.
-# Ancak manuel çalıştırma için burada basit bir başlatma yapıyoruz.
-import firebase_admin
-from firebase_admin import credentials, firestore, functions
+# Firebase Admin SDK ve Firestore'u test ortamında mock'la
+@pytest.fixture(autouse=True, scope="module")
+def mock_firebase():
+    with patch("firebase_admin.initialize_app") as mock_init_app, \
+         patch("firebase_admin.firestore.client") as mock_firestore_client:
+        mock_init_app.return_value = MagicMock()
+        mock_firestore_client.return_value = MagicMock()
+        yield
 
 # Test için Firebase emülatör URL'lerini kullan
 FIRESTORE_EMULATOR_HOST = os.environ.get('FIRESTORE_EMULATOR_HOST', 'localhost:8080')

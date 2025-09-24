@@ -39,7 +39,7 @@ dmyp.json
 .cursor/
 .cursor/rules/
 chatcontext/
-
+smart-tree/
 # Environment files
 .env
 .env.local

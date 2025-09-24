@@ -33,8 +33,9 @@ div.google-calendar-settings
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '~/firebase';
+// import { httpsCallable } from 'firebase/functions'; // Kaldırıldı
+// import { functions } from '../firebase'; // Kaldırıldı
+import axios from 'axios'; // Eklendi
 
 interface Calendar {
   id: string;
@@ -52,7 +53,7 @@ const saving = ref(false);
 const error = ref<string | null>(null);
 
 // Firebase Cloud Functions çağrıları
-const listGoogleCalendarsCallable = httpsCallable(functions, 'listGoogleCalendars');
+// const listGoogleCalendarsCallable = httpsCallable(functions, 'listGoogleCalendars'); // Kaldırıldı
 
 const connectGoogleAccount = async () => {
   connecting.value = true;
@@ -61,11 +62,16 @@ const connectGoogleAccount = async () => {
   error.value = null;
 
   try {
-    // TODO: Google OAuth akışını başlatmak için bir backend fonksiyonu çağrısı
-    // Geçici olarak, başarılı olduğunu varsayalım ve takvimleri listeleyelim.
-    connectionStatus.value = 'Google hesabınız başarıyla bağlandı!';
-    isConnected.value = true;
-    await fetchCalendars();
+    // Google OAuth akışını başlatmak için backend fonksiyonu çağrısı
+    const response = await axios.post('/api/google-calendar/auth-url', { userId: 'test_user_id' }); // TODO: Gerçek userId
+    if (response.data.success && response.data.authUrl) {
+      window.location.href = response.data.authUrl;
+    } else {
+      connectionError.value = response.data.message || 'Kimlik doğrulama URL\'si alınamadı.'; // Hata mesajı düzeltildi
+    }
+    // connectionStatus.value = 'Google hesabınız başarıyla bağlandı!'; // Artık backend'den gelecek
+    // isConnected.value = true;
+    // await fetchCalendars(); // Bağlantı başarılı olduktan sonra otomatik olarak çağrılacak
   } catch (err: any) {
     console.error('Google hesabını bağlarken hata oluştu:', err);
     connectionError.value = err.message || 'Google hesabını bağlarken bir hata oluştu.';
@@ -76,8 +82,9 @@ const connectGoogleAccount = async () => {
 
 const fetchCalendars = async () => {
   try {
-    const result = await listGoogleCalendarsCallable();
-    const calendars = (result.data as any).calendars as Calendar[];
+    // const result = await listGoogleCalendarsCallable(); // Kaldırıldı
+    const response = await axios.get('/api/google-calendar/list-calendars/test_user_id'); // TODO: Gerçek userId
+    const calendars = (response.data.data) as Calendar[];
     availableCalendars.value = calendars.map(cal => ({
       text: cal.summary + (cal.primary ? ' (Birincil)' : ''),
       value: cal.id,
@@ -97,9 +104,17 @@ const saveSettings = async () => {
   saving.value = true;
   error.value = null;
   try {
-    // TODO: Seçilen takvimleri ve senkronizasyon ayarlarını kaydetmek için backend fonksiyonu çağrısı
-    // Bu, Firestore'da kullanıcının ayarlarını güncellemek anlamına gelebilir.
-    connectionStatus.value = 'Ayarlar başarıyla kaydedildi!';
+    // Seçilen takvimleri ve senkronizasyon ayarlarını kaydetmek için backend fonksiyonu çağrısı
+    const response = await axios.post('/api/google-calendar/save-settings', {
+      userId: 'test_user_id', // TODO: Gerçek userId
+      selectedCalendars: selectedCalendars.value,
+    });
+
+    if (response.data.success) {
+      connectionStatus.value = 'Ayarlar başarıyla kaydedildi!';
+    } else {
+      error.value = response.data.message || 'Ayarlar kaydedilirken bir hata oluştu.';
+    }
   } catch (err: any) {
     console.error('Ayarlar kaydedilirken hata oluştu:', err);
     error.value = err.message || 'Ayarlar kaydedilirken bir hata oluştu.';
@@ -110,11 +125,23 @@ const saveSettings = async () => {
 
 onMounted(() => {
   // Sayfa yüklendiğinde bağlantı durumunu kontrol et ve takvimleri çek
-  // TODO: Gerçek bir bağlantı durumu kontrolü ekleyin
-  isConnected.value = false; // Başlangıçta bağlı değil olarak varsayalım
-  // Eğer kullanıcı daha önce bağlandıysa, fetchCalendars() doğrudan çağrılabilir
-  // fetchCalendars();
+  checkConnectionStatus();
 });
+
+const checkConnectionStatus = async () => {
+  try {
+    const response = await axios.get('/api/google-calendar/connection-status/test_user_id'); // TODO: Gerçek userId
+    if (response.data.success && response.data.data) {
+      isConnected.value = response.data.data.isConnected;
+      if (isConnected.value) {
+        await fetchCalendars();
+      }
+    }
+  } catch (err: any) {
+    console.error('Bağlantı durumu kontrol edilirken hata oluştu:', err);
+    error.value = err.message || 'Bağlantı durumu kontrol edilirken bir hata oluştu.';
+  }
+};
 </script>
 
 <style scoped lang="scss">

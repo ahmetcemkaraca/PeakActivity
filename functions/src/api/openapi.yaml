@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  title: PeakActivity Encryption API
+  version: 1.0.0
+  description: API endpoints for managing user encryption keys and security settings in PeakActivity.
+
+servers:
+  - url: /api
+    description: Base URL for encryption related API endpoints
+
+paths:
+  /encryption/master-password-setup:
+    post:
+      summary: Set or change user's master password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - password
+              properties:
+                userId:
+                  type: string
+                  description: Unique ID of the user.
+                password:
+                  type: string
+                  format: password
+                  description: The new master password for the user.
+      responses:
+        '200':
+          description: Master password successfully set.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Ana parola başarıyla ayarlandı."
+                  data:
+                    type: object
+                    nullable: true
+        '400':
+          description: Invalid arguments provided.
+        '500':
+          description: Internal server error.
+
+  /encryption/rotate-keys:
+    post:
+      summary: Rotate user's encryption keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - oldPassword
+                - newPassword
+              properties:
+                userId:
+                  type: string
+                  description: Unique ID of the user.
+                oldPassword:
+                  type: string
+                  format: password
+                  description: The current master password.
+                newPassword:
+                  type: string
+                  format: password
+                  description: The new master password.
+      responses:
+        '200':
+          description: Encryption keys successfully rotated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Anahtarlar başarıyla döndürüldü."
+                  data:
+                    type: object
+                    nullable: true
+        '400':
+          description: Invalid arguments or incorrect old password.
+        '500':
+          description: Internal server error.
+
+  /encryption/key-recovery:
+    post:
+      summary: Recover user's encryption key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - recoveryMethod
+                - recoveryData
+              properties:
+                userId:
+                  type: string
+                  description: Unique ID of the user.
+                recoveryMethod:
+                  type: string
+                  description: Method used for recovery (e.g., email, security_questions, backup_codes).
+                recoveryData:
+                  type: string
+                  description: Data relevant to the recovery method (e.g., email address, answer to security question, backup code).
+      responses:
+        '200':
+          description: Encryption key successfully recovered.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Anahtar başarıyla kurtarıldı."
+                  data:
+                    type: object
+                    nullable: true
+        '400':
+          description: Invalid arguments or recovery data.
+        '500':
+          description: Internal server error. 

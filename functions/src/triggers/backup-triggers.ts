@@ -3,8 +3,24 @@ import * as functions from "firebase-functions";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { admin } from "../firebaseAdmin";
 
-// Her gün belirli bir saatte (örneğin gece 03:00) Firestore'u yedekleyen bir fonksiyon.
-// Firebase Projenizde Blaze planının etkinleştirilmesi gerekmektedir.
+/**
+ * Firestore günlük yedekleme tetikleyicisi
+ * 
+ * Bu trigger her gün gece 03:00'da otomatik olarak çalışır ve tüm Firestore
+ * veritabanını Google Cloud Storage'a yedekler.
+ * 
+ * Tetiklenme zamanı: Her gün 03:00 (cron: "0 3 * * *")
+ * Gereksinimler: 
+ * - Firebase Blaze (ücretli) planı
+ * - Google Cloud Storage bucket'ı ({project-id}-firestore-backups)
+ * - Firestore Admin API'ye erişim
+ * 
+ * Kullanım senaryoları:
+ * - Günlük veri yedekleme
+ * - Veri kaybı durumunda geri yükleme
+ * - Compliance ve yasal gereklilikler
+ * - Versiyon kontrolü ve arşivleme
+ */
 export const firestoreDailyBackup = onSchedule("0 3 * * *", async (event) => {
   const projectId = process.env.GCLOUD_PROJECT;
   const bucketName = `gs://${projectId}-firestore-backups`; // Google Cloud Storage kovasının adı

@@ -1,3 +1,27 @@
+"""PraisonAI Agent Integration Service for ActivityWatch.
+
+This module provides integration between ActivityWatch and PraisonAI Agents framework,
+enabling AI-powered analysis and automation of activity data. It supports Google's
+Gemini models through LangChain integration for advanced natural language processing.
+
+Key Features:
+- Google Gemini model integration via LangChain
+- PraisonAI Agents framework support for multi-agent workflows
+- Dynamic tool loading for agent capabilities
+- Configurable agent and task creation from YAML/dict configurations
+- Sequential and hierarchical agent process execution
+
+Dependencies:
+- langchain-google-genai: For Google Gemini model access
+- praisonaiagents: For multi-agent AI framework
+- Standard Python libraries for configuration management
+
+Usage:
+    model = PraisonAIModel(api_key="your_api_key")
+    generator = AgentsGenerator(config_data, api_key)
+    result = generator.generate_and_run_agents("analyze user productivity")
+"""
+
 import os
 import logging
 import yaml
@@ -26,13 +50,33 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper(), format='%(asctime)s - %(levelname)s - %(message)s')
 
 class PraisonAIModel:
+    """Wrapper for Google Gemini model integration with PraisonAI.
+    
+    Provides a standardized interface for creating and configuring Google Gemini
+    models through LangChain for use with PraisonAI Agents framework.
+    
+    Supported Models:
+        - gemini-1.5-flash-8b: Fast, efficient model for general tasks
+        - gemini-pro: More capable model for complex reasoning
+        - Other Gemini variants supported by LangChain
+    """
     def __init__(self, model_name: str = "gemini-1.5-flash-8b", api_key: str = None):
-        """
-        Initializes the PraisonAIModel specifically for Gemini 2.5 Flash.
+        """Initialize the PraisonAIModel for Google Gemini integration.
 
         Args:
-            model_name (str): The name of the Gemini model. Defaults to "gemini-1.5-flash-8b".
-            api_key (str): The Google API key. This is expected to be provided securely (e.g., from Firebase Functions).
+            model_name: The name of the Gemini model. Defaults to "gemini-1.5-flash-8b"
+                       for optimal speed/performance balance. Other options include
+                       "gemini-pro" for more complex tasks.
+            api_key: The Google API key for authentication. Must be provided securely
+                    (e.g., from Firebase Functions environment variables).
+                    
+        Raises:
+            ImportError: If langchain-google-genai is not installed
+            ValueError: If api_key is not provided
+            
+        Note:
+            API keys should never be hardcoded. Use environment variables or
+            secure configuration management systems.
         """
         self.model_name = model_name
         self.api_key = api_key
@@ -46,8 +90,15 @@ class PraisonAIModel:
             raise ValueError("API Key for Google Generative AI is required.")
 
     def get_model(self):
-        """
-        Returns an instance of the langchain ChatGoogleGenerativeAI client.
+        """Create and return a LangChain ChatGoogleGenerativeAI instance.
+        
+        Returns:
+            ChatGoogleGenerativeAI: Configured Gemini model instance ready for
+                                   use with PraisonAI Agents or direct LangChain operations
+                                   
+        Note:
+            The returned model can be used directly with PraisonAI Agent constructors
+            or for standalone LangChain operations.
         """
         return ChatGoogleGenerativeAI(
             model=self.model_name,
@@ -55,14 +106,58 @@ class PraisonAIModel:
         )
 
 class AgentsGenerator:
+    """Generator and orchestrator for PraisonAI multi-agent workflows.
+    
+    Manages the creation, configuration, and execution of PraisonAI Agents based
+    on YAML or dictionary configurations. Handles dynamic tool loading, agent
+    instantiation, task assignment, and workflow execution.
+    
+    Workflow Process:
+        1. Parse agent and task configurations
+        2. Load custom tools from specified paths
+        3. Create PraisonAI Agent instances with Gemini models
+        4. Create PraisonAI Task instances and assign to agents
+        5. Execute multi-agent workflow (sequential or hierarchical)
+        
+    Configuration Structure:
+        {
+            "agents": [
+                {
+                    "name": "analyst",
+                    "role": "Data Analyst", 
+                    "goal": "Analyze user activity patterns",
+                    "backstory": "Expert in productivity analysis",
+                    "tools": [{"name": "tool_name", "path": "/path/to/tool.py"}]
+                }
+            ],
+            "tasks": [
+                {
+                    "name": "analysis_task",
+                    "agent": "analyst",
+                    "description": "Analyze weekly productivity trends",
+                    "expected_output": "Detailed productivity report"
+                }
+            ]
+        }
+    """
     def __init__(self, agent_config_data: dict, api_key: str, log_level=None):
-        """
-        Initializes the AgentsGenerator object for PraisonAI framework.
+        """Initialize the AgentsGenerator for PraisonAI framework.
 
-        Parameters:
-            agent_config_data (dict): Dictionary containing agent and task configurations.
-            api_key (str): The Google API key to be passed to the PraisonAIModel.
-            log_level (int, optional): The logging level to use. Defaults to logging.INFO.
+        Args:
+            agent_config_data: Dictionary containing agent and task configurations.
+                              Must include 'agents' and 'tasks' keys with respective
+                              configuration lists.
+            api_key: The Google API key for Gemini model authentication.
+                    Should be sourced from secure environment variables.
+            log_level: Optional logging level override. If not provided, uses
+                      environment LOGLEVEL or defaults to INFO.
+                      
+        Raises:
+            ImportError: If PraisonAI Agents framework is not installed
+            
+        Note:
+            Logging is configured to include timestamps and level information
+            for debugging multi-agent workflows.
         """
         self.agent_config_data = agent_config_data
         self.api_key = api_key
@@ -78,12 +173,48 @@ class AgentsGenerator:
             raise ImportError("PraisonAI is not installed. Please install it with 'pip install praisonaiagents'")
 
     def _is_function_or_decorated(self, obj):
+        """Check if an object is a function or callable (including decorated functions).
+        
+        Args:
+            obj: Object to check for callable nature
+            
+        Returns:
+            bool: True if object is a function or has __call__ method
+            
+        Note:
+            Used during dynamic tool loading to identify valid tool functions
+            within loaded modules.
+        """
         return inspect.isfunction(obj) or hasattr(obj, '__call__')
 
     def load_tools(self, tools_config: list):
-        """
-        Loads tools based on the provided configuration.
-        This simplified version expects tools to be directly importable or within a specified path.
+        """Load tools based on the provided configuration.
+        
+        Args:
+            tools_config: List of tool configuration dictionaries. Each should contain:
+                         - name: Tool function name to load
+                         - path: Optional file path to Python module containing the tool
+                         
+        Returns:
+            list: List of loaded tool functions/objects ready for agent use
+            
+        Tool Loading Process:
+            1. For tools with 'path': Dynamically import the module and extract
+               the named function
+            2. For tools without 'path': Assumes built-in tool handled by PraisonAI
+            3. Logs warnings for failed tool loads but continues processing
+            
+        Example Configuration:
+            [
+                {"name": "web_scraper", "path": "/tools/web_scraper.py"},
+                {"name": "calendar_reader", "path": "/tools/calendar.py"},
+                {"name": "built_in_tool"}  # No path for built-in tools
+            ]
+            
+        Note:
+            This simplified version expects tools to be directly importable
+            or within a specified file path. For production use, consider
+            adding tool validation and security checks.
         """
         loaded_tools = []
         for tool_entry in tools_config:
@@ -112,11 +243,36 @@ class AgentsGenerator:
         return loaded_tools
 
     def generate_and_run_agents(self, topic: str):
-        """
-        Generates and runs agents and tasks using the PraisonAI framework.
+        """Generate and execute a multi-agent workflow using PraisonAI framework.
 
-        Parameters:
-            topic (str): The topic or goal for the agents.
+        Args:
+            topic: The topic or goal description for the agent workflow.
+                  This provides context for what the agents should accomplish.
+                  
+        Returns:
+            The result from the PraisonAI workflow execution, typically containing
+            outputs from all completed tasks.
+            
+        Workflow Steps:
+            1. Parse agent configurations and create PraisonAgent instances
+            2. Load custom tools for each agent based on configuration
+            3. Parse task configurations and create PraisonTask instances
+            4. Assign tasks to appropriate agents
+            5. Create PraisonAIAgents orchestrator with sequential processing
+            6. Execute the complete workflow via kickoff()
+            
+        Error Handling:
+            - Logs warnings for missing agents referenced in tasks
+            - Aborts execution if no valid agents or tasks are created
+            - Raises exceptions from PraisonAI framework for debugging
+            
+        Model Configuration:
+            Uses "gemini-pro" model for enhanced reasoning capabilities.
+            Consider using "gemini-1.5-flash-8b" for faster, simpler tasks.
+            
+        Note:
+            Currently uses sequential processing. For more complex workflows,
+            consider "hierarchical" process mode with manager agents.
         """
         agents_data = self.agent_config_data.get("agents", [])
         tasks_data = self.agent_config_data.get("tasks", [])

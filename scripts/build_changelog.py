@@ -149,12 +149,13 @@ class Commit:
 
     def type_str(self) -> str:
         _type, subtype = self.parse_type() or (None, None)
-        return f"{_type}" + (f"({subtype})" if subtype else "")
+        # Use f-string instead of concatenation for better performance
+        return f"{_type}({subtype})" if subtype else f"{_type}"
 
     def format(self) -> str:
         commit_link = commit_linkify(self.id, self.org, self.repo) if self.id else ""
-
-        return f"{self.msg_processed}" + (f" ({commit_link})" if commit_link else "")
+        # Use f-string instead of concatenation for better performance
+        return f"{self.msg_processed} ({commit_link})" if commit_link else self.msg_processed
 
 
 def run(cmd, cwd=".") -> str:

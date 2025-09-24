@@ -7,13 +7,16 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     languageOptions: {
-      globals: globals.node,
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
       parserOptions: {
         project: ["tsconfig.json", "tsconfig.dev.json"],
         sourceType: "module",
       },
     },
-    ignores: ["lib/**/*"], // Ignore built files.
+    ignores: ["lib/**/*"], // Built dosyalarını yok say.
     rules: {
       "quotes": ["off"],
       "import/no-unresolved": "off",

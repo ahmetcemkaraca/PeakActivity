@@ -5,16 +5,23 @@ import { TrelloClient } from 'trello.js';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - jira-client has no type declarations
 import JiraApi from 'jira-client';
+import { TrelloCredentialsEncryption } from './encryption/TrelloCredentialsEncryption';
+import { JiraCredentialsEncryption } from './encryption/JiraCredentialsEncryption';
+import { ExternalCredential } from '../types/external-credentials';
 
 export class TrelloJiraService {
   private db: any;
   private trelloClients: Map<string, any>;
   private jiraClients: Map<string, any>;
+  private trelloEncryptionService: TrelloCredentialsEncryption;
+  private jiraEncryptionService: JiraCredentialsEncryption;
 
-  constructor() {
+  constructor(trelloEncryptionService: TrelloCredentialsEncryption, jiraEncryptionService: JiraCredentialsEncryption) {
     this.db = db;
     this.trelloClients = new Map();
     this.jiraClients = new Map();
+    this.trelloEncryptionService = trelloEncryptionService;
+    this.jiraEncryptionService = jiraEncryptionService;
   }
 
   private async getTrelloClient(userId: string) {
@@ -22,16 +29,20 @@ export class TrelloJiraService {
       return this.trelloClients.get(userId);
     }
 
-    const userDoc = await this.db.collection('users').doc(userId).get();
-    const trelloCredentials = userDoc.data()?.trelloCredentials; // Firestore'da saklanan Trello kimlik bilgileri
+    const encryptedTrelloCredentials = await this.trelloEncryptionService.getEncryptedCredentials(userId, "trello");
 
-    if (!trelloCredentials || !trelloCredentials.apiKey || !trelloCredentials.token) {
+    if (!encryptedTrelloCredentials) {
       throw new Error('Trello kimlik bilgileri bulunamadı. Lütfen entegrasyonu yapılandırın.');
     }
 
+    const decryptedTrelloCredentials = await this.trelloEncryptionService.decrypt(
+      encryptedTrelloCredentials.encryptedPayload,
+      encryptedTrelloCredentials.encryptionMetadata
+    );
+
     const trelloClient = new TrelloClient({
-      key: trelloCredentials.apiKey,
-      token: trelloCredentials.token,
+      key: decryptedTrelloCredentials.apiKey,
+      token: decryptedTrelloCredentials.token,
     });
     this.trelloClients.set(userId, trelloClient);
     return trelloClient;
@@ -42,18 +53,22 @@ export class TrelloJiraService {
       return this.jiraClients.get(userId);
     }
 
-    const userDoc = await this.db.collection('users').doc(userId).get();
-    const jiraCredentials = userDoc.data()?.jiraCredentials; // Firestore'da saklanan Jira kimlik bilgileri
+    const encryptedJiraCredentials = await this.jiraEncryptionService.getEncryptedCredentials(userId, "jira");
 
-    if (!jiraCredentials || !jiraCredentials.host || !jiraCredentials.username || !jiraCredentials.password) {
+    if (!encryptedJiraCredentials) {
       throw new Error('Jira kimlik bilgileri bulunamadı. Lütfen entegrasyonu yapılandırın.');
     }
 
+    const decryptedJiraCredentials = await this.jiraEncryptionService.decrypt(
+      encryptedJiraCredentials.encryptedPayload,
+      encryptedJiraCredentials.encryptionMetadata
+    );
+
     const jiraClient = new JiraApi({
       protocol: 'https',
-      host: jiraCredentials.host,
-      username: jiraCredentials.username,
-      password: jiraCredentials.password,
+      host: decryptedJiraCredentials.host,
+      username: decryptedJiraCredentials.username,
+      password: decryptedJiraCredentials.password,
       apiVersion: '2',
       strictSSL: true,
     });

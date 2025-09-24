@@ -17,6 +17,13 @@ import { GoalService } from "../services/goal-service";
 import { ProjectPredictionService } from "../services/project-prediction-service";
 import { ReportManagementService } from "../services/report-management-service";
 import { AINotificationService } from '../services/ai-notification-service';
+import { MasterKeyService } from '../services/encryption/MasterKeyService';
+import { KeyRotationService } from '../services/encryption/KeyRotationService';
+import { KeyRecoveryService } from '../services/KeyRecoveryService';
+import { KeyDerivationService } from '../services/encryption/KeyDerivationService';
+import { NodeEncryptionService } from '../services/encryption/NodeEncryptionService';
+import { SecureStorageService } from '../services/encryption/SecureStorageService';
+import { FeedbackService } from '../services/feedback-service'; // FeedbackService import edildi
 
 // Yardımcı fonksiyonlar ve tipler için importlar
 import { ActivityEvent } from '../types/activity-event.d';
@@ -43,6 +50,16 @@ const focusModeService = new FocusModeService();
 const projectPredictionService = new ProjectPredictionService();
 const reportManagementService = new ReportManagementService();
 const aiNotificationService = new AINotificationService();
+const feedbackService = new FeedbackService(); // FeedbackService örneği oluşturuldu
+
+// Encryption Services
+const keyDerivationService = new KeyDerivationService();
+const secureStorageService = new SecureStorageService(); // Firestore'a bağımlılığı olan bir servis
+const nodeEncryptionService = new NodeEncryptionService();
+
+const masterKeyService = new MasterKeyService(secureStorageService, keyDerivationService);
+const keyRotationService = new KeyRotationService(masterKeyService, secureStorageService, nodeEncryptionService);
+const keyRecoveryService = new KeyRecoveryService(secureStorageService); // SecureStorageService bağımlılığı eklendi
 
 // Activity API rotası: Yeni aktivite kaydet
 router.post('/activity', asyncHandler(async (req: Request, res: Response) => {
@@ -205,6 +222,34 @@ router.post('/reports/:reportId/generate-data', asyncHandler(async (req: Request
   }
   // Rapor veri üretme mantığı buraya eklenecek
   res.status(200).json(successResponse(null, 'Rapor verileri başarıyla üretildi. (Simüle edildi)'));
+}));
+
+// Encryption API rotaları
+router.post('/encryption/master-password-setup', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, password } = req.body;
+  if (!userId || !password) {
+    throw new InvalidArgumentError('Kullanıcı kimliği veya parola eksik.');
+  }
+  const result = await masterKeyService.setupMasterPassword(userId, password);
+  res.status(200).json(successResponse(result, 'Ana parola başarıyla ayarlandı.'));
+}));
+
+router.post('/encryption/rotate-keys', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, oldPassword, newPassword } = req.body;
+  if (!userId || !oldPassword || !newPassword) {
+    throw new InvalidArgumentError('Kullanıcı kimliği, eski parola veya yeni parola eksik.');
+  }
+  const result = await keyRotationService.rotateUserKeyAndData(userId, oldPassword, newPassword);
+  res.status(200).json(successResponse(result, 'Anahtarlar başarıyla döndürüldü.'));
+}));
+
+router.post('/encryption/key-recovery', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, recoveryMethod, recoveryData } = req.body;
+  if (!userId || !recoveryMethod || !recoveryData) {
+    throw new InvalidArgumentError('Kullanıcı kimliği, kurtarma metodu veya kurtarma verisi eksik.');
+  }
+  const result = await keyRecoveryService.recoverUserKey(userId, recoveryMethod, recoveryData);
+  res.status(200).json(successResponse(result, 'Anahtar başarıyla kurtarıldı.'));
 }));
 
 // Goal API rotası: Yeni bir hedef oluştur
@@ -711,6 +756,20 @@ router.post('/focus-modes/:modeId/set-active', asyncHandler(async (req: Request,
     throw new NotFoundError('Aktif edilecek odaklanma modu bulunamadı.');
   }
   res.status(200).json(successResponse(activeMode, 'Odaklanma modu başarıyla aktif edildi.'));
+}));
+
+// Feedback API rotası
+router.post('/feedback', asyncHandler(async (req: Request, res: Response) => {
+  // TODO: Gerçek kullanıcı kimliği alınmalı, şu an için sabit bir değer kullanıldı
+  const userId = req.user?.uid || 'anonymous'; 
+  const { subject, message } = req.body;
+
+  if (!subject || !message) {
+    throw new InvalidArgumentError('Geri bildirim konusu ve mesajı eksik.');
+  }
+
+  const result = await feedbackService.submitFeedback(userId, { subject, message });
+  res.status(201).json(successResponse(result, 'Geri bildiriminiz başarıyla gönderildi.'));
 }));
 
 export default router; 

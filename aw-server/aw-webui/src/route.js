@@ -29,6 +29,16 @@ const BehavioralTrendsView = () => import('./views/ai-features/BehavioralTrendsV
 const FocusQualityScoreView = () => import('./views/ai-features/FocusQualityScoreView.vue');
 const AgentBuilder = () => import('./views/ai-features/AgentBuilder.vue');
 
+import Login from './views/Login.vue';
+import Register from './views/Register.vue';
+import AutomationRules from './views/AutomationRules.vue';
+import ProjectPrediction from './views/ProjectPrediction.vue';
+import CommunityRules from './views/CommunityRules.vue';
+import ContextualCategorization from './views/ContextualCategorization.vue';
+import Goals from './views/Goals.vue';
+import Reports from './views/Reports.vue';
+import FeedbackView from './views/FeedbackView.vue';
+
 Vue.use(VueRouter);
 
 const router = new VueRouter({
@@ -84,10 +94,16 @@ const router = new VueRouter({
     { path: '/ai-features/behavioral-trends', component: BehavioralTrendsView },
     { path: '/ai-features/focus-quality-score', component: FocusQualityScoreView },
     { path: '/ai-features/agent-builder', component: AgentBuilder },
-    {
-      path: '/settings/ai-notification',
+    { path: '/settings/ai-notification',
       component: () => import('./views/settings/AINotificationSettings.vue'),
     },
+    { path: '/settings/privacy', component: () => import('./views/settings/PrivacySettings.vue') },
+    { path: '/settings/encryption', component: () => import('./views/settings/EncryptionSettings.vue') },
+    { path: '/settings/data-sharing', component: () => import('./views/settings/DataSharingControls.vue') },
+    { path: '/settings/security-questions', component: () => import('./views/settings/SecurityQuestionSetup.vue') },
+    { path: '/settings/two-factor-auth', component: () => import('./views/settings/TwoFactorSetup.vue') },
+    { path: '/settings/master-password', component: () => import('./views/settings/MasterPasswordSetup.vue') },
+    { path: '/settings/key-recovery', component: () => import('./views/settings/KeyRecoveryWizard.vue') },
     {
       path: '/community-rules',
       name: 'community-rules',
@@ -99,6 +115,11 @@ const router = new VueRouter({
       name: 'contextual-categorization',
       component: () => import('./views/ContextualCategorization.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/feedback',
+      name: 'Feedback',
+      component: FeedbackView,
     },
     // NOTE: Will break with Vue 3: https://stackoverflow.com/questions/40193634/vue-router-redirect-on-page-not-found-404/64186073#64186073
     {

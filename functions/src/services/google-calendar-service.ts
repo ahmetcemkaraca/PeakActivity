@@ -1,9 +1,12 @@
 import { google } from 'googleapis';
 import { db } from '../firebaseAdmin';
 import * as functions from 'firebase-functions';
+import { GoogleCalendarTokenEncryption } from './encryption/GoogleCalendarTokenEncryption';
+import { UserKeyManager } from './encryption/UserKeyManager';
+import { NodeEncryptionService } from './encryption/NodeEncryptionService';
+import { GoogleCalendarAuth } from '../types/external-credentials.d';
+import { KeyDerivationService } from './encryption/KeyDerivationService';
 
-// Bu, gerçek uygulamada kullanıcı başına depolanması gereken kimlik doğrulama bilgileri için bir yer tutucudur.
-// Genellikle Firebase Authentication ve Firestore kullanılarak yönetilir.
 interface UserGoogleAuth {
   accessToken: string;
   refreshToken: string;
@@ -12,9 +15,10 @@ interface UserGoogleAuth {
 
 export class GoogleCalendarService {
   private oAuth2Client: any; // GoogleAuth.OAuth2Client
+  private googleCalendarTokenEncryption: GoogleCalendarTokenEncryption;
+  private userKeyManager: UserKeyManager;
 
   constructor() {
-    // Ortam değişkenlerinden kimlik bilgilerini yükle
     const CLIENT_ID = functions.config().googleapi.client_id;
     const CLIENT_SECRET = functions.config().googleapi.client_secret;
     const REDIRECT_URI = functions.config().googleapi.redirect_uri;
@@ -24,28 +28,53 @@ export class GoogleCalendarService {
       CLIENT_SECRET,
       REDIRECT_URI
     );
+
+    const nodeEncryptionService = new NodeEncryptionService();
+    // UserKeyManager, secureStorageService'e bağımlı olduğu için, Firebase Admin SDK'sının
+    // initialize edildiğini varsayarak firestore instance'ını doğrudan iletiyoruz.
+    // SecureStorageService, UserKeyManager içinde tanımlandığından burada ayrıca tanımlamıyoruz.
+    this.userKeyManager = new UserKeyManager(new KeyDerivationService(), {
+      store: async (key: string, value: string) => {
+        await db.collection("secureStorage").doc(key).set({ value });
+      },
+      retrieve: async (key: string) => {
+        const doc = await db.collection("secureStorage").doc(key).get();
+        return doc.exists ? doc.data()?.value : null;
+      },
+      delete: async (key: string) => {
+        await db.collection("secureStorage").doc(key).delete();
+      }
+    });
+    this.googleCalendarTokenEncryption = new GoogleCalendarTokenEncryption(this.userKeyManager, nodeEncryptionService);
   }
 
   // Kullanıcı kimlik doğrulama bilgilerini ayarlar
   async setCredentials(userId: string): Promise<boolean> {
-    const userDoc = await db.collection('users').doc(userId).get();
-    const userData = userDoc.data();
+    // Şifrelenmiş tokenları Firestore'dan al
+    const encryptedAuthData = await db.collection('users').doc(userId).collection("externalCredentials").doc("google").get();
+    
+    if (encryptedAuthData.exists) {
+      const authData = encryptedAuthData.data() as GoogleCalendarAuth;
+      
+      // Tokenları çöz
+      const decryptedAuth = await this.googleCalendarTokenEncryption.decryptGoogleCalendarTokens(userId, authData);
 
-    if (userData && userData.googleCalendarAuth) {
-      const auth: UserGoogleAuth = userData.googleCalendarAuth;
       this.oAuth2Client.setCredentials({
-        access_token: auth.accessToken,
-        refresh_token: auth.refreshToken,
-        expiry_date: auth.expiryDate,
+        access_token: decryptedAuth.accessToken,
+        refresh_token: decryptedAuth.refreshToken,
+        expiry_date: decryptedAuth.expiryDate,
       });
 
       // Erişim tokenı süresi dolduysa yenile
-      if (this.oAuth2Client.is === true) {
+      if (this.oAuth2Client.isAccessTokenExpired()) { // is yerine isAccessTokenExpired kullanıyorum
         const { credentials } = await this.oAuth2Client.refreshAccessToken();
-        await db.collection('users').doc(userId).update({
-          'googleCalendarAuth.accessToken': credentials.access_token,
-          'googleCalendarAuth.expiryDate': credentials.expiry_date,
-        });
+        // Yenilenen tokenları tekrar şifreleyip kaydet
+        await this.googleCalendarTokenEncryption.encryptGoogleCalendarTokens(
+          userId,
+          credentials.access_token,
+          credentials.refresh_token || decryptedAuth.refreshToken, // refresh_token değişmeyebilir
+          credentials.expiry_date
+        );
         this.oAuth2Client.setCredentials(credentials);
       }
       return true;

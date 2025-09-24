@@ -1,6 +1,7 @@
 import functools
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from socket import gethostname
@@ -13,18 +14,29 @@ from typing import (
 from uuid import uuid4
 
 import iso8601
+from cachetools import TTLCache
 from aw_core.dirs import get_data_dir
 from aw_core.log import get_log_file_path
 from aw_core.models import Event
 from aw_query import query2
 from aw_transform import heartbeat_merge
-from aw_core import MANUAL_ACTIVITY_EVENT_TYPE
+from aw_core import MANUAL_ACTIVITY_EVENT_TYPE, MICROSURVEY_EVENT_TYPE
 
 from .__about__ import __version__
 from .exceptions import NotFound
 from .settings import Settings
 from aw_server.firebase_datastore.firestore import FirestoreStorage
 from aw_server.sync import DataSynchronizer
+from aw_server.data_anonymization.anonymizer import Anonymizer
+
+# Performance optimization imports
+from .performance import (
+    cached_query,
+    profile_execution,
+    profile_database,
+    get_cache_manager,
+    get_performance_profiler,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +68,11 @@ class ServerAPI:
         self.db = db
         self.settings = Settings(testing)
         self.testing = testing
-        self.last_event = {}  # type: dict
+        # Önbellek: 1024 öğe, 300 saniye (5 dakika) TTL
+        self.last_event_cache = TTLCache(maxsize=1024, ttl=300)
         self.firebase_db = FirestoreStorage(testing=testing) # Firestore depolamasını başlat
         self.synchronizer = DataSynchronizer(local_db=self.db, firebase_db=self.firebase_db) # Senkronizasyon nesnesini başlat
+        self.anonymizer = Anonymizer() # Anonymizer başlat
 
     def get_info(self) -> Dict[str, Any]:
         """Get server info"""
@@ -216,17 +230,23 @@ class ServerAPI:
         return event.to_json_dict() if event else None
 
     @check_bucket_exists
+    @cached_query(ttl=60)  # Cache query results for 1 minute
+    @profile_database("select")  # Profile database query performance
     def get_events(
         self,
         bucket_id: str,
-        limit: int = -1,
+        limit: int = 500,
         start: Optional[datetime] = None,
         end: Optional[datetime] = None,
     ) -> List[Event]:
-        """Get events from a bucket"""
+        """Get events from a bucket with performance optimization"""
         logger.debug(f"Received get request for events in bucket '{bucket_id}'")
-        if limit is None:  # Let limit = None also mean "no limit"
-            limit = -1
+        if limit is None or limit < 0:
+            limit = 500  # Varsayılan limiti ayarla
+        # Üst bir limit belirleyerek kontrolsüz veri çekmeyi önle
+        if limit > 5000:
+            limit = 5000
+
         events = [
             event.to_json_dict() for event in self.db[bucket_id].get(limit, start, end)
         ]
@@ -238,6 +258,81 @@ class ServerAPI:
 
         Returns the inserted event when a single event was inserted, otherwise None."""
         return self.db[bucket_id].insert(events)
+
+    @check_bucket_exists
+    def create_raw_events(self, bucket_id: str, events: List[Event]) -> Optional[Event]:
+        """Create raw events for a bucket, with optional anonymization.
+
+        Returns the inserted event when a single event was inserted, otherwise None."""
+        anonymized_events = []
+        for event in events:
+            anonymized_events.append(self.anonymizer.anonymize_event(event.to_json_dict()))
+
+        # Convert back to Event objects after anonymization
+        events_to_insert = [Event(**e) for e in anonymized_events]
+
+        return self.db[bucket_id].insert(events_to_insert)
+
+    @check_bucket_exists
+    def create_encrypted_ai_events(self, bucket_id: str, encrypted_events: List[Dict[str, Any]]) -> Optional[Event]:
+        """Create encrypted and AI-enabled events for a bucket.
+
+        This method will decrypt the events (placeholder for now) and prepare them for AI processing.
+        Returns the inserted event when a single event was inserted, otherwise None."""
+        # TODO: Şifreli veriyi çözme (Decryption service henüz implemente edilmedi)
+        decrypted_events_data = []
+        for event_data in encrypted_events:
+            # Şifreli verinin metadata'sını al (örneğin, iv, salt, algorithm)
+            # encrypted_payload = event_data["payload"]
+            # metadata = event_data["metadata"]
+            
+            # Şimdilik sadece payload'u alıp Event objesine dönüştürüyoruz
+            # Gerçekte burada şifre çözme işlemi olacak
+            decrypted_events_data.append(event_data.get("payload", {})) 
+
+        # Verify and convert to Event objects (similar to create_raw_events)
+        events_to_insert = []
+        for event_data in decrypted_events_data:
+            try:
+                event_obj = Event(**event_data)
+                events_to_insert.append(event_obj)
+            except Exception as e:
+                logger.error(f"Şifresi çözülmüş olay verisi doğrulanamadı: {e}")
+                raise ValueError("Geçersiz şifresi çözülmüş olay verisi")
+
+        # AI işleme adımları (sonraki görevlerde implemente edilecek)
+        # self.ai_processor.process_events(events_to_insert)
+
+        return self.db[bucket_id].insert(events_to_insert)
+
+    @check_bucket_exists
+    def create_encrypted_noai_events(self, bucket_id: str, encrypted_events: List[Dict[str, Any]]) -> Optional[Event]:
+        """Create encrypted events for a bucket without AI processing.
+
+        This method will decrypt the events (placeholder for now) and store them directly.
+        Returns the inserted event when a single event was inserted, otherwise None."""
+        # TODO: Şifreli veriyi çözme (Decryption service henüz implemente edilmedi)
+        decrypted_events_data = []
+        for event_data in encrypted_events:
+            # Şifreli verinin metadata'sını al (örneğin, iv, salt, algorithm)
+            # encrypted_payload = event_data["payload"]
+            # metadata = event_data["metadata"]
+
+            # Şimdilik sadece payload'u alıp Event objesine dönüştürüyoruz
+            # Gerçekte burada şifre çözme işlemi olacak
+            decrypted_events_data.append(event_data.get("payload", {}))
+
+        # Verify and convert to Event objects (similar to create_raw_events)
+        events_to_insert = []
+        for event_data in decrypted_events_data:
+            try:
+                event_obj = Event(**event_data)
+                events_to_insert.append(event_obj)
+            except Exception as e:
+                logger.error(f"Şifresi çözülmüş olay verisi doğrulanamadı: {e}")
+                raise ValueError("Geçersiz şifresi çözülmüş olay verisi")
+
+        return self.db[bucket_id].insert(events_to_insert)
 
     @check_bucket_exists
     def get_eventcount(
@@ -256,6 +351,86 @@ class ServerAPI:
         return self.db[bucket_id].delete(event_id)
 
     @check_bucket_exists
+    def _get_last_event(self, bucket_id: str) -> Event | None:
+        """Get the last event from cache or database for a given bucket."""
+        last_event = self.last_event_cache.get(bucket_id)
+        
+        if not last_event:
+            last_events = self.db[bucket_id].get(limit=1)
+            if len(last_events) > 0:
+                last_event = last_events[0]
+        
+        return last_event
+    
+    def _try_merge_heartbeat(self, bucket_id: str, last_event: Event, heartbeat: Event, pulsetime: float) -> Event | None:
+        """
+        Try to merge heartbeat with last event if data matches.
+        Returns merged event if successful, None if merge failed.
+        """
+        if last_event.data != heartbeat.data:
+            logger.debug(
+                "Received heartbeat with differing data, inserting as new event. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+            return None
+        
+        merged = heartbeat_merge(last_event, heartbeat, pulsetime)
+        if merged is not None:
+            # Heartbeat was merged into last_event
+            logger.debug(
+                "Received valid heartbeat, merging. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+            self.last_event_cache[bucket_id] = merged
+            self.db[bucket_id].replace_last(merged)
+            return merged
+        else:
+            logger.info(
+                "Received heartbeat after pulse window, inserting as new event. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+            return None
+    
+    def _insert_new_heartbeat(self, bucket_id: str, heartbeat: Event, reason: str) -> Event:
+        """Insert heartbeat as a new event and update cache."""
+        if reason == "empty_bucket":
+            logger.info(
+                "Received heartbeat, but bucket was previously empty, inserting as new event. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+        elif reason == "different_data":
+            logger.debug(
+                "Received heartbeat with differing data, inserting as new event. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+        elif reason == "pulse_window_expired":
+            logger.info(
+                "Received heartbeat after pulse window, inserting as new event. (bucket: {})".format(
+                    bucket_id
+                )
+            )
+        
+        self.db[bucket_id].insert(heartbeat)
+        self.last_event_cache[bucket_id] = heartbeat
+        return heartbeat
+    
+    def _log_heartbeat_received(self, bucket_id: str, heartbeat: Event, pulsetime: float) -> None:
+        """Log the received heartbeat details."""
+        logger.debug(
+            "Received heartbeat in bucket '{}'\n\ttimestamp: {}, duration: {}, pulsetime: {}\n\tdata: {}".format(
+                bucket_id,
+                heartbeat.timestamp,
+                heartbeat.duration,
+                pulsetime,
+                heartbeat.data,
+            )
+        )
+
     def heartbeat(self, bucket_id: str, heartbeat: Event, pulsetime: float) -> Event:
         """
         Heartbeats are useful when implementing watchers that simply keep
@@ -278,68 +453,20 @@ class ServerAPI:
 
         Inspired by: https://wakatime.com/developers#heartbeats
         """
-        logger.debug(
-            "Received heartbeat in bucket '{}'\n\ttimestamp: {}, duration: {}, pulsetime: {}\n\tdata: {}".format(
-                bucket_id,
-                heartbeat.timestamp,
-                heartbeat.duration,
-                pulsetime,
-                heartbeat.data,
-            )
-        )
-
-        # The endtime here is set such that in the event that the heartbeat is older than an
-        # existing event we should try to merge it with the last event before the heartbeat instead.
-        # FIXME: This (the endtime=heartbeat.timestamp) gets rid of the "heartbeat was older than last event"
-        #        warning and also causes a already existing "newer" event to be overwritten in the
-        #        replace_last call below. This is problematic.
-        # Solution: This could be solved if we were able to replace arbitrary events.
-        #           That way we could double check that the event has been applied
-        #           and if it hasn't we simply replace it with the updated counterpart.
-
-        last_event = None
-        if bucket_id not in self.last_event:
-            last_events = self.db[bucket_id].get(limit=1)
-            if len(last_events) > 0:
-                last_event = last_events[0]
-        else:
-            last_event = self.last_event[bucket_id]
-
+        self._log_heartbeat_received(bucket_id, heartbeat, pulsetime)
+        
+        last_event = self._get_last_event(bucket_id)
+        
         if last_event:
-            if last_event.data == heartbeat.data:
-                merged = heartbeat_merge(last_event, heartbeat, pulsetime)
-                if merged is not None:
-                    # Heartbeat was merged into last_event
-                    logger.debug(
-                        "Received valid heartbeat, merging. (bucket: {})".format(
-                            bucket_id
-                        )
-                    )
-                    self.last_event[bucket_id] = merged
-                    self.db[bucket_id].replace_last(merged)
-                    return merged
-                else:
-                    logger.info(
-                        "Received heartbeat after pulse window, inserting as new event. (bucket: {})".format(
-                            bucket_id
-                        )
-                    )
-            else:
-                logger.debug(
-                    "Received heartbeat with differing data, inserting as new event. (bucket: {})".format(
-                        bucket_id
-                    )
-                )
+            merged_event = self._try_merge_heartbeat(bucket_id, last_event, heartbeat, pulsetime)
+            if merged_event:
+                return merged_event
+            
+            # If merge failed, insert as new event
+            return self._insert_new_heartbeat(bucket_id, heartbeat, "pulse_window_expired")
         else:
-            logger.info(
-                "Received heartbeat, but bucket was previously empty, inserting as new event. (bucket: {})".format(
-                    bucket_id
-                )
-            )
-
-        self.db[bucket_id].insert(heartbeat)
-        self.last_event[bucket_id] = heartbeat
-        return heartbeat
+            # No last event, insert as new event
+            return self._insert_new_heartbeat(bucket_id, heartbeat, "empty_bucket")
 
     def query2(self, name, query, timeperiods, cache):
         result = []

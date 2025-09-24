@@ -1,20 +1,36 @@
 import { firestore } from 'firebase-admin';
 import { ActivityEvent } from '../types/activity-event';
+import { DataTransmissionType } from './encryption/DataTransmissionTypes';
+import { ActivityDataProcessor } from './data_processing/ActivityDataProcessor';
+import { NodeEncryptionService } from './encryption/NodeEncryptionService';
+import { KeyDerivationService } from './encryption/KeyDerivationService';
 
 export class ActivityService {
   private db: firestore.Firestore;
+  private activityDataProcessor: ActivityDataProcessor;
 
   constructor() {
     this.db = firestore();
+    const nodeEncryptionService = new NodeEncryptionService();
+    
+    this.activityDataProcessor = new ActivityDataProcessor(nodeEncryptionService);
   }
 
-  async saveActivity(userId: string, activityData: any) {
+  async saveActivity(userId: string, activityData: any, transmissionType: DataTransmissionType, userKey?: string) {
     try {
+      const { processedData, transmissionType: finalTransmissionType, metadata } = await this.activityDataProcessor.processActivityData(
+        JSON.stringify(activityData),
+        transmissionType,
+        userKey
+      );
+
       const activityRef = this.db.collection(`users/${userId}/activities`).doc();
       await activityRef.set({
-        ...activityData,
+        ...JSON.parse(processedData),
         id: activityRef.id,
         user_id: userId,
+        transmission_type: finalTransmissionType,
+        encryption_metadata: metadata || null,
         created_at: firestore.FieldValue.serverTimestamp(),
         updated_at: firestore.FieldValue.serverTimestamp(),
       });

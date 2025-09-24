@@ -1,0 +1,5 @@
+export enum DataTransmissionType {
+  RAW = "RAW",
+  ENCRYPTED_AI_ENABLED = "ENCRYPTED_AI_ENABLED",
+  ENCRYPTED_AI_DISABLED = "ENCRYPTED_AI_DISABLED",
+} 

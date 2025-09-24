@@ -26,6 +26,9 @@ sysinfo = "0.29.11" # Sistem bilgileri (CPU/RAM) için
 aes-gcm = { version = "0.10.1", features = ["aes"] }
 rand = "0.8.5"
 rand_core = { version = "0.6.4", features = ["std"] }
+argon2 = "0.5.2"
+rand_chacha = "0.3.1"
+keyring = "2.0.2"
 
 [features]
 # Bu, "tauri dev" komutuyla tauri-build'i derlerken "custom-protocol" özelliğini etkinleştirir

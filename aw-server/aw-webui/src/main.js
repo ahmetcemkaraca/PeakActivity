@@ -84,6 +84,31 @@ createClient();
 import App from './App.vue';
 import Home from './views/Home.vue';
 
+import VueI18n from 'vue-i18n';
+import en from './locales/en.json';
+import tr from './locales/tr.json';
+
+Vue.use(VueI18n);
+
+// Add axios to Vue prototype
+import axios from 'axios';
+Vue.prototype.$axios = axios;
+
+const messages = {
+  en: {
+    ...en
+  },
+  tr: {
+    ...tr
+  }
+};
+
+const i18n = new VueI18n({
+  locale: 'en', // Varsayılan dil
+  fallbackLocale: 'en',
+  messages,
+});
+
 // Dark Mode Toggle Logic
 function applyTheme(theme: string) {
   document.documentElement.classList.remove('light-mode', 'dark-mode');
@@ -114,6 +139,7 @@ new Vue({
   router: router,
   render: h => h(App),
   pinia,
+  i18n,
 });
 
 // Set the $aw global

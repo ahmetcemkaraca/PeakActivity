@@ -1,4 +1,13 @@
 import { db } from "../firebaseAdmin";
+import { logger } from 'firebase-functions';
+import { 
+  FirestoreError, 
+  ValidationError, 
+  NotFoundError, 
+  handleError, 
+  validateRequired,
+  validateType 
+} from '../utils/errorHandler';
 
 export interface Goal {
   id: string;
@@ -33,6 +42,17 @@ export class GoalService {
    */
   static async createGoal(goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'version' | 'progress'>, userId: string): Promise<Goal> {
     try {
+      validateRequired(userId, 'userId');
+      validateRequired(goalData, 'goalData');
+      validateRequired(goalData.title, 'goalData.title');
+      validateType(goalData.title, 'string', 'goalData.title');
+      
+      if (!['time_based', 'count_based', 'habit_based', 'milestone_based'].includes(goalData.type)) {
+        throw new ValidationError('Invalid goal type', 'goalData.type', goalData.type);
+      }
+
+      logger.info(`Creating goal for user ${userId}: ${goalData.title}`);
+
       const newGoalRef = db.collection('users').doc(userId).collection('goals').doc();
       const newGoal: Goal = {
         id: newGoalRef.id,
@@ -50,9 +70,13 @@ export class GoalService {
       };
 
       await newGoalRef.set(newGoal);
+      logger.info(`Goal created successfully with ID: ${newGoal.id}`);
       return newGoal;
     } catch (error: any) {
-      throw new Error(`Hedef oluşturulurken hata oluştu: ${error.message}`);
+      if (error.code?.startsWith('firestore/')) {
+        throw new FirestoreError('create goal', error);
+      }
+      handleError(error, 'GoalService.createGoal');
     }
   }
 
@@ -61,13 +85,27 @@ export class GoalService {
    */
   static async getGoal(goalId: string, userId: string): Promise<Goal | null> {
     try {
+      validateRequired(goalId, 'goalId');
+      validateRequired(userId, 'userId');
+      validateType(goalId, 'string', 'goalId');
+      validateType(userId, 'string', 'userId');
+
+      logger.info(`Retrieving goal ${goalId} for user ${userId}`);
+
       const goalDoc = await db.collection('users').doc(userId).collection('goals').doc(goalId).get();
       if (!goalDoc.exists) {
+        logger.warn(`Goal ${goalId} not found for user ${userId}`);
         return null;
       }
-      return goalDoc.data() as Goal;
+      
+      const goal = goalDoc.data() as Goal;
+      logger.info(`Goal ${goalId} retrieved successfully`);
+      return goal;
     } catch (error: any) {
-      throw new Error(`Hedef alınırken hata oluştu: ${error.message}`);
+      if (error.code?.startsWith('firestore/')) {
+        throw new FirestoreError('get goal', error);
+      }
+      handleError(error, 'GoalService.getGoal');
     }
   }
 

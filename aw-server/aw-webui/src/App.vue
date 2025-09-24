@@ -1,7 +1,8 @@
 <template>
   <div id="app">
+    <a href="#main-content" class="visually-hidden skip-link">Ana içeriğe atla</a>
     <Header />
-    <main>
+    <main id="main-content">
       <router-view />
     </main>
   </div>
@@ -22,6 +23,21 @@ export default defineComponent({
     return {
       unsubscribeAuth: null as (() => void) | null,
     };
+  },
+  watch: {
+    '$route': {
+      immediate: true,
+      handler(to) {
+        document.title = to.meta.title ? `${to.meta.title} - ActivityWatch` : 'ActivityWatch';
+        // Odak yönetimi için atlama bağlantısına odaklan
+        this.$nextTick(() => {
+          const skipLink = document.querySelector('.skip-link') as HTMLElement;
+          if (skipLink) {
+            skipLink.focus();
+          }
+        });
+      },
+    },
   },
   created() {
     const authService = new AuthService();
@@ -58,5 +74,22 @@ export default defineComponent({
 
 main {
   padding: 20px;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.visually-hidden:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  left: auto;
+  top: auto;
 }
 </style>

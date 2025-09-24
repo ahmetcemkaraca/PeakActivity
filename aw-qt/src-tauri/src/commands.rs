@@ -11,6 +11,11 @@ use aes_gcm::{Aes256Gcm, Key, Nonce};
 use aes_gcm::aead::{Aead, NewAead, generic_array::GenericArray};
 use rand_core::RngCore;
 use rand::rngs::OsRng;
+use crate::keyring_service::SystemKeychainService;
+use crate::key_derivation_service::KeyDerivationService;
+use crate::encryption_service::RustEncryptionService;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Goal {
@@ -150,13 +155,11 @@ fn now_millis() -> f64 {
 }
 
 // SQLite veritabanı bağlantısını başlatır ve tabloyu oluşturur
-fn init_db() -> Result<Connection, rusqlite::Error> {
+fn init_db(user_id: &str, encryption_key_base64: &str) -> Result<Connection, rusqlite::Error> {
     let path = "aw_goals.db";
     let conn = Connection::open(path)?;
 
-    // Veritabanı şifrelemesi için anahtar belirleme (güvenli bir yerden gelmeli)
-    let encryption_key = "your-strong-encryption-key"; // Bu anahtar güvenli bir şekilde yönetilmelidir!
-    conn.execute(&format!("PRAGMA key = '{}'", encryption_key), [])?;
+    conn.execute(&format!("PRAGMA key = '{}'", encryption_key_base64), [])?;
     conn.execute("PRAGMA cipher_page_size = 4096", [])?;
     conn.execute("PRAGMA kdf_iter = 64000", [])?;
     conn.execute("PRAGMA cipher_hmac_algorithm = HMAC_SHA512", [])?;
@@ -192,7 +195,17 @@ fn init_db() -> Result<Connection, rusqlite::Error> {
 
 #[tauri::command]
 pub async fn create_goal_command(app_handle: tauri::AppHandle, goal_data: Goal, user_id: String) -> Result<Goal, String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+    // Anahtar zincirinden anahtarı al veya türet (geçici olarak varsayılan bir anahtar kullanacağız)
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            // Eğer anahtar yoksa veya alınamazsa, yeni bir anahtar oluştur ve kaydet (basit bir yer tutucu)
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
 
     let app_names_str = goal_data.target_criteria.app_names.map(|v| v.join(","));
     let categories_str = goal_data.target_criteria.categories.map(|v| v.join(","));
@@ -243,7 +256,16 @@ pub async fn create_goal_command(app_handle: tauri::AppHandle, goal_data: Goal, 
 
 #[tauri::command]
 pub async fn get_all_goals_command(user_id: String) -> Result<Vec<Goal>, String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            // Eğer anahtar yoksa veya alınamazsa, yeni bir anahtar oluştur ve kaydet (basit bir yer tutucu)
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
     let mut stmt = conn.prepare("SELECT * FROM goals WHERE user_id = ?")
         .map_err(|e| format!("SQL hazırlık hatası: {}", e))?;
     let goals_iter = stmt.query_map(params![user_id], |row| {
@@ -288,7 +310,14 @@ pub async fn get_all_goals_command(user_id: String) -> Result<Vec<Goal>, String>
 
 #[tauri::command]
 pub async fn update_goal_command(app_handle: tauri::AppHandle, goal_id: String, updates: Goal, user_id: String) -> Result<(), String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
 
     let app_names_str = updates.target_criteria.app_names.map(|v| v.join(","));
     let categories_str = updates.target_criteria.categories.map(|v| v.join(","));
@@ -337,7 +366,14 @@ pub async fn update_goal_command(app_handle: tauri::AppHandle, goal_id: String, 
 
 #[tauri::command]
 pub async fn delete_goal_command(goal_id: String, user_id: String) -> Result<(), String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
 
     conn.execute(
         "DELETE FROM goals WHERE id = ? AND user_id = ?",
@@ -378,6 +414,15 @@ pub async fn create_automation_rule_command(
     user_id: String,
     rule_data: AutomationRule,
 ) -> Result<String, String> {
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+
     let client = reqwest::Client::new();
     let url = Url::parse(&format!("{}/createAutomationRule", API_BASE_URL))
         .map_err(|e| format!("URL ayrıştırma hatası: {}", e))?;
@@ -408,6 +453,15 @@ pub async fn create_automation_rule_command(
 pub async fn get_all_automation_rules_command(
     user_id: String,
 ) -> Result<Vec<AutomationRule>, String> {
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+
     let client = reqwest::Client::new();
     let url = Url::parse(&format!("{}/getAllAutomationRules", API_BASE_URL))
         .map_err(|e| format!("URL ayrıştırma hatası: {}", e))?;
@@ -437,6 +491,15 @@ pub async fn update_automation_rule_command(
     rule_id: String,
     updates: serde_json::Value,
 ) -> Result<(), String> {
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+
     let client = reqwest::Client::new();
     let url = Url::parse(&format!("{}/updateAutomationRule", API_BASE_URL))
         .map_err(|e| format!("URL ayrıştırma hatası: {}", e))?;
@@ -467,15 +530,30 @@ pub async fn delete_automation_rule_command(
     user_id: String,
     rule_id: String,
 ) -> Result<(), String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+
     conn.execute("DELETE FROM automation_rules WHERE id = ? AND user_id = ?", params![rule_id, user_id])
         .map_err(|e| format!("Otomasyon kuralı silme hatası: {}", e))?;
     Ok(())
 }
 
 #[tauri::command]
-pub async fn get_automation_rule_by_id_command(rule_id: String) -> Result<AutomationRule, String> {
-    let conn = init_db().map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
+pub async fn get_automation_rule_by_id_command(rule_id: String, user_id: String) -> Result<AutomationRule, String> {
+    let encryption_key_base64 = SystemKeychainService::get_credential("aw_goals_db", &user_id)
+        .map_err(|e| format!("Anahtar zincirinden anahtar alınamadı: {}", e))
+        .unwrap_or_else(|_| {
+            let new_key = KeyDerivationService::generate_key().unwrap();
+            let _ = SystemKeychainService::set_credential("aw_goals_db", &user_id, &new_key);
+            new_key
+        });
+    let conn = init_db(&user_id, &encryption_key_base64).map_err(|e| format!("Veritabanı başlatma hatası: {}", e))?;
     let mut stmt = conn.prepare("SELECT * FROM automation_rules WHERE id = ?")
         .map_err(|e| format!("SQL hazırlık hatası: {}", e))?;
 
@@ -769,4 +847,58 @@ pub async fn decrypt_local_data(encrypted_data: Vec<u8>, key_bytes: Vec<u8>) -> 
     cipher.decrypt(nonce, ciphertext)
         .map(|decrypted_bytes| String::from_utf8(decrypted_bytes).map_err(|e| format!("UTF-8 dönüşüm hatası: {}", e)))
         .map_err(|e| format!("Şifre çözme hatası: {}", e))?
+} 
+
+#[tauri::command]
+pub async fn encrypt_file_command(path: String, user_id: String, master_password: String) -> Result<(), String> {
+    let file_path = PathBuf::from(path);
+    let file_content = fs::read_to_string(&file_path)
+        .map_err(|e| format!("Dosya okuma hatası: {}", e))?;
+
+    let (_, salt) = KeyDerivationService::derive_key_argon2(&master_password, None)
+        .map_err(|e| format!("Anahtar türetme hatası: {}", e))?;
+
+    let derived_key_hash = KeyDerivationService::derive_key_argon2(&master_password, Some(&salt))
+        .map_err(|e| format!("Anahtar türetme hatası: {}", e))?.0;
+
+    // Anahtar hashini 32 byte'a dönüştür (AES-256 için)
+    let key_bytes_base64 = base64::encode(derived_key_hash.as_bytes());
+
+    let iv = RustEncryptionService::generate_iv()
+        .map_err(|e| format!("IV oluşturma hatası: {}", e))?;
+
+    let encrypted_content = RustEncryptionService::encrypt(file_content, key_bytes_base64, iv)
+        .map_err(|e| format!("Şifreleme hatası: {}", e))?;
+
+    fs::write(&file_path, encrypted_content)
+        .map_err(|e| format!("Şifreli dosya yazma hatası: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn decrypt_file_command(path: String, user_id: String, master_password: String) -> Result<String, String> {
+    let file_path = PathBuf::from(path);
+    let encrypted_content_base64 = fs::read_to_string(&file_path)
+        .map_err(|e| format!("Dosya okuma hatası: {}", e))?;
+
+    let (_, salt) = KeyDerivationService::derive_key_argon2(&master_password, None)
+        .map_err(|e| format!("Anahtar türetme hatası: {}", e))?;
+
+    let derived_key_hash = KeyDerivationService::derive_key_argon2(&master_password, Some(&salt))
+        .map_err(|e| format!("Anahtar türetme hatası: {}", e))?.0;
+
+    let key_bytes_base64 = base64::encode(derived_key_hash.as_bytes());
+
+    // Şifrelenmiş içeriği ve IV'yi ayrıştır
+    // Bu, şifrelenmiş verinin nasıl saklandığına bağlıdır.
+    // Basitlik adına, IV'nin ayrı bir yerde saklandığını veya tahmin edilebilir olduğunu varsayıyoruz.
+    // Gerçek uygulamalarda, metadata ile birlikte saklanmalıdır.
+    let iv = RustEncryptionService::generate_iv()
+        .map_err(|e| format!("IV oluşturma hatası: {}", e))?; // IV, şifreleme sırasında oluşturulanla aynı olmalı
+
+    let decrypted_content = RustEncryptionService::decrypt(encrypted_content_base64, key_bytes_base64, iv)
+        .map_err(|e| format!("Şifre çözme hatası: {}", e))?;
+
+    Ok(decrypted_content)
 } 

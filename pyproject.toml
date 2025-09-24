@@ -6,7 +6,7 @@ authors = ["Erik Bjäreholt <erik@bjareho.lt>", "Johan Bjäreholt <johan@bjareho
 license = "MPL-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.8.0"
 # Installing them from here won't work
 #aw-core = {path = "aw-core"}
 #aw-client = {path = "aw-client"}
@@ -16,18 +16,18 @@ python = "^3.8"
 #aw-qt = {path = "aw-qt"}
 
 # https://github.com/ionrock/cachecontrol/issues/292
-urllib3 = "<2"
+urllib3 = "1.26.18"
 
 [tool.poetry.dev-dependencies]
-mypy = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-benchmark = "*"
-psutil = "*"
-pywin32-ctypes = {version = "*", platform = "win32"}
-pefile = {version = "*", platform = "win32"}
+mypy = "1.10.0"
+pytest = "7.4.0"
+pytest-cov = "4.1.0"
+pytest-benchmark = "4.0.0"
+psutil = "5.9.6"
+pywin32-ctypes = {version = "0.2.2", platform = "win32"}
+pefile = {version = "2023.2.7", platform = "win32"}
 
-pyinstaller = {version = "*", python = "^3.8,<3.14"}
+pyinstaller = {version = "6.8.0", python = "^3.8,<3.14"}
 # releases are very infrequent, so good idea to use the master branch
 # we need this unreleased commit: https://github.com/pyinstaller/pyinstaller-hooks-contrib/commit/0f40dc6e74086e5472aee75070b9077b4c17ab18
 pyinstaller-hooks-contrib = {git = "https://github.com/pyinstaller/pyinstaller-hooks-contrib.git", branch="master"}
@@ -38,3 +38,23 @@ pyinstaller-hooks-contrib = {git = "https://github.com/pyinstaller/pyinstaller-h
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+line_length = 99
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_first_party = ["aw_core", "aw_client", "aw_server", "aw_qt", "aw_watcher_afk", "aw_watcher_window", "aw_watcher_input", "aw_notify", "aw_datastore"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py38"
+select = ["E", "F", "W", "I"]  # Enable import sorting (I)
+ignore = ["E501"]  # Ignore line too long (handled by black)
+
+[tool.ruff.isort]
+known-first-party = ["aw_core", "aw_client", "aw_server", "aw_qt", "aw_watcher_afk", "aw_watcher_window", "aw_watcher_input", "aw_notify", "aw_datastore"]

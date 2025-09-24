@@ -80,3 +80,38 @@ body {
     color: var(--text-color);
   }
 }
+
+/* Responsive Design İyileştirmeleri */
+
+// Mobil cihazlar için temel ayarlar
+@media (max-width: 768px) {
+  body {
+    font-size: 14px; // Daha küçük ekranlar için yazı tipi boyutunu küçült
+  }
+
+  .aw-container, .card {
+    margin: 10px; // Mobil cihazlarda kenar boşluklarını ayarla
+    padding: 15px; // Daha küçük iç boşluklar
+  }
+
+  .btn {
+    width: 100%; // Düğmeleri tam genişlik yap
+    margin-bottom: 10px; // Düğmeler arasına boşluk ekle
+  }
+
+  h1, h2, h3 {
+    font-size: 1.5rem; // Başlık boyutlarını ayarla
+  }
+}
+
+// Daha küçük mobil cihazlar için ek ayarlar
+@media (max-width: 480px) {
+  .aw-container, .card {
+    margin: 5px; // Çok daha küçük ekranlar için kenar boşluklarını daha da küçült
+    padding: 10px; // Çok daha küçük ekranlar için iç boşlukları küçült
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem; // Düğme dolgularını küçült
+  }
+}

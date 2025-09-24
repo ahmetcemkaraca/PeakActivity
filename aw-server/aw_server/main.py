@@ -4,7 +4,6 @@ import os
 from google.cloud import logging as cloud_logging
 
 from aw_core.log import setup_logging
-from aw_datastore import get_storage_methods
 from aw_datastore.storages.memory import MemoryStorage
 from aw_datastore.storages.peewee import PeeweeStorage
 from aw_server.firebase_datastore.firestore import FirestoreStorage # Firestore depolama sınıfını içe aktar
@@ -31,13 +30,13 @@ def main():
         # Hata durumunda uygulama yine de çalışmaya devam etmeli
 
 
-    settings, storage_method = parse_settings()
-
     # TODO: Gerçek kullanıcı kimliği doğrulama bağlamından alınmalı
     # Şimdilik, varsayılan bir kullanıcı kimliği kullanıyoruz veya yapılandırmadan alıyoruz
     # Bu kısım, kimlik doğrulama sistemi uygulandığında güncellenmelidir.
     user_id = os.environ.get("FIREBASE_USER_ID", "default_user_id")
     anonymize_data = os.environ.get("ANONYMIZE_ACTIVITY_DATA", "False").lower() == "true"
+
+    settings, storage_method = parse_settings(user_id, anonymize_data)
 
     # FIXME: The LogResource API endpoint relies on the log being in JSON format
     # at the path specified by aw_core.log.get_log_file_path(). We probably want
@@ -77,7 +76,7 @@ def main():
         sys.exit(1)
 
 
-def parse_settings():
+def parse_settings(user_id: str = "default_user", anonymize_data: bool = True):
     import argparse
 
     """ CLI Arguments """

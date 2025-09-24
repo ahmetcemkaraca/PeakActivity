@@ -58,7 +58,36 @@ icon_path = (script_dir / ".." / "media" / "logo" / "logo.png").resolve()
 
 
 def cache_ttl(ttl: Union[timedelta, int]):
-    """Decorator that caches the result of a function in-memory, with a given time-to-live."""
+    """Decorator that caches function results in-memory with time-to-live expiration.
+    
+    Creates a caching decorator that stores function results for a specified duration,
+    reducing redundant computations and API calls. Each unique combination of 
+    arguments creates a separate cache entry.
+    
+    Args:
+        ttl: Time-to-live for cached results. Can be a timedelta object or
+             integer representing seconds.
+             
+    Returns:
+        Decorator function that wraps the target function with caching logic
+        
+    Cache Key:
+        Generated from function arguments (*args) and keyword arguments (**kwargs).
+        Different argument combinations create separate cache entries.
+        
+    Example:
+        @cache_ttl(60)  # Cache for 60 seconds
+        def expensive_calculation(x, y):
+            return complex_operation(x, y)
+            
+        @cache_ttl(timedelta(minutes=5))  # Cache for 5 minutes
+        def api_call():
+            return fetch_data_from_server()
+            
+    Note:
+        Cache is stored in memory and will be lost when the process restarts.
+        For persistent caching, consider using disk-based solutions.
+    """
     T = TypeVar("T")
 
     _ttl: timedelta = ttl if isinstance(ttl, timedelta) else timedelta(seconds=ttl)
@@ -86,10 +115,42 @@ def cache_ttl(ttl: Union[timedelta, int]):
 
 @cache_ttl(60)
 def get_time(date=None, top_level_only=True) -> dict[str, timedelta]:
-    """
-    Returns a dict with the time spent today (or for `date`) for each category.
-
-    Might throw exceptions if the query fails.
+    """Retrieve time spent in different categories for a given date.
+    
+    Queries ActivityWatch server for window and AFK data, then categorizes
+    and aggregates time spent in different activities. Results are cached
+    for 60 seconds to reduce server load.
+    
+    Args:
+        date: Target date for analysis. If None, uses current date.
+              Will be normalized to start of day (00:00:00).
+        top_level_only: If True, only returns top-level categories.
+                       If False, returns full category hierarchy with '>' separator.
+                       
+    Returns:
+        Dictionary mapping category names to timedelta objects representing
+        time spent in each category. Always includes an "All" category with
+        total time.
+        
+    Query Process:
+        1. Uses canonical events query to get window and AFK data
+        2. Applies TIME_OFFSET for day boundary adjustment
+        3. Merges events by category using ActivityWatch query functions
+        4. Sorts categories by duration (most time first)
+        5. Aggregates durations by category level
+        
+    Raises:
+        Exception: If ActivityWatch server is unavailable or query fails.
+                  Caller should handle these exceptions appropriately.
+                  
+    Example:
+        time_data = get_time()
+        print(f"Work time: {time_data.get('Work', timedelta())}")
+        print(f"Total time: {time_data['All']}")
+        
+    Note:
+        Requires global 'aw' client and 'hostname' to be initialized.
+        Uses TIME_OFFSET (default 4 hours) to adjust day boundaries.
     """
     assert aw
     if date is None:
@@ -130,6 +191,32 @@ def get_time(date=None, top_level_only=True) -> dict[str, timedelta]:
 
 
 def to_hms(duration: timedelta) -> str:
+    """Convert timedelta to human-readable hours, minutes, seconds format.
+    
+    Args:
+        duration: Timedelta object to convert to readable format
+        
+    Returns:
+        String representation in format like "2d 3h 45m" or "1h 30m"
+        For durations less than 1 minute, returns seconds like "45s"
+        
+    Format Rules:
+        - Days are shown if > 0 (e.g., "1d")
+        - Hours are shown if > 0 (e.g., "2h") 
+        - Minutes are shown if > 0 (e.g., "30m")
+        - Seconds only shown if no larger units present
+        - Units are space-separated and trimmed
+        
+    Examples:
+        to_hms(timedelta(days=1, hours=2, minutes=30)) -> "1d 2h 30m"
+        to_hms(timedelta(hours=1, minutes=5)) -> "1h 5m"
+        to_hms(timedelta(minutes=45)) -> "45m"
+        to_hms(timedelta(seconds=30)) -> "30s"
+        
+    Note:
+        Only shows the most significant time units to keep output concise.
+        Microseconds are ignored in the calculation.
+    """
     days = duration.days
     hours, remainder = divmod(duration.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -146,7 +233,40 @@ def to_hms(duration: timedelta) -> str:
 
 
 def notify(title: str, msg: str):
-    """send a notification to the user"""
+    """Send a notification to the user using available notification systems.
+    
+    Args:
+        title: Notification title/headline
+        msg: Main notification message content
+        
+    Notification Priority:
+        1. macOS: Attempts terminal-notifier first (if available)
+        2. Cross-platform: Falls back to desktop-notifier library
+        3. Failure: Logs warning if all methods fail
+        
+    Features:
+        - Uses ActivityWatch app icon when available
+        - Limits concurrent notifications to 10
+        - Logs all notification attempts for debugging
+        - Graceful fallback between different notification systems
+        
+    Dependencies:
+        - terminal-notifier: macOS command-line tool (optional)
+        - desktop-notifier: Python cross-platform library
+        
+    Global State:
+        Initializes global 'notifier' DesktopNotifier instance on first use
+        with ActivityWatch branding and icon configuration.
+        
+    Example:
+        notify("Break Reminder", "You've been working for 2 hours")
+        notify("Daily Summary", "Total productive time: 6h 30m")
+        
+    Note:
+        On macOS, terminal-notifier provides native system notifications.
+        Desktop-notifier provides cross-platform support but may have
+        limited styling options on some systems.
+    """
     global notifier
 
     logger.info(f'Showing: "{title} - {msg}"')
@@ -174,7 +294,39 @@ def notify(title: str, msg: str):
 
 
 def notify_terminal_notifier(title: str, msg: str) -> bool:
-    """Send notification using terminal-notifier. Returns True if successful."""
+    """Send notification using macOS terminal-notifier command-line tool.
+    
+    Args:
+        title: Notification subtitle (main title is always "ActivityWatch")
+        msg: Notification message content, will be cleaned for display
+        
+    Returns:
+        True if notification was sent successfully, False if tool unavailable
+        or command failed
+        
+    Message Processing:
+        - Strips leading/trailing dashes
+        - Replaces "- " with ", " for better readability  
+        - Removes newlines to create single-line message
+        
+    Notification Features:
+        - Groups notifications by title to prevent spam
+        - Makes notification clickable to open ActivityWatch web UI
+        - Uses system-native macOS notification center
+        
+    Requirements:
+        - macOS system
+        - terminal-notifier installed via Homebrew or manual installation
+        
+    Example:
+        success = notify_terminal_notifier("Break Time", "Take a 15 minute break")
+        if not success:
+            # Fall back to other notification method
+            
+    Note:
+        App icon setting is commented out due to compatibility issues.
+        Notifications open http://localhost:5600 when clicked.
+    """
     if not shutil.which("terminal-notifier"):
         return False
     try:

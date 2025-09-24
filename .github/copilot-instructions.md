@@ -180,26 +180,11 @@ productivity_agent = Agent(
 9. **Import Compatibility**: Ensure all files have proper imports and type definitions
 10. **Version Tracking**: Update `version.md` every 2 prompts with timestamp and changes
 
-## Version Management Workflow
-
-### 2-Prompt Development Cycle
-```bash
-# At end of every 2 development prompts:
-Get-Date -Format 'yyyy-MM-dd HH:mm:ss'  # Get current timestamp
-# Update version.md with new entry
-# Commit changes to git repo
-```
-
-### Version Entry Format
-```markdown
-## Version 0.X.Y - [Timestamp]
-### Eklenen Özellikler:
-- [Turkish description of new features]
-### Düzeltilen Hatalar:
-- [Turkish description of bug fixes]
-### Teknik Değişiklikler:
-- [Turkish description of technical changes]
-```
+##Development Cycle Management
+- **2-Prompt Cycle**: Update `version.md` and git repo every 2 development prompts
+- **Time Tracking**: Use `Get-Date -Format 'yyyy-MM-dd HH:mm:ss'` for version timestamps
+- **Version History**: Never delete previous versions, always append new entries
+- **Change Documentation**: Summarize features added, bugs fixed, important changes
 
 ## File Organization Priorities
 

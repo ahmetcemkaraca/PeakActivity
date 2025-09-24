@@ -1,10 +1,11 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { ProjectPredictionService } from '../services/project-prediction-service';
+import { requireSubscription } from '../middlewares/requireAuth'; // requireSubscription'ı import et
 
 const projectPredictionService = new ProjectPredictionService();
 
 // Create Project API
-export const createProject = onCall(async (request) => {
+export const createProject = onCall(requireSubscription('premium')(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       'unauthenticated',
@@ -38,7 +39,7 @@ export const createProject = onCall(async (request) => {
       error.message || 'Failed to create project.'
     );
   }
-});
+}));
 
 // Get Project API
 export const getProject = onCall(async (request) => {

@@ -11,7 +11,27 @@ interface UserProfile {
   lastAgentGeneration?: admin.firestore.Timestamp;
 }
 
-// Her gün gece yarısı çalışacak zamanlanmış fonksiyon
+/**
+ * Zamanlanmış ajan oluşturma tetikleyicisi
+ * 
+ * Bu trigger her 24 saatte bir çalışır ve ücretli kullanıcılar için otomatik
+ * ajan oluşturma işlemini tetikler. Ana görevleri:
+ * 
+ * 1. Tüm kullanıcıları tarar
+ * 2. Ücretli kullanıcıları filtreler (free kullanıcıları atlar)
+ * 3. Son ajan oluşturma zamanını kontrol eder (2 günlük interval)
+ * 4. Kullanıcı etkinliğini doğrular (son 7 gün içinde aktivite var mı?)
+ * 5. Dinamik ajan yapılandırması oluşturur
+ * 6. Ajan oluşturma endpoint'ini çağırır
+ * 7. Son ajan oluşturma zamanını günceller
+ * 
+ * Tetiklenme zamanı: Her 24 saatte bir
+ * Kullanım senaryoları:
+ * - Otomatik periyodik verimlilik analizleri
+ * - Abonelik tabanlı premium hizmetler
+ * - Kullanıcı aktivite durumu takibi
+ * - AI destekli içgörü oluşturma
+ */
 export const scheduleAgentGeneration = onSchedule('every 24 hours', async (event) => {
   functions.logger.info('Ajan oluşturma zamanlanmış fonksiyonu başladı.', event);
 

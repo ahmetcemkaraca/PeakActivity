@@ -1,7 +1,10 @@
 import sys
 from typing import Optional
+import logging
 
 from .exceptions import FatalError
+
+logger = logging.getLogger(__name__)
 
 
 def get_current_window_linux() -> Optional[dict]:
@@ -39,13 +42,32 @@ def get_current_window_windows() -> Optional[dict]:
     from . import windows
 
     window_handle = windows.get_active_window_handle()
+    app = None
+    
     try:
         app = windows.get_app_name(window_handle)
-    except Exception:  # TODO: narrow down the exception
-        # try with wmi method
-        app = windows.get_app_name_wmi(window_handle)
+    except (AttributeError, OSError, PermissionError) as e:
+        # Spesifik Windows API hataları
+        logger.warning("Primary method failed to get app name: %s", e)
+        try:
+            # Fallback: WMI method
+            app = windows.get_app_name_wmi(window_handle)
+        except (ImportError, OSError, PermissionError, AttributeError) as wmi_e:
+            logger.warning("WMI fallback also failed: %s", wmi_e)
+            app = "unknown"
+    except (ImportError, ModuleNotFoundError) as import_e:
+        # Module import errors
+        logger.error("Module import error getting app name: %s", import_e)
+        app = "unknown"
 
-    title = windows.get_window_title(window_handle)
+    try:
+        title = windows.get_window_title(window_handle)
+    except (AttributeError, OSError, PermissionError) as e:
+        logger.warning("Failed to get window title: %s", e)
+        title = "unknown"
+    except (ImportError, ModuleNotFoundError) as import_e:
+        logger.error("Module import error getting window title: %s", import_e)
+        title = "unknown"
 
     if app is None:
         app = "unknown"

@@ -91,8 +91,14 @@ def main(testing: bool):
         current_window = None
         try:
             current_window = get_current_window() # macOS için strategy parametresi gerekebilir, şimdilik varsayılan
-        except Exception as e:
-            logger.warning(f"Pencere bilgisi alınırken hata oluştu: {e}")
+        except ImportError as import_e:
+            logger.warning("Window tracking module not available: %s", import_e)
+        except (OSError, PermissionError) as perm_e:
+            logger.warning("Permission or OS error getting window info: %s", perm_e)
+        except AttributeError as attr_e:
+            logger.warning("Window API attribute error: %s", attr_e)
+        except ValueError as val_e:
+            logger.warning("Invalid parameter for window detection: %s", val_e)
 
         if current_window:
             app_name = current_window.get("app", "unknown")

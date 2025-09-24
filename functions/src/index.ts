@@ -558,4 +558,4 @@ export const applyCommunityRules = onRequest(async (request: Request, response: 
 });
 
 export { predictTaskCompletion } from './api/task-completion-prediction-api';
-export { firestoreDailyBackup } from './triggers/backup-triggers'; 
+export { firestoreDailyBackup } from './triggers/backup-triggers';
