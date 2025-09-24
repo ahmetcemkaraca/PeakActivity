@@ -9,6 +9,18 @@ import { z } from 'zod';
 import apiRoutes from './api/routes'; // API rotalarını import et
 import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi import et
 import { generateAgent } from './api/agent-api'; // Yeni eklenen import
+import rateLimit from 'express-rate-limit'; // Rate limiting için
+
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -57,6 +69,7 @@ const app = express();
 
 // Middleware'ler
 app.use(express.json()); // JSON body parsing
+app.use(limiter); // Rate limiting middleware
 
 // API rotalarını kullan
 app.use('/api', apiRoutes);
@@ -135,7 +148,7 @@ export { ai as genkitInstance };
 // export const insightGenerationApi = { generateInsight: generateInsight, listInsights: listInsights, getInsight: getInsight, deleteInsight: deleteInsight, };
 // export const reportManagementApi = { createReport: createReport, getReport: getReport, updateReport: updateReport, deleteReport: deleteReport, listReports: listReports, generateReportData: generateReportData, };
 // export const activityQueryApi = { queryActivities: queryActivities, };
-// export const projectApi = { createProject: createProject, getProject: getProject, updateProject: updateProject, getAllProjects: getAllProjects, deleteProject: deleteProject, };
+// export const projectApi = { createProject: createProject, getProject: updateProject, getAllProjects: getAllProjects, deleteProject: deleteProject, };
 
 // Global settings for all functions in this file
 setGlobalOptions({
