@@ -7,6 +7,22 @@ export class AuthService {
   private auth = getAuth();
   private db = getFirestore();
 
+  async logAction(uid: string, action: string, details: any = {}) {
+    try {
+      await this.db.collection('auditLogs').add({
+        user_id: uid,
+        action,
+        timestamp: new Date().toISOString(),
+        details,
+        ip_address: details.ip || 'unknown',
+        user_agent: details.userAgent || 'unknown',
+      });
+      logger.info('Audit log created', { uid, action });
+    } catch (error: any) {
+      logger.error('Failed to log action', { error: error.message, uid, action });
+    }
+  }
+
   async signUp(email: string, password: string, displayName?: string) {
     try {
       if (!email || !password) {
@@ -40,6 +56,9 @@ export class AuthService {
         verified: false,
       });
 
+      // Log sign up action
+      await this.logAction(userRecord.uid, 'user_signup', { email });
+
       logger.info('User created successfully', { uid: userRecord.uid });
       return { uid: userRecord.uid, email };
     } catch (error: any) {
@@ -58,6 +77,8 @@ export class AuthService {
         await this.auth.updateUser(decodedToken.uid, { emailVerified: true });
         await this.db.collection('users').doc(decodedToken.uid).update({ verified: true });
       }
+      // Log verification
+      await this.logAction(decodedToken.uid, 'email_verified', { email: decodedToken.email });
       return { success: true, uid: decodedToken.uid };
     } catch (error: any) {
       logger.error('Error verifying email', { error: error.message });
@@ -84,8 +105,12 @@ export class AuthService {
       if (!decodedToken.email_verified) {
         throw new HttpsError('unauthenticated', 'Email not verified');
       }
+      // Log login attempt
+      await this.logAction(decodedToken.uid, 'login_attempt', { success: true });
       return decodedToken;
     } catch (error: any) {
+      // Log failed login attempt
+      await this.logAction('unknown', 'login_attempt', { success: false, error: error.message });
       logger.error('Error verifying ID token', { error: error.message });
       if (error.code === 'auth/id-token-expired') {
         throw new HttpsError('unauthenticated', 'Token expired');
@@ -94,43 +119,4 @@ export class AuthService {
     }
   }
 
-  async updateUserProfile(uid: string, profileData: any) {
-    try {
-      await this.db.collection('users').doc(uid).update({
-        ...profileData,
-        updatedAt: new Date().toISOString(),
-      });
-      logger.info('User profile updated', { uid });
-      return { success: true };
-    } catch (error: any) {
-      logger.error('Error updating user profile', { error: error.message });
-      throw new HttpsError('internal', 'Failed to update profile');
-    }
-  }
-
-  async getUserProfile(uid: string) {
-    try {
-      const doc = await this.db.collection('users').doc(uid).get();
-      if (doc.exists) {
-        return { ...doc.data(), id: uid };
-      }
-      throw new HttpsError('not-found', 'User profile not found');
-    } catch (error: any) {
-      logger.error('Error getting user profile', { error: error.message });
-      throw new HttpsError('internal', 'Failed to get profile');
-    }
-  }
-
-  async setProfile(uid: string, profileData: any) {
-    try {
-      await this.db.collection('users').doc(uid).set(profileData, { merge: true });
-      logger.info('User profile set', { uid });
-      return { success: true };
-    } catch (error: any) {
-      logger.error('Error setting user profile', { error: error.message });
-      throw new HttpsError('internal', 'Failed to set profile');
-    }
-  }
-}
-
-export const authService = new AuthService();
+  async updateUserProfile
