@@ -1,0 +1,110 @@
+---
+alwaysApply: true
+---
+
+# Unified Prompts and Steps for PeakActivity Development
+
+This file consolidates all prompts, steps, and guidelines from previous rules into a single, structured reference. It serves as a permanent context for agents, replacing repetitive snippets. Use this for all development tasks.
+
+## Consolidated Tasks from Rules
+
+### 1. Testing Infrastructure and Coverage Expansion
+From testing-guidelines.instructions.mdc and Project-Standards-and-Guidelines.mdc:
+- Establish unit, integration, E2E tests with 80%+ coverage.
+- Implement CI/CD integration for automated testing.
+- Add performance/load tests for APIs.
+- Ensure GDPR compliance in test data handling.
+
+### 2. CI/CD and Deployment Automation
+From deployment-devops.instructions.mdc and Project-Standards-and-Guidelines.mdc:
+- Set up GitHub Actions for lint/test/deploy.
+- Use multi-stage Docker for builds.
+- Implement health checks and alerting.
+- Automate backups and rollbacks.
+
+### 3. Security Improvements
+From security-auth.instructions.mdc and Project-Standards-and-Guidelines.mdc:
+- Enforce OWASP Top 10 compliance.
+- Implement role-based access (RBAC).
+- Add encryption for sensitive data (AES-256-GCM).
+- Integrate brute force protection, JWT security, HTTP headers.
+
+### 4. Build Optimization
+From deployment-devops.instructions.mdc:
+- Optimize Vite/Webpack bundles.
+- Use tree-shaking and code splitting.
+- Implement caching strategies.
+- Monitor bundle sizes with visualizers.
+
+### 5. Environment and Configuration Management
+From proje.instructions.mdc and copilot-instructions.mdc:
+- Use Pydantic for config validation.
+- Support multi-env (dev/prod/test).
+- Secure secret management (Firebase Secrets).
+- Language: English code, Turkish comments, i18n UI.
+
+### AI-Specific Prompts (from ai-feature-documentation.mdc and ai-features.instructions.mdc)
+For Anomaly Detection:
+- Input: JSON with daily_totals array.
+- Algorithm: Z-score calculation, |z| ≥ 2 threshold.
+- Output: JSON with anomalies, mean, stddev, Turkish explanation.
+- Prompt: "Act as statistical watchdog. Follow algorithm strictly. Reply ONLY with JSON. Explanation in Turkish."
+
+For Auto Categorization:
+- Input: Events array with app/title/url.
+- Algorithm: TF-IDF + heuristics, fixed taxonomy (coding, design, etc.).
+- Output: Labels array with index/category/confidence.
+- Prompt: "Classification engine. Use algorithm and taxonomy. Return ONLY JSON."
+
+For Behavioral Trends:
+- Input: Daily_totals with categories, window.
+- Algorithm: Linear regression slope, seasonality via autocorrelation.
+- Output: Trending categories, seasonality, Turkish summary.
+- Prompt: "Analytics engine. Perform time-series detection. Return ONLY JSON. Summary in Turkish ≤280 chars."
+
+For Community Rules:
+- Input: Event + community_rules array.
+- Algorithm: Iterate by popularity, glob/regex match, first match wins.
+- Output: Matched rule, category, source.
+- Prompt: "Rule-matching engine. Apply rules exactly. Return ONLY JSON."
+
+For Contextual Categorization:
+- Input: Context string, language.
+- Algorithm: Zero-shot LLM classification with labels.
+- Output: Category, confidence, English rationale ≤140 chars.
+- Prompt: "Zero-shot classifier. Return ONLY JSON. Rationale ≤140 chars in English."
+
+For Focus Quality Score:
+- Input: Events array, user_tz.
+- Algorithm: Base 100, penalties for switches/AFK/social, bonuses for time.
+- Output: Session scores, daily average, explanations.
+- Prompt: "Strict analytics engine. Calculate FQS exactly. Return ONLY valid JSON. Null if no sessions."
+
+### General Development Steps (from copilot-instructions.mdc)
+1. Architecture Planning: Core classes/functions with comments.
+2. Entrypoint Analysis: Start from main file, follow imports.
+3. Fully Functional Code: No placeholders.
+4. Compatibility Check: Proper imports/types.
+5. Dependency Management: Include package files.
+6. Architecture Verification: Check components.
+
+### Language Conventions
+- Code/Files: English only.
+- Developer Communication: Turkish (comments, logs).
+- UI: Multi-language i18n.
+- Commits: English messages.
+
+### Firebase Integration Steps (from firebase-integration.instructions.mdc)
+1. Auth middleware: RequireAuth for handlers.
+2. Data conversion: AWEvent to Firebase.
+3. Query optimization: Use indexes, pagination.
+4. Caching: Multi-level (memory/Firestore).
+5. Aggregation: Real-time triggers, scheduled jobs.
+
+### Error Handling Steps (from error-handling-logging.instructions.mdc)
+1. Use BaseError hierarchy.
+2. Normalize errors with context.
+3. Log structured with Logger.
+4. Fallbacks for AI/network errors.
+
+All agents must follow this unified guide for consistency.

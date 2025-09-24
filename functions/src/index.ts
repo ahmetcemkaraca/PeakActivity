@@ -631,5 +631,27 @@ export const applyCommunityRules = onRequest(async (request: Request, response: 
   return;
 });
 
+import { authService } from './services/auth-service';
+
+export const setProfile = onCall(async (request) => {
+  const { auth, data } = request;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required');
+  }
+  const uid = auth.uid;
+  const { profileData } = data;
+  return await authService.setProfile(uid, profileData);
+});
+
+export const updateProfile = onCall(async (request) => {
+  const { auth, data } = request;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required');
+  }
+  const uid = auth.uid;
+  const { profileData } = data;
+  return await authService.updateUserProfile(uid, profileData);
+});
+
 export { predictTaskCompletion } from './api/task-completion-prediction-api';
 export { firestoreDailyBackup } from './triggers/backup-triggers';

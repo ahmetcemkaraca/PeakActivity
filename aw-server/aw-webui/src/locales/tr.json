@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "encryption": {
+      "title": "Şifreleme Ayarları",
+      "description": "Şifreleme anahtarlarınızı ve güvenlik ayarlarınızı yönetin.",
+      "masterPassword": {
+        "title": "Ana Parola",
+        "description": "Şifreleme anahtarlarınızı güvence altına almak için ana parolanızı ayarlayın veya değiştirin.",
+        "setupButton": "Ana Parolayı Ayarla/Değiştir"
+      },
+      "keyRotation": {
+        "title": "Anahtar Döndürme",
+        "description": "Gelişmiş güvenlik için şifreleme anahtarlarınızı periyodik olarak döndürün.",
+        "rotateButton": "Anahtarları Döndür"
+      },
+      "backupRecovery": {
+        "title": "Yedekleme ve Kurtarma",
+        "description": "Yedekleme kodlarını ve anahtar kurtarma seçeneklerini yönetin.",
+        "recoverButton": "Anahtar Kurtarma Sihirbazı"
+      }
+    },
+    "saving": "Ayarlar kaydediliyor...",
+    "saveSuccess": "Ayarlar başarıyla kaydedildi!",
+    "saveError": "Ayarlar kaydedilemedi."
+  }
+} 

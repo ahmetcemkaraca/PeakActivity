@@ -1,0 +1,399 @@
+---
+applyTo: "functions/src/api/**/*.ts"
+description: "API response standards and data modeling guidelines"
+---
+
+# API Geliştirme Standartları
+
+Bu dosya, PeakActivity API'leri için yanıt formatları, hata yönetimi, veri modelleme ve standartlarını tanımlar. api-response-standards.mdc içeriği buraya entegre edilmiştir.
+
+## Standart API Response Format
+
+### Başarılı Yanıtlar
+```typescript
+interface SuccessResponse<T> {
+  success: true;
+  data: T;
+  timestamp: string;
+  version: string;
+}
+
+// Örnek kullanım
+export function createSuccessResponse<T>(data: T): SuccessResponse<T> {
+  return {
+    success: true,
+    data,
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  };
+}
+```
+
+### Hata Yanıtları
+```typescript
+interface ErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  timestamp: string;
+  version: string;
+}
+
+export function createErrorResponse(code: string, message: string, details?: any): ErrorResponse {
+  return {
+    success: false,
+    error: { code, message, details },
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  };
+}
+```
+
+## ActivityWatch API Compatibility
+
+### Event CRUD Operations
+```typescript
+// GET /0/buckets/{bucket_id}/events
+interface GetEventsResponse {
+  events: AWEvent[];
+  count: number;
+  has_more: boolean;
+}
+
+// POST /0/buckets/{bucket_id}/events
+interface CreateEventRequest {
+  timestamp: string;
+  duration: number;
+  data: Record<string, any>;
+}
+
+// POST /0/buckets/{bucket_id}/heartbeat
+interface HeartbeatRequest {
+  timestamp: string;
+  duration: number;
+  data: Record<string, any>;
+  pulsetime: number;
+}
+```
+
+### Bucket Management
+```typescript
+interface BucketMetadata {
+  id: string;
+  type: string;
+  client: string;
+  hostname: string;
+  created: string;
+  name?: string;
+  data?: Record<string, any>;
+}
+
+interface CreateBucketRequest {
+  type: string;
+  client: string;
+  hostname: string;
+  name?: string;
+  data?: Record<string, any>;
+}
+```
+
+## Firebase Cloud Functions Response Patterns
+
+### Authentication Middleware Response
+```typescript
+export const authenticatedFunction = onCall(
+  { enforceAppCheck: true },
+  async (request): Promise<SuccessResponse<any> | ErrorResponse> => {
+    try {
+      // Authentication check
+      if (!request.auth) {
+        return createErrorResponse('AUTH_REQUIRED', 'Kullanıcı kimlik doğrulaması gerekli');
+      }
+
+      const result = await processRequest(request.data);
+      return createSuccessResponse(result);
+    } catch (error) {
+      logger.error('Function execution failed', { error: error.message });
+      return createErrorResponse('INTERNAL_ERROR', 'İç sunucu hatası', error.message);
+    }
+  }
+);
+```
+
+### Pagination Support
+```typescript
+interface PaginationRequest {
+  limit?: number;
+  offset?: number;
+  cursor?: string;
+}
+
+interface PaginatedResponse<T> {
+  items: T[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    has_more: boolean;
+    next_cursor?: string;
+  };
+}
+
+export function createPaginatedResponse<T>(
+  items: T[],
+  total: number,
+  request: PaginationRequest
+): PaginatedResponse<T> {
+  const limit = request.limit || 50;
+  const offset = request.offset || 0;
+  
+  return {
+    items,
+    pagination: {
+      total,
+      limit,
+      offset,
+      has_more: offset + items.length < total,
+      next_cursor: offset + items.length < total ? 
+        Buffer.from(`${offset + limit}`).toString('base64') : undefined
+    }
+  };
+}
+```
+
+## Input Validation Patterns
+
+### Zod Schema Validation
+```typescript
+import { z } from 'zod';
+
+// Activity event validation
+export const ActivityEventSchema = z.object({
+  timestamp: z.string().datetime(),
+  duration: z.number().min(0),
+  data: z.record(z.any()),
+  bucket_id: z.string().min(1)
+});
+
+// User settings validation
+export const UserSettingsSchema = z.object({
+  timezone: z.string(),
+  start_of_day: z.string().regex(/^\d{2}:\d{2}$/),
+  privacy_mode: z.boolean(),
+  data_retention_days: z.number().min(1).max(3650)
+});
+
+// Validation middleware
+export function validateInput<T>(schema: z.ZodSchema<T>) {
+  return (data: unknown): T => {
+    try {
+      return schema.parse(data);
+    } catch (error) {
+      throw new HttpsError('invalid-argument', 'Geçersiz giriş verisi', error);
+    }
+  };
+}
+```
+
+## Rate Limiting ve Quota
+
+### Request Rate Limiting
+```typescript
+interface RateLimitConfig {
+  requests_per_minute: number;
+  requests_per_hour: number;
+  burst_size: number;
+}
+
+export class RateLimiter {
+  private static readonly CONFIGS: Record<string, RateLimitConfig> = {
+    'free': { requests_per_minute: 60, requests_per_hour: 1000, burst_size: 10 },
+    'premium': { requests_per_minute: 300, requests_per_hour: 10000, burst_size: 50 },
+    'pro': { requests_per_minute: 1000, requests_per_hour: 50000, burst_size: 200 }
+  };
+
+  static async checkLimit(userId: string, tier: string): Promise<boolean> {
+    const config = this.CONFIGS[tier] || this.CONFIGS['free'];
+    const key = `rate_limit:${userId}`;
+    
+    // Redis-based rate limiting implementation
+    const current = await redis.incr(key);
+    if (current === 1) {
+      await redis.expire(key, 60); // 1 minute window
+    }
+    
+    return current <= config.requests_per_minute;
+  }
+}
+```
+
+## Error Handling Standards
+
+### Standart Error Codes
+```typescript
+export const API_ERROR_CODES = {
+  // Authentication errors
+  AUTH_REQUIRED: 'Kullanıcı kimlik doğrulaması gerekli',
+  AUTH_INVALID: 'Geçersiz kimlik bilgileri',
+  AUTH_EXPIRED: 'Oturum süresi dolmuş',
+  
+  // Authorization errors
+  FORBIDDEN: 'Bu işlem için yetkiniz yok',
+  QUOTA_EXCEEDED: 'Kullanım kotası aşıldı',
+  
+  // Validation errors
+  INVALID_INPUT: 'Geçersiz giriş verisi',
+  MISSING_REQUIRED: 'Gerekli alan eksik',
+  
+  // Resource errors
+  NOT_FOUND: 'Kaynak bulunamadı',
+  ALREADY_EXISTS: 'Kaynak zaten mevcut',
+  
+  // System errors
+  INTERNAL_ERROR: 'İç sunucu hatası',
+  SERVICE_UNAVAILABLE: 'Servis geçici olarak kullanılamıyor'
+} as const;
+```
+
+### Structured Error Logging
+```typescript
+export function logError(error: Error, context: Record<string, any> = {}) {
+  logger.error('API Error', {
+    error: {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    },
+    context,
+    timestamp: new Date().toISOString()
+  });
+}
+```
+
+## API Versioning Strategy
+
+### URL-based Versioning
+```typescript
+// v1 endpoints
+export const apiV1 = functions.https.onRequest(express().use('/v1', v1Router));
+
+// v2 endpoints with backward compatibility
+export const apiV2 = functions.https.onRequest(express().use('/v2', v2Router));
+
+// Version detection middleware
+export function versionMiddleware(req: Request, res: Response, next: NextFunction) {
+  const version = req.path.split('/')[1] || 'v1';
+  req.apiVersion = version;
+  next();
+}
+```
+
+## Hata Kodları ve HTTP Durum Kodu Eşleşmeleri
+
+Hatalar için özel olarak tanımlanmış uygulama içi hata kodları (`API_ERROR_CODES`) kullanılmalıdır. Bu kodlar, HTTP durum kodlarıyla aşağıdaki gibi eşleştirilmelidir:
+
+```typescript
+export const API_ERROR_CODES = {
+  COMMON: {
+    UNKNOWN_ERROR: "COMMON_UNKNOWN_ERROR",             // Genel bilinmeyen hata
+    INVALID_ARGUMENT: "COMMON_INVALID_ARGUMENT",       // Geçersiz giriş argümanı (HTTP 400 Bad Request)
+    RESOURCE_NOT_FOUND: "COMMON_RESOURCE_NOT_FOUND",   // Kaynak bulunamadı (HTTP 404 Not Found)
+    UNAUTHORIZED: "COMMON_UNAUTHORIZED",             // Kimlik doğrulama başarısız (HTTP 401 Unauthorized)
+    FORBIDDEN: "COMMON_FORBIDDEN",                 // Yetkilendirme başarısız (HTTP 403 Forbidden)
+    INTERNAL_SERVER_ERROR: "COMMON_INTERNAL_SERVER_ERROR", // Sunucu iç hatası (HTTP 500 Internal Server Error)
+    SERVICE_UNAVAILABLE: "COMMON_SERVICE_UNAVAILABLE",   // Servis kullanılamıyor (HTTP 503 Service Unavailable)
+  },
+  AUTH: {
+    INVALID_CREDENTIALS: "AUTH_INVALID_CREDENTIALS",     // Geçersiz kimlik bilgileri (HTTP 401 Unauthorized)
+    USER_DISABLED: "AUTH_USER_DISABLED",             // Kullanıcı devre dışı (HTTP 403 Forbidden)
+    EMAIL_ALREADY_EXISTS: "AUTH_EMAIL_ALREADY_EXISTS",   // E-posta zaten kayıtlı (HTTP 409 Conflict)
+    PHONE_NUMBER_ALREADY_EXISTS: "AUTH_PHONE_NUMBER_ALREADY_EXISTS", // Telefon numarası zaten kayıtlı (HTTP 409 Conflict)
+  },
+  FIRESTORE: {
+    TRANSACTION_FAILED: "FIRESTORE_TRANSACTION_FAILED", // Firestore işlem hatası (HTTP 500 Internal Server Error)
+    DOCUMENT_NOT_FOUND: "FIRESTORE_DOCUMENT_NOT_FOUND", // Firestore belge bulunamadı (HTTP 404 Not Found)
+  },
+  // Diğer servisler/modüller için hata kodları buraya eklenebilir.
+};
+
+export const HTTP_STATUS_CODE_MAP: { [key: string]: number } = {
+  [API_ERROR_CODES.COMMON.INVALID_ARGUMENT]: 400,
+  [API_ERROR_CODES.COMMON.RESOURCE_NOT_FOUND]: 404,
+  [API_ERROR_CODES.COMMON.UNAUTHORIZED]: 401,
+  [API_ERROR_CODES.COMMON.FORBIDDEN]: 403,
+  [API_ERROR_CODES.COMMON.INTERNAL_SERVER_ERROR]: 500,
+  [API_ERROR_CODES.COMMON.SERVICE_UNAVAILABLE]: 503,
+  [API_ERROR_CODES.AUTH.INVALID_CREDENTIALS]: 401,
+  [API_ERROR_CODES.AUTH.USER_DISABLED]: 403,
+  [API_ERROR_CODES.AUTH.EMAIL_ALREADY_EXISTS]: 409,
+  [API_ERROR_CODES.AUTH.PHONE_NUMBER_ALREADY_EXISTS]: 409,
+  [API_ERROR_CODES.FIRESTORE.DOCUMENT_NOT_FOUND]: 404,
+  [API_ERROR_CODES.FIRESTORE.TRANSACTION_FAILED]: 500,
+  [API_ERROR_CODES.COMMON.UNKNOWN_ERROR]: 500,
+};
+```
+
+## Özel Hata Sınıfları
+
+Uygulama içinde daha okunabilir ve yönetilebilir hata fırlatmak için `CustomError` temel sınıfından türetilmiş özel hata sınıfları kullanılmalıdır. Bu sınıflar, uygun `API_ERROR_CODES` ve HTTP durum kodlarıyla ilişkilendirilmiştir.
+
+```typescript
+// functions/src/utils/api-error-codes.ts dosyasından alınmıştır.
+
+export class CustomError extends Error {
+  public code: string;
+  public details?: any;
+  public httpStatus: number;
+
+  constructor(code: string, message: string, details?: any, httpStatus?: number) {
+    // ... implementasyon ...
+  }
+}
+
+export class InvalidArgumentError extends CustomError {
+  constructor(message: string = "Geçersiz argümanlar sağlandı.", details?: any) {
+    super(API_ERROR_CODES.COMMON.INVALID_ARGUMENT, message, details, 400);
+    // ... implementasyon ...
+  }
+}
+
+export class NotFoundError extends CustomError {
+  constructor(message: string = "Kaynak bulunamadı.", details?: any) {
+    super(API_ERROR_CODES.COMMON.RESOURCE_NOT_FOUND, message, details, 404);
+    // ... implementasyon ...
+  }
+}
+
+export class UnauthorizedError extends CustomError {
+  constructor(message: string = "Yetkilendirme başarısız oldu.", details?: any) {
+    super(API_ERROR_CODES.COMMON.UNAUTHORIZED, message, details, 401);
+    // ... implementasyon ...
+  }
+}
+
+export class ForbiddenError extends CustomError {
+  constructor(message: string = "Bu eylemi gerçekleştirmeye izniniz yok.", details?: any) {
+    super(API_ERROR_CODES.COMMON.FORBIDDEN, message, details, 403);
+    // ... implementasyon ...
+  }
+}
+
+export class InternalServerError extends CustomError {
+  constructor(message: string = "Sunucu tarafında beklenmeyen bir hata oluştu.", details?: any) {
+    super(API_ERROR_CODES.COMMON.INTERNAL_SERVER_ERROR, message, details, 500);
+    // ... implementasyon ...
+  }
+}
+```
+
+## Uygulama Talimatları
+
+*   Tüm API uç noktaları, başarılı yanıtlar için `successResponse` ve hatalı yanıtlar için `errorResponse` yardımcı fonksiyonlarını kullanmalıdır.
+*   Hata durumlarında uygun `CustomError` sınıfını fırlatılmalıdır. Merkezi hata işleyici bu hataları yakalayıp standart `ErrorResponse` formatına dönüştürecektir.
+*   Yeni hata senaryoları için `API_ERROR_CODES` içine yeni kodlar eklenmeli ve gerekiyorsa `HTTP_STATUS_CODE_MAP` güncellenmelidir.
+*   Dış kütüphanelerden veya Firebase SDK'larından kaynaklanan hatalar yakalanmalı ve standart `CustomError` sınıflarına dönüştürülmelidir.
+
+Bu standartlara uyum, API'mizin hem geliştiriciler hem de kullanıcılar için daha öngörülebilir ve güvenilir olmasını sağlayacaktır.

@@ -1,0 +1,823 @@
+# Firestore Data Modeling Rules
+
+## PeakActivity Firestore Data Model
+
+This document defines the Firestore database structure, collections, document schemas, and security rules for the PeakActivity project.
+
+### Main Collection Structure
+
+```
+firestore/
+├── users/                           # User profiles
+│   └── {userId}/
+│       ├── activities/              # User activities
+│       ├── goals/                   # Goals
+│       ├── insights/                # AI-generated insights
+│       ├── daily_reports/           # Daily reports
+│       ├── weekly_reports/          # Weekly reports
+│       ├── automation_rules/        # User-defined rules
+│       └── settings/                # Custom settings
+├── teams/                           # Team information (Pro tier)
+├── subscriptions/                   # Subscription information
+├── app_categories/                  # Application category cache
+├── system_insights/                 # System-wide insights
+├── performance_metrics/             # Performance metrics
+├── error_logs/                      # Error logs
+└── analytics_events/                # Analytics events
+```
+
+## Detailed Collection Schemas
+
+### 1. users/{userId}
+```typescript
+interface UserDocument {
+  // Basic information
+  uid: string;                       // Firebase Auth UID
+  email: string;                     // Email address
+  displayName?: string;             // Display name
+  avatarUrl?: string;               // Profile picture URL
+  
+  // Account information
+  createdAt: number;                // Account creation time (timestamp)
+  lastLogin: number;                // Last login time
+  lastActive: number;               // Last active time
+  timezone: string;                  // User timezone
+  locale: string;                    // Language setting (tr, en, etc.)
+  
+  // Subscription information
+  subscription: {
+    tier: 'free' | 'premium' | 'pro'; // Subscription tier
+    status: 'active' | 'inactive' | 'cancelled' | 'past_due';
+    startedAt: number;              // Subscription start date
+    expiresAt: number;              // Subscription end date
+    autoRenew: boolean;             // Auto-renewal
+    paymentMethod?: string;         // Payment method
+  };
+  
+  // Notification settings
+  notificationSettings: {
+    dailyInsights: boolean;         // Daily insights
+    weeklyInsights: boolean;        // Weekly insights
+    goalReminders: boolean;         // Goal reminders
+    breakSuggestions: boolean;      // Break suggestions
+    anomalyAlerts: boolean;         // Anomaly alerts
+    pushNotifications: boolean;     // Push notifications
+    emailNotifications: boolean;    // Email notifications
+    notificationSchedule: {
+      startTime: string;            // "09:00"
+      endTime: string;              // "18:00"
+      days: string[];                // ["monday", "tuesday", ...]
+    };
+  };
+  
+  // Privacy settings
+  privacySettings: {
+    dataSharing: boolean;           // Data sharing permission
+    anonymousAnalytics: boolean;    // Anonymous analytics
+    windowTitleTracking: boolean;  // Window title tracking
+    websiteTracking: boolean;      // Website tracking
+    detailedAppTracking: boolean;  // Detailed app tracking
+    teamInsightsSharing: boolean;  // Team insights sharing
+  };
+  
+  // Application settings
+  appSettings: {
+    autoCategorization: boolean;    // Automatic categorization
+    productivityScoring: boolean;   // Productivity scoring
+    breakReminders: boolean;        // Break reminders
+    focusMode: boolean;             // Focus mode
+    trackingEnabled: boolean;       // Is tracking enabled?
+    dataRetentionDays: number;     // Data retention period (days)
+  };
+  
+  // Statistics (updatable)
+  stats: {
+    totalTrackedTime: number;      // Total tracked time (seconds)
+    totalActivities: number;        // Total number of activities
+    avgDailyTime: number;          // Average daily time
+    bestFocusScore: number;        // Best focus score
+    currentStreakDays: number;     // Current consecutive days
+    longestStreakDays: number;     // Longest consecutive days
+  };
+  
+  // Metadata
+  updatedAt: number;                // Last update time
+  version: number;                   // Document version
+}
+```
+
+### 2. users/{userId}/activities/{activityId}
+```typescript
+interface ActivityDocument {
+  // Basic activity information
+  id: string;                        // Document ID
+  userId: string;                   // User ID
+  timestamp: number;                 // Activity start time
+  duration: number;                  // Duration (seconds)
+  endTimestamp: number;             // Activity end time
+  
+  // Application information
+  appName: string;                  // Application name
+  appId?: string;                   // Application ID (for Windows)
+  windowTitle: string;              // Window title
+  processName?: string;             // Process name
+  
+  // For web activities
+  url?: string;                      // Full URL
+  domain?: string;                   // Domain (google.com)
+  pageTitle?: string;               // Page title
+  
+  // Categorization
+  category: string;                  // Main category (productive, social, entertainment, etc.)
+  subcategory?: string;              // Subcategory
+  tags: string[];                    // Tags
+  
+  // AI analysis results
+  productivityScore: number;        // Productivity score (0-1)
+  focusQuality?: number;            // Focus quality (0-1)
+  interruptionCount?: number;       // Interruption count
+  contextSwitches?: number;         // Context switch count
+  
+  // User data entry
+  isManual: boolean;                // Is it a manual entry?
+  manualCategory?: string;          // Manual category
+  manualNotes?: string;             // User notes
+  moodRating?: number;              // Mood rating (1-5)
+  energyLevel?: number;             // Energy level (1-5)
+  
+  // Project/goal association
+  projectId?: string;               // Associated project ID
+  goalIds: string[];                // Related goal IDs
+  
+  // Metadata
+  deviceInfo?: {
+    platform: string;               // Windows, macOS, Linux
+    version: string;                 // Operating system version
+    screenResolution?: string;      // Screen resolution
+  };
+  
+  // Data quality
+  dataQuality: {
+    confidenceScore: number;        // Data reliability score (0-1)
+    source: 'automatic' | 'manual' | 'imported'; // Data source
+    verified: boolean;               // Is it verified by the user?
+  };
+  
+  // Synchronization
+  syncedToCloud: boolean;          // Is it synced to the cloud?
+  localId?: string;                 // Local database ID
+  
+  // Metadata
+  createdAt: number;                // Creation time
+  updatedAt: number;                // Update time
+  version: number;                   // Document version
+}
+```
+
+### 3. users/{userId}/goals/{goalId}
+```typescript
+interface GoalDocument {
+  // Basic goal information
+  id: string;                        // Document ID
+  userId: string;                   // User ID
+  title: string;                     // Goal title
+  description?: string;              // Description
+  
+  // Goal type and metrics
+  type: 'time_based' | 'count_based' | 'habit_based' | 'milestone_based';
+  
+  // For time-based goals
+  targetDuration?: number;          // Target duration (seconds)
+  targetDailyDuration?: number;    // Daily target duration
+  targetWeeklyDuration?: number;   // Weekly target duration
+  
+  // For count-based goals
+  targetCount?: number;             // Target count
+  currentCount?: number;            // Current count
+  
+  // Goal filter
+  targetCriteria: {
+    appNames?: string[];            // Targeted applications
+    categories?: string[];           // Targeted categories
+    tags?: string[];                 // Targeted tags
+  };
+  
+  // Progress tracking
+  progress: {
+    currentDuration: number;        // Current duration (seconds)
+    currentStreak: number;          // Current streak (days)
+    longestStreak: number;          // Longest streak (days)
+    lastUpdated: number;            // Last updated time
+  };
+  
+  // Metadata
+  createdAt: number;                // Creation time
+  updatedAt: number;                // Update time
+  version: number;                   // Document version
+}
+```
+
+### 4. users/{userId}/insights/{insightId}
+```typescript
+interface InsightDocument {
+  // Basic information
+  id: string;                        // Document ID
+  userId: string;                   // User ID
+  type: 'daily' | 'weekly' | 'monthly' | 'custom' | 'anomaly' | 'achievement';
+  
+  // Analysis period
+  analysisPeriod: {
+    startDate: string;              // "2024-01-01"
+    endDate: string;                // "2024-01-07"
+    timezone: string;                // Analysis timezone
+  };
+  
+  // Insight data
+  insights: {
+    // General metrics
+    totalTime: number;              // Total time (seconds)
+    productiveTime: number;         // Productive time
+    distractedTime: number;         // Distracted time
+    focusScore: number;             // Focus score (0-100)
+    productivityScore: number;      // Productivity score (0-100)
+    
+    // Trend analysis
+    trends: {
+      productivityTrend: 'increasing' | 'decreasing' | 'stable';
+      focusTrend: 'improving' | 'declining' | 'stable';
+      timeSpentTrend: 'more' | 'less' | 'similar';
+    };
+    
+    // Most used applications
+    topApplications: Array<{
+      appName: string;
+      duration: number;
+      percentage: number;
+      category: string;
+    }>;
+    
+    // Category breakdown
+    categoryBreakdown: Array<{
+      category: string;
+      duration: number;
+      percentage: number;
+      changeFromPrevious?: number; // % change
+    }>;
+    
+    // Time analysis
+    timePatterns: {
+      mostProductiveHours: string[]; // ["09:00", "10:00", "14:00"]
+      leastProductiveHours: string[];
+      peakFocusTime: string;         // "10:30"
+      averageSessionLength: number;  // Average session length
+    };
+    
+    // Goal analysis
+    goalProgress: Array<{
+      goalId: string;
+      goalTitle: string;
+      progressPercentage: number;
+      isOnTrack: boolean;
+      estimatedCompletion?: string;
+    }>;
+    
+    // Anomalies
+    anomalies?: Array<{
+      type: 'unusualApp' | 'longSession' | 'lateNight' | 'productivityDrop';
+      description: string;
+      severity: 'low' | 'medium' | 'high';
+      suggestion?: string;
+    }>;
+    
+    // Personal bests
+    personalBests?: Array<{
+      metric: string;                  // "longestFocusSession"
+      value: number;
+      date: string;
+      isNewRecord: boolean;
+    }>;
+  };
+  
+  // Recommendations generated by AI
+  recommendations: Array<{
+    type: 'productivity' | 'focus' | 'break' | 'goal' | 'habit';
+    title: string;
+    description: string;
+    priority: 'low' | 'medium' | 'high';
+    actionableSteps?: string[];
+    estimatedImpact: 'low' | 'medium' | 'high';
+  }>;
+  
+  // Comparisons
+  comparisons?: {
+    previousPeriod?: {
+      productivityChange: number;   // % change
+      focusChange: number;
+      timeChange: number;
+    };
+    peerBenchmark?: {               // Anonymous comparison
+      percentile: number;            // User's percentile
+      category: string;              // Comparison category
+    };
+  };
+  
+  // Metadata
+  createdAt: number;                // Creation time
+  updatedAt: number;                // Update time
+  version: number;                   // Document version
+}
+```
+
+### 5. users/{userId}/automation_rules/{ruleId}
+```typescript
+interface AutomationRuleDocument {
+  id: string;                     // Document ID
+  userId: string;                // User ID
+  name: string;                   // Rule name
+  description?: string;           // Optional description
+  isActive: boolean;             // Whether the rule is currently active
+  priority: number;               // Rule priority (higher value = higher priority)
+  
+  // Trigger definition: When should this rule activate?
+  trigger: {
+    type: 'time_spent' | 'schedule' | 'app_opened' | 'category_time' | 'idle_time' | 'focus_mode_change';
+    
+    // time_spent trigger specific
+    thresholdSeconds?: number;   // e.g., 3600 for 1 hour
+    appNames?: string[];         // Specific apps to monitor
+    categories?: string[];        // Specific categories to monitor
+
+    // schedule trigger specific
+    cronExpression?: string;     // e.g., "0 9 * * 1-5" for 9 AM on weekdays
+    
+    // app_opened trigger specific
+    targetAppName?: string;     // e.g., "chrome.exe"
+    
+    // category_time trigger specific
+    targetCategory?: string;     // e.g., "social"
+    thresholdMinutes?: number;   // e.g., 30
+    
+    // idle_time trigger specific
+    idleThresholdSeconds?: number; // e.g., 300 for 5 minutes
+    
+    // focus_mode_change trigger specific
+    fromMode?: string;           // e.g., "work"
+    toMode?: string;             // e.g., "break"
+
+    // General conditions (can apply to any trigger)
+    conditions?: Array<{
+      field: string;              // e.g., "current_time", "activity_category"
+      operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
+      value: any;
+    }>;
+  };
+  
+  // Action definition: What should happen when the rule activates?
+  action: {
+    type: 'show_notification' | 'block_app' | 'suggest_break' | 'switch_focus_mode' | 'log_mood' | 'context_prompt';
+    
+    // show_notification action specific
+    title?: string;
+    message?: string;
+    
+    // block_app action specific
+    appToBlock?: string;
+    durationMinutes?: number;
+
+    // suggest_break action specific
+    breakDurationMinutes?: number;
+
+    // switch_focus_mode action specific
+    targetFocusMode?: string;
+
+    // log_mood action specific
+    moodOptions?: string[]; // e.g., ["happy", "neutral", "stressed"]
+
+    // context_prompt action specific
+    promptText?: string;
+  };
+
+  // Cooldown mechanism to prevent rapid re-triggering
+  cooldownSeconds?: number;      // e.g., 300 for 5 minutes
+  lastTriggeredAt?: number;     // Timestamp of last trigger (Unix epoch milliseconds)
+  
+  // Metadata
+  createdAt: number;             // Creation timestamp
+  updatedAt: number;             // Last update timestamp
+  version: number;                // Document version
+}
+```
+
+### 6. users/{userId}/projects/{projectId}
+```typescript
+interface ProjectDocument {
+  id: string;                         // Document ID
+  userId: string;                    // User ID
+  title: string;                      // Project title
+  description?: string;               // Optional description
+  status: 'active' | 'completed' | 'archived' | 'cancelled'; // Project status
+  
+  // Dates
+  startDate: number;                 // Project start timestamp
+  dueDate?: number;                  // Project planned due timestamp
+  completionDate?: number;           // Actual completion timestamp
+
+  // Progress metrics (can be updated by background functions)
+  totalTrackedDuration: number;     // Total duration tracked for this project (seconds)
+  estimatedRemainingDuration?: number; // Estimated remaining work (seconds)
+  progressPercentage: number;        // Calculated progress percentage (0-100)
+
+  // Associated entities
+  associatedGoals?: string[];        // List of goal IDs associated with this project
+  associatedTasks?: string[];        // List of task IDs associated with this project
+
+  // Factors for prediction
+  activityBreakdown?: {              // Breakdown of activity by category for this project
+    [category: string]: number;       // e.g., "coding": 36000
+  };
+  focusScoreAverage?: number;       // Average focus quality score for this project
+
+  // Metadata
+  createdAt: number;                 // Creation timestamp
+  updatedAt: number;                 // Last update timestamp
+  version: number;                    // Document version
+}
+```
+
+### 7. users/{userId}/reports/{reportId}
+```typescript
+interface ReportDocument {
+  id: string;                         // Document ID
+  userId: string;                    // User ID
+  name: string;                       // Report or dashboard name
+  description?: string;               // Optional description
+  type: 'report' | 'dashboard';       // Type of document
+  
+  // Report/Dashboard configuration
+  configuration: {
+    // Common filters
+    timeRange: 'daily' | 'weekly' | 'monthly' | 'custom';
+    startDate?: number;              // Unix epoch milliseconds
+    endDate?: number;                // Unix epoch milliseconds
+    
+    // Data granularity
+    granularity: 'hourly' | 'daily' | 'weekly';
+
+    // Specific data points/metrics to include
+    metrics: Array<{
+      metricName: string;            // e.g., "total_time_spent", "focus_score_average", "anomaly_count"
+      filterCriteria?: {
+        appNames?: string[];
+        categories?: string[];
+        tags?: string[];
+      };
+    }>;
+
+    // Layout and visualization (for dashboards)
+    layout?: any;                     // JSON object describing dashboard layout
+    chartTypes?: {                   // Mapping of metric_name to chart_type
+      [metricName: string]: string;  // e.g., "total_time_spent": "bar_chart"
+    };
+  };
+
+  // Generated data (can be cached or dynamically generated)
+  generatedData?: any;               // JSON object containing the report/dashboard data
+  lastGeneratedAt?: number;         // Timestamp of last data generation
+
+  // Metadata
+  createdAt: number;                 // Creation timestamp
+  updatedAt: number;                 // Last update timestamp
+  version: number;                    // Document version
+}
+```
+
+### 8. users/{userId}/custom_events/{eventId}
+```typescript
+interface CustomEventDocument {
+  id: string;                         // Document ID
+  userId: string;                    // User ID
+  name: string;                       // Event name
+  description?: string;               // Optional description
+  type: 'app_opened' | 'app_closed' | 'category_time' | 'focus_mode_change' | 'idle_time' | 'custom'; // Event type
+  
+  // Event details
+  details: {
+    appName?: string;                // e.g., "chrome.exe"
+    category?: string;                 // e.g., "social"
+    durationSeconds?: number;        // e.g., 300 for 5 minutes
+    fromMode?: string;               // e.g., "work"
+    toMode?: string;                 // e.g., "break"
+    idleDurationSeconds?: number;  // e.g., 300 for 5 minutes
+  };
+
+  // Metadata
+  createdAt: number;                 // Creation timestamp
+  updatedAt: number;                 // Last update timestamp
+  version: number;                    // Document version
+}
+```
+
+**Veri Yapısı Optimizasyonu Notları:**
+- `details` objesindeki alanlara göre sıkça sorgulama yapılacaksa (örn. belirli bir uygulama adı için tüm olaylar), bu alanları üst düzeye denormalize etmek daha iyi indeksleme ve sorgu performansı sağlayabilir.
+
+### 9. users/{userId}/notifications/{notificationId}
+```typescript
+interface NotificationDocument {
+  id: string;                         // Document ID
+  userId: string;                    // User ID
+  title: string;                      // Notification title
+  message: string;                    // Notification message content
+  type: 'info' | 'warning' | 'alert' | 'goal_progress' | 'insight_available' | 'automation_trigger'; // Type of notification
+  read: boolean;                      // Whether the user has read the notification
+  timestamp: number;                  // When the notification was created (Unix epoch milliseconds)
+  actionLink?: string;               // Optional link to related content
+  relatedEntityId?: string;         // ID of related entity (goal, insight, etc.)
+  version: number;                    // Document version
+}
+```
+
+**Veri Yapısı Optimizasyonu Notları:**
+- Kullanıcı bildirimleri için uygun yapı. Okunmamış bildirimler için sorgulama performansı önemlidir, `read` alanı için indeksleme sağlanmalı.
+
+### 10. users/{userId}/focus_modes/{modeId}
+```typescript
+interface FocusModeDocument {
+  id: string;                         // Document ID
+  userId: string;                    // User ID
+  name: string;                       // Name of the focus mode (e.g., "Deep Work", "Break")
+  description?: string;               // Optional description
+  isActive: boolean;                 // Whether this mode is currently active for the user
+  
+  // Configuration for the focus mode
+  configuration: {
+    blockApps?: string[];            // List of app names to block
+    blockCategories?: string[];      // List of categories to block
+    muteNotifications?: boolean;     // Whether to mute system/app notifications
+    autoSuggestBreaks?: boolean;    // Whether to suggest breaks during this mode
+    breakIntervalMinutes?: number;  // How often to suggest breaks
+    breakDurationMinutes?: number;  // How long each suggested break should be
+    allowedApps?: string[];          // List of apps specifically allowed (whitelist)
+    allowedCategories?: string[];    // List of categories specifically allowed (whitelist)
+    // Future: integration with external tools (e.g., Slack status, music)
+  };
+
+  // Metadata
+  createdAt: number;                 // Creation timestamp
+  updatedAt: number;                 // Last update timestamp
+  version: number;                    // Document version
+}
+```
+
+## Firestore Security Rules
+
+```javascript
+// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User authentication function
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // User ownership check
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Team membership check
+    function isTeamMember(teamId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/teams/$(teamId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.members;
+    }
+    
+    // Premium subscription check
+    function hasPremiumAccess(userId) {
+      let userData = get(/databases/$(database)/documents/users/$(userId)).data;
+      return userData.subscription.tier in ['premium', 'pro'] && 
+             userData.subscription.status == 'active';
+    }
+    
+    // User documents
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isOwner(userId);
+      
+      // Team members can read limited information
+      allow read: if isAuthenticated() && 
+        resource.data.privacySettings.teamInsightsSharing == true;
+      
+      // Subcollections
+      match /activities/{activityId} {
+        allow read, write: if isOwner(userId);
+        
+        // Data size check
+        allow create: if isOwner(userId) && 
+          request.resource.data.size() < 5000;
+      }
+      
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /insights/{insightId} {
+        allow read, write: if isOwner(userId);
+        
+        // Only system insights can be created
+        allow create: if false;
+      }
+      
+      match /daily_reports/{reportId} {
+        allow read: if isOwner(userId);
+        allow create, update, delete: if false; // Only Cloud Functions
+      }
+      
+      match /weekly_reports/{reportId} {
+        allow read: if isOwner(userId) && hasPremiumAccess(userId);
+        allow create, update, delete: if false; // Only Cloud Functions
+      }
+      
+      match /automation_rules/{ruleId} {
+        allow read, write: if isOwner(userId);
+        
+        // Premium feature check
+        allow create: if isOwner(userId) && 
+          (hasPremiumAccess(userId) || 
+           get(/databases/$(database)/documents/users/$(userId)/automation_rules).size() < 3);
+      }
+    }
+    
+    // Team documents
+    match /teams/{teamId} {
+      // Team members can read
+      allow read: if isTeamMember(teamId);
+      
+      // Only admins and managers can write
+      allow write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/teams/$(teamId)) &&
+        get(/databases/$(database)/documents/teams/$(teamId)).data.members[request.auth.uid].role in ['admin', 'manager'];
+      
+      // New team creation (Pro subscription required)
+      allow create: if isAuthenticated() && 
+        hasPremiumAccess(request.auth.uid);
+    }
+    
+    // Subscription information
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow write: if false; // Only payment system updates
+    }
+    
+    // System collections - only readable
+    match /app_categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only Cloud Functions
+    }
+    
+    match /system_insights/{insightId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only Cloud Functions
+    }
+    
+    // Admin collections - no access
+    match /performance_metrics/{metricId} {
+      allow read, write: if false;
+    }
+    
+    match /error_logs/{logId} {
+      allow read, write: if false;
+    }
+    
+    match /analytics_events/{eventId} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+## Index Optimization
+
+### Composite Indexes
+```json
+// firestore.indexes.json
+{
+  "indexes": [
+    {
+      "collectionGroup": "activities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "activities", 
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "activities",
+      "queryScope": "COLLECTION", 
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "appName", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "goals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "insights",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
+```
+
+## Data Optimization Rules
+
+### 1. Document Size Limits
+- Maximum 1MB per document
+- Activity documents: ~2-5KB targeted
+- Insight documents: ~10-50KB targeted
+- User documents: ~5-10KB targeted
+
+### 2. Collection Organization
+- Group related data using subcollections
+- Keep frequently accessed data at the top level
+- Archive old data to archival collections
+
+### 3. Query Optimization
+```typescript
+// Good: Use indexed fields
+const activities = await db
+  .collection('users')
+  .doc(userId)
+  .collection('activities')
+  .where('timestamp', '>=', startTime)
+  .where('timestamp', '<=', endTime)
+  .orderBy('timestamp', 'desc')
+  .limit(100)
+  .get();
+
+// Bad: Fetch too much data
+const allActivities = await db
+  .collection('users')
+  .doc(userId)
+  .collection('activities')
+  .get(); // Fetches all data
+
+// Good: Use pagination
+const firstPage = await db
+  .collection('users')
+  .doc(userId)
+  .collection('activities')
+  .orderBy('timestamp', 'desc')
+  .limit(25)
+  .get();
+
+const lastDoc = firstPage.docs[firstPage.docs.length - 1];
+const nextPage = await db
+  .collection('users')
+  .doc(userId)
+  .collection('activities')
+  .orderBy('timestamp', 'desc')
+  .startAfter(lastDoc)
+  .limit(25)
+  .get();
+```
+
+### 4. Data Cleanup Strategy
+- Daily activities: Archive after 90 days
+- Temporary insights: Delete after 30 days
+- Error logs: Delete after 7 days
+- Performance metrics: Aggregate and delete after 30 days
+
+### 5. Real-time vs Batch Processing
+- Real-time: Critical notifications, instant feedback
+- Batch: Daily/weekly reports, statistics calculations
+- Scheduled: Data cleanup, analytics calculations
+
+### 5. Real-time vs Batch Processing
+- Real-time: Critical notifications, instant feedback
+- Batch: Daily/weekly reports, statistics calculations
+- Scheduled: Data cleanup, analytics calculations

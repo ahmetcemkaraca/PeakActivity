@@ -1,0 +1,613 @@
+
+# ActivityWatch Proje Standartları ve Kuralları
+
+## 1. Kod İnceleme Politikası
+
+Bu belge, ActivityWatch projesi için kod inceleme standartlarını ve yönergelerini tanımlar. Tüm kodlar, birleştirilmeden önce akran değerlendirmesinden geçmelidir. Güvenlik, performans ve okunabilirlik için kontrol listeleri kullanılmalıdır. 
+
+## 2. Mimari Karar Kayıtları (ADR) Kuralları
+
+Bu belge, önemli mimari kararların ADR.md adresinde Mimari Karar Kayıtları (ADR) olarak belgelenmesi gerektiğini tanımlar.
+
+### İlke
+Tüm önemli mimari kararlar ADR.md adresinde Mimari Karar Kayıtları (ADR) olarak belgelenmelidir.
+
+### Yönergeler
+- Her büyük mimari seçim için (örneğin, teknoloji yığını, veritabanı, bulut sağlayıcı) bir ADR oluşturun.
+- Tüm ADR'ler için tutarlı bir şablon kullanın (bağlam, karar, sonuçlar).
+- ADR'leri özel bir dizinde (örneğin, /docs/adr/) saklayın.
+- Kod ve belgelerde ilgili ADR'lere atıfta bulunun.
+- Kararlar geliştikçe ADR'leri güncelleyin veya geçersiz kılın.
+- Katılım ve büyük planlama oturumları sırasında ADR'leri inceleyin.
+- ADR'leri özlü ve gerekçe ile etkiye odaklı tutun.
+
+### Örnek
+```
+# ADR-001: Etkinlik Verileri için Firebase Firestore Kullanımı
+## Bağlam
+Kullanıcı etkinliği için ölçeklenebilir, gerçek zamanlı veritabanına ihtiyaç var.
+## Karar
+Firestore'u birincil veri deposu olarak benimseyin.
+## Sonuçlar
+Gerçek zamanlı senkronizasyonu etkinleştirir, bulut maliyetlerini artırır.
+``` 
+
+## 3. Kullanıcı Geri Bildirimi Entegrasyon Kuralları
+
+Bu belge, kullanıcı geri bildirimlerinin tüm ana sürümler için toplanması, kategorize edilmesi ve izlenmesi gerektiğini tanımlar.
+
+### İlke
+Kullanıcı geri bildirimleri, tüm ana sürümler için toplanmalı, kategorize edilmeli ve izlenmelidir.
+
+### Yönergeler
+- Hem web hem de masaüstü uygulamalarında geri bildirim toplamayı entegre edin (örneğin, geri bildirim formları, anketler, hata raporları).
+- Geri bildirimleri kategorilere ayırın: hata, özellik isteği, kullanılabilirlik, performans, diğer.
+- Tüm geri bildirimleri merkezi bir sistemde (örneğin, GitHub Issues, Jira veya özel bir gösterge panosu) izleyin.
+- Büyük sürümlerden önce kritik geri bildirimleri önceliklendirin ve ele alın.
+- Kullanıcı geri bildirimlerine dayalı değişiklikleri ve düzeltmeleri sürüm notlarında iletin.
+- Anonim geri bildirime izin verin, ancak takip için kullanıcı kimliğini teşvik edin.
+- Geri bildirim eğilimlerini düzenli olarak gözden geçirin ve yol haritasını buna göre ayarlayın.
+
+### Örnek
+```
+// Geri bildirim kategorileri
+{
+  type: 'feature-request',
+  message: 'Add dark mode',
+  userId: 'abc123',
+  submittedAt: 1689000000
+}
+```
+
+### Raporlama
+- Her sürümde alınan temel geri bildirimleri ve yapılan eylemleri özetleyin. 
+
+## 4. Güvenlik En İyi Uygulamaları
+
+Bu belge, tüm kod ve altyapı için OWASP Top 10 ve Google Cloud güvenlik yönergelerinin izlenmesi gerektiğini tanımlar.
+
+### İlke
+Tüm kod ve altyapı için OWASP Top 10 ve Google Cloud güvenlik yönergelerine uyun.
+
+### Yönergeler
+- Tüm kullanıcı girişlerini doğrulayın ve temizleyin.
+- Tüm ağ iletişimi için HTTPS kullanın.
+- Gizli bilgileri ve kimlik bilgilerini kodda asla değil, ortam değişkenlerinde saklayın.
+- Tüm hizmetler ve kullanıcılar için en az ayrıcalık ilkesini uygulayın.
+- Tüm yönetici hesapları için 2FA'yı etkinleştirin.
+- Güvenlik açıkları için kodu ve bağımlılıkları düzenli olarak denetleyin.
+- SQL enjeksiyonunu önlemek için parametreli sorgular kullanın.
+- XSS'yi önlemek için çıktıyı kaçırın.
+- Hız sınırlaması ve kaba kuvvet koruması uygulayın.
+- Güvenlikle ilgili tüm olayları günlüğe kaydedin ve anormallikleri izleyin.
+- Hassas verileri beklemede ve aktarım sırasında şifreleyin.
+- Bulut IAM izinlerini düzenli olarak gözden geçirin ve kısıtlayın.
+
+### Örnek
+```
+// İyi
+const user = await db.getUserById(safeId);
+
+// Kötü
+const user = await db.query(`SELECT * FROM users WHERE id = ${id}`);
+```
+
+### Olay Müdahalesi
+- Olay müdahale prosedürlerini belgeleyin ve test edin.
+- Güvenlik sorunlarını hemen bildirin ve düzeltin. 
+
+## 5. Performans Kıyaslama Kuralları
+
+Bu belge, ana özelliklerin performans kıyaslamaları ve gerileme testlerini içermesi gerektiğini tanımlar.
+
+### İlke
+Ana özellikler, performans kıyaslamalarını ve gerileme testlerini içermelidir.
+
+### Yönergeler
+- Tüm kritik özellikler için performans hedeflerini (gecikme, verim, bellek kullanımı) tanımlayın.
+- Yeni özellikleri önceki kararlı sürümlerle karşılaştırın.
+- Performans testi için otomatik araçlar kullanın (örneğin, Benchmark.js, pytest-benchmark, Criterion).
+- Tüm kıyaslama sonuçlarını belgeleyin ve hedeflerle karşılaştırın.
+- Sürümden önce performans düşüşlerini yakalamak için gerileme testleri ekleyin.
+- Hem hız hem de kaynak kullanımı için kodu optimize edin.
+- Birleştirmeden önce yavaş kod yollarını profilleyin ve optimize edin.
+- Performans sorunları izleyiciye kaydedilmeli ve önceliklendirilmelidir.
+
+### Örnek
+```
+// Örnek: Benchmark.js
+suite('Etkinlik İşleme', function() {
+  benchmark('processActivity', function() {
+    processActivity(sampleData);
+  });
+});
+```
+
+### Raporlama
+- Büyük güncellemeler için sürüm notlarına performans sonuçlarını ekleyin. 
+
+## 6. İzleme ve Gözlemlenebilirlik Kuralları
+
+Bu belge, tüm sistemlerin sağlık, performans ve hatalar açısından eyleme geçirilebilir uyarılarla izlenmesi gerektiğini tanımlar.
+
+### İlke
+Tüm sistemler, sağlık, performans ve hatalar açısından eyleme geçirilebilir uyarılarla izlenmelidir.
+
+### Yönergeler
+- Merkezi izleme araçları kullanın (örneğin, Prometheus, Grafana, Google Cloud Monitoring).
+- Ana metrikleri izleyin: çalışma süresi, gecikme, hata oranları, kaynak kullanımı.
+- Kritik eşikler ve hatalar için eyleme geçirilebilir uyarılar ayarlayın.
+- Tüm önemli olayları ve hataları bağlamla birlikte günlüğe kaydedin.
+- Hızlı teşhis için metrikleri ve günlükleri panolarda görselleştirin.
+- Uyarı kurallarını düzenli olarak gözden geçirin ve güncelleyin.
+- Kök neden analizi için günlükleri, izlemeleri ve metrikleri ilişkilendirin.
+- Tüm izleme ve uyarı yapılandırmalarını belgeleyin.
+- Büyük değişikliklerden sonra uyarı ve izleme kurulumunu test edin.
+
+### Örnek
+```
+alert: HighErrorRate
+expr: job:request_errors:rate5m > 0.05
+for: 5m
+labels:
+  severity: critical
+``` 
+
+## 7. Uluslararasılaşma ve Erişilebilirlik Kuralları
+
+Bu belge, tüm kullanıcı arayüzlerinin uluslararasılaşma (i18n) ve erişilebilirlik (a11y) standartlarını desteklemesi gerektiğini tanımlar.
+
+### İlke
+Tüm kullanıcı arayüzleri, uluslararasılaşma (i18n) ve erişilebilirlik (a11y) standartlarını desteklemelidir.
+
+### Yönergeler
+- Tüm kullanıcı arayüzü metinlerini harici kaynak dosyalarında (örn. JSON, PO) tutun.
+- Metinlerin çeviri için uygun olduğundan emin olun (kodu sabit dizeler içermeyin).
+- Sağdan sola (RTL) diller için düzen desteği sağlayın.
+- Tarih, saat ve sayı formatlarını yerel ayarlara göre biçimlendirin.
+- Renk kontrastı, klavye gezintisi ve ekran okuyucu uyumluluğu için WCAG yönergelerini takip edin.
+- Tüm görüntüler ve medya için alternatif metinler sağlayın.
+- Erişilebilirlik denetimlerini (örn. Lighthouse) düzenli olarak çalıştırın.
+- Kullanıcıların tercih ettiği dili ve bölgesel ayarları seçmelerine izin verin.
+
+### Örnek
+```html
+<!-- İyi -->
+<button aria-label="Kapat">X</button>
+
+<!-- Kötü -->
+<button>X</button>
+``` 
+
+## 8. Özellik Bayrağı Kullanım Kuralları
+
+Bu belge, tüm deneysel veya riskli özelliklerin özellik bayraklarının arkasında olması gerektiğini tanımlar.
+
+### İlke
+Tüm deneysel veya riskli özellikler özellik bayraklarının arkasında olmalıdır.
+
+### Yönergeler
+- Tüm yeni, deneysel veya yüksek riskli özellikler için özellik bayrakları kullanın.
+- Özellik bayrakları çalışma zamanında (yapılandırma, ortam veya uzak hizmet aracılığıyla) yapılandırılabilir olmalıdır.
+- Tüm özellik bayraklarını ve amaçlanan kullanımlarını bir FEATURE_FLAGS.md dosyasında belgeleyin.
+- Süresi dolmuş özellik bayraklarını ve ilgili kodu düzenli olarak kaldırın.
+- Tüm bayraklar için benzersiz, açıklayıcı adlar kullanın.
+- Güvenlik kontrolleri için asla özellik bayrakları kullanmayın (uygun kimlik doğrulama/izinler kullanın).
+- Her bayrak için tüm kod yollarını (etkin/devre dışı) test edin.
+- Hata ayıklama ve analiz için özellik bayrağı durumunu günlüğe kaydedin.
+
+### Örnek
+```
+if (features.enableSmartNotifications) {
+  showSmartNotification(...);
+}
+```
+
+### Yaygınlaştırma
+- Büyük özellikler için kademeli yaygınlaştırma ve A/B testi kullanın. 
+
+## 9. Hata Kayıt Standartları
+
+Bu belge, tüm hataların tam bağlam, kullanıcı etkisi ve yığın izi ile günlüğe kaydedilmesi gerektiğini tanımlar. Hem arka uç hem de ön uç için merkezi günlük kaydı kullanılmalıdır.
+
+### İlke
+Tüm hatalar, tam bağlam, kullanıcı etkisi ve yığın izi ile günlüğe kaydedilmelidir. Hem arka uç hem de ön uç için merkezi günlük kaydı kullanılmalıdır.
+
+### Yönergeler
+- Tüm hataları uygun günlük seviyeleriyle (örn. ERROR, WARN) kaydedin.
+- Hata mesajlarına ilgili bağlamı (kullanıcı kimliği, istek kimliği, giriş verileri) ekleyin.
+- Tüm istisnalar için yığın izlerini yakalayın.
+- Günlükleri merkezi bir günlük toplama sistemine (örn. Google Cloud Logging, ELK Stack) gönderin.
+- Kullanıcılar üzerindeki etkiyi anlamak için hataları izleyin ve kategorize edin.
+- Hata uyarılarını (örn. PagerDuty) kritik hatalar için yapılandırın.
+- Hassas bilgileri günlüklere kaydetmekten kaçının.
+- Üretim günlükleri için yapılandırılmış günlük kaydı (örn. JSON) kullanın.
+
+### Örnek
+```typescript
+try {
+  // ... kritik işlem ...
+} catch (error) {
+  console.error('Kritik işlem hatası:', {
+    userId: currentUser.uid,
+    path: req.path,
+    errorMessage: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString()
+  });
+  throw new functions.https.HttpsError('internal', 'Beklenmedik bir hata oluştu');
+}
+``` 
+
+## 10. Dokümantasyon Standartları
+
+Bu belge, tüm genel API'lerin, modüllerin ve karmaşık mantığın İngilizce olarak kullanım örnekleriyle belgelenmesi gerektiğini tanımlar.
+
+### İlke
+Tüm genel API'ler, modüller ve karmaşık mantık, kullanım örnekleriyle İngilizce olarak belgelenmelidir.
+
+### Yönergeler
+- Tüm API uç noktaları, parametreleri, dönüş değerleri ve hata kodları için API belgeleri oluşturun.
+- Karmaşık algoritmalar veya iş akışları için teknik tasarım belgeleri (TDD) yazın.
+- Kod yorumlarını, kodun neyi değil, nedenini ve nasılını açıklamak için kullanın.
+- README dosyalarını güncel tutun ve projenin genel bir bakışını, kurulum talimatlarını ve temel kullanım örneklerini sağlayın.
+- Kullanıcılar için kapsamlı kullanıcı kılavuzları ve SSS bölümleri oluşturun.
+- Tutarlı bir dokümantasyon stili ve formatı kullanın.
+- Belgelemeyi kod değişiklikleriyle birlikte güncelleyin.
+- Belgelemeyi düzenli olarak gözden geçirin ve güncelleyin.
+
+### Örnek
+```typescript
+/**
+ * Kullanıcının etkinlik verilerini belirli bir zaman aralığı için işler.
+ * @param userId - İşlenecek kullanıcının kimliği.
+ * @param timeRange - Etkinlik verilerinin zaman aralığı.
+ * @returns İşlenmiş etkinlik verileri ve analiz sonuçları.
+ * @throws {HttpsError} Geçersiz kullanıcı kimliği veya yetkilendirme hatası durumunda.
+ */
+export const processActivityData = onRequest((request, response) => {
+  // ... implementasyon ...
+});
+``` 
+
+## 11. Bağımlılık Yönetimi Kuralları
+
+Bu belge, tüm harici kütüphanelerin ve hizmetlerin katı sürüm kontrolü ve bağımlılık enjeksiyonu ile yönetilmesi gerektiğini tanımlar.
+
+### İlke
+Tüm harici kütüphaneler ve hizmetler, katı sürüm kontrolü ve bağımlılık enjeksiyonu ile yönetilmelidir.
+
+### Yönergeler
+- Tüm proje bağımlılıklarını `package.json`, `pyproject.toml` veya `requirements.txt` gibi uygun bir bağımlılık yönetim dosyasına listeleyin.
+- Bağımlılıklar için kesin sürüm sabitlemesi (örn. `1.2.3` yerine `^1.2.3` veya `~1.2.3` değil) veya kilit dosyaları (örn. `yarn.lock`, `poetry.lock`) kullanın.
+- Güvenlik açıkları için bağımlılıkları düzenli olarak denetleyin ve güncelleyin.
+- Yeni bağımlılıklar eklemeden önce lisans uyumluluğunu kontrol edin.
+- Bağımlılık enjeksiyonunu, bileşenler arasındaki sıkı bağımlılıkları azaltmak ve test edilebilirliği artırmak için kullanın.
+- Geliştirme ve üretim bağımlılıklarını ayırın.
+- Kullanılmayan bağımlılıkları düzenli olarak kaldırın.
+
+### Örnek
+```json
+// package.json
+{
+  "dependencies": {
+    "express": "4.17.1",
+    "firebase-admin": "9.11.0"
+  }
+}
+``` 
+
+## 12. Veri Taşıma Uyumluluk Kuralları
+
+Bu belge, tüm veri taşıma işlemlerinin güvenli, geri alınabilir olması ve mümkün olduğunda geriye dönük uyumluluğu sürdürmesi gerektiğini tanımlar.
+
+### İlke
+Tüm veri taşıma işlemleri güvenli, geri alınabilir olmalı ve mümkün olduğunda geriye dönük uyumluluğu sürdürmelidir.
+
+### Yönergeler
+- Her veri taşıma işlemi için net bir plan ve geri alma stratejisi oluşturun.
+- Veri taşıma işlemlerini üretim ortamında çalıştırmadan önce test ortamlarında kapsamlı bir şekilde test edin.
+- Veri taşıma sırasında veri kaybını önlemek için yedekleme mekanizmaları uygulayın.
+- Eski veri formatlarını desteklemek için geriye dönük uyumlu API'ler veya geçiş katmanları sağlayın.
+- Tüm veri taşıma işlemlerini sürüm kontrolü altında belgeleyin.
+- Büyük veri kümeleri için artımlı taşıma stratejilerini göz önünde bulundurun.
+- Her taşıma işlemi için benzersiz bir sürüm veya tanımlayıcı kullanın.
+- Veri taşıma işlemleri sırasında performansı ve sistem üzerindeki etkiyi izleyin.
+
+### Örnek
+```typescript
+// Veri modelinin eski versiyonu
+interface OldUser {
+  name: string;
+  email: string;
+}
+
+// Veri modelinin yeni versiyonu
+interface NewUser {
+  fullName: string;
+  emailAddress: string;
+  createdAt: number;
+}
+
+// Taşıma fonksiyonu
+function migrateUser(oldUser: OldUser): NewUser {
+  return {
+    fullName: oldUser.name,
+    emailAddress: oldUser.email,
+    createdAt: Date.now() // Varsayılan değer
+  };
+}
+``` 
+
+## 13. CI/CD Standartları
+
+Bu belge, tüm kodların otomatik olarak bir CI/CD hattı kullanılarak inşa edilmesi, test edilmesi ve dağıtılması gerektiğini tanımlar.
+
+### İlke
+Tüm kodlar, otomatik olarak bir CI/CD hattı kullanılarak inşa edilmeli, test edilmeli ve dağıtılmalıdır.
+
+### Yönergeler
+- Kod değişiklikleri için otomatik derleme ve testleri uygulayın.
+- Birleştirme öncesi kod kalitesi denetimlerini (linting, statik analiz) CI/CD hattına entegre edin.
+- Her başarılı birleşme için otomatik dağıtım iş akışları oluşturun.
+- Test ortamlarına ve üretim ortamlarına dağıtım için ayrı aşamalar tanımlayın.
+- Güvenlik açıklarını ve bağımlılık sorunlarını yakalamak için güvenlik taramalarını CI/CD hattına dahil edin.
+- Dağıtım öncesi manuel onay adımları ekleyin.
+- Geri alma stratejilerini belgeleyin ve otomatikleştirin.
+- CI/CD hattı için tüm yapılandırmaları sürüm kontrolü altında tutun.
+- Hızlı geri bildirim sağlamak için CI/CD işlem sürelerini optimize edin.
+
+### Örnek
+```yaml
+# .github/workflows/main.yml
+name: CI/CD Pipeline
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      run: npm ci
+    - name: Run tests
+      run: npm test
+    - name: Run linter
+      run: npm run lint
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy to Firebase
+      run: firebase deploy --only hosting,functions
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+``` 
+
+## 14. API Tasarım Standartları
+
+Bu belge, tüm API'lerin tutarlı, sürümlü olması ve RESTful veya GraphQL en iyi uygulamalarını takip etmesi gerektiğini tanımlar.
+
+### İlke
+Tüm API'ler tutarlı, sürümlü olmalı ve RESTful veya GraphQL en iyi uygulamalarını takip etmelidir.
+
+### Yönergeler
+- Kaynak tabanlı RESTful API'leri tasarlayın.
+- Anlamlı ve tutarlı adlandırma kuralları kullanın (örn. camelCase, kebab-case).
+- API'lerinizi sürümleyin (örn. `/v1/users`, `/v2/users`).
+- API belgelerini (örn. OpenAPI/Swagger) sağlayın.
+- Kimlik doğrulama ve yetkilendirme için JWT veya OAuth2 gibi standartları kullanın.
+- Hata yanıtları için tutarlı bir format (örn. { "code": "INVALID_INPUT", "message": "Geçersiz giriş." }) sağlayın.
+- Sayfalama, filtreleme ve sıralama için standart sorgu parametreleri uygulayın.
+- API yanıtlarını sıkıştırın ve önbelleğe alın.
+- API güvenliği için rate limiting ve throttling uygulayın.
+
+### Örnek
+```http
+GET /api/v1/users?limit=10&offset=0&sortBy=createdAt:desc
+``` 
+
+## 15. Yapay Zeka Etiği ve Gizlilik Kuralları
+
+Bu belge, tüm yapay zeka özelliklerinin kullanıcı gizliliğine, veri koruma yasalarına ve etik yapay zeka yönergelerine saygı duyması gerektiğini tanımlar.
+
+### İlke
+Tüm yapay zeka özellikleri, kullanıcı gizliliğine, veri koruma yasalarına ve etik yapay zeka yönergelerine saygı duymalıdır.
+
+### Yönergeler
+- Yapay zeka için kişisel veri toplamadan veya işlemeden önce kullanıcıdan açık izin alın.
+- Kullanıcılara yapay zeka destekli özellikler ve veri kullanımı hakkında açıkça bilgi verin.
+- Kullanıcıların yapay zeka özelliklerinden ve veri toplama işlemlerinden vazgeçmelerine izin verin.
+- Yapay zeka eğitimi ve analizi için kullanılan verileri anonimleştirin veya takma ad kullanın.
+- Yasal dayanak ve kullanıcı izni olmadan hassas verileri (örn. sağlık, biyometrik) kullanmayın.
+- Yapay zeka modellerini önyargı, adalet ve açıklanabilirlik açısından düzenli olarak inceleyin.
+- Yapay zeka verilerini GDPR ve yerel düzenlemelere uygun olarak güvenli bir şekilde saklayın ve işleyin.
+- Tüm yapay zeka modellerini, veri kaynaklarını ve karar mantığını belgeleyin.
+- Kullanıcılara verilerine ve yapay zeka tarafından oluşturulan içgörülere erişim sağlayın.
+
+### Örnek
+```
+// Kullanıcı rıza iletişim kutusu
+showConsentDialog('Etkinlik verilerinizi analiz etmek için yapay zeka kullanıyoruz. Kabul ediyor musunuz?');
+``` 
+
+## 16. Otomatik Test Kuralları
+
+Bu belge, her yeni özellik ve hata düzeltmesinin birim, entegrasyon ve uçtan uca testleri içermesi gerektiğini tanımlar. CI/CD hattı test edilmemiş kodu engellemelidir.
+
+### İlke
+Her yeni özellik ve hata düzeltmesi, birim, entegrasyon ve uçtan uca testleri içermelidir. CI/CD hattı test edilmemiş kodu engellemelidir.
+
+### Yönergeler
+- Tüm modüller için minimum %80 kod kapsamı gereklidir.
+- Tüm kritik ve iş mantığı %100 test kapsamına sahip olmalıdır.
+- Uygulamadan önce veya uygulamayla birlikte testler yazın (TDD tercih edilir).
+- Açıklayıcı test adları kullanın ve ilgili testleri gruplayın.
+- Birim testlerinde harici hizmetleri ve API'leri taklit edin.
+- Entegrasyon testleri, gerçek dünya kullanım senaryolarını kapsamalıdır.
+- Uçtan uca testler, kullanıcı akışlarını ve köşe durumlarını simüle etmelidir.
+- Tüm testler, her çekme isteğinde ve dağıtımdan önce otomatik olarak çalışmalıdır.
+- Başarısız olan testler, birleştirmeleri ve dağıtımları engellemelidir.
+
+### Örnek
+```
+describe('ActivitySync', () => {
+  it('Firebase ile etkinlikleri senkronize etmeli', async () => { ... });
+  it('Ağ hatalarını sorunsuz bir şekilde ele almalı', async () => { ... });
+});
+```
+
+### Raporlama
+- Her yapılandırma için test sonuçları ve kapsama raporları yayınlanmalıdır.
+
+## 17. Veri Şifreleme ve Güvenlik Standartları
+
+Bu belge, PeakActivity v0.4.0 ile birlikte gelen kapsamlı şifreleme ve güvenlik gereksinimlerini tanımlar.
+
+### İlke
+Tüm hassas veriler hem yerel hem de bulut ortamında şifrelenmeli, kullanıcı anahtar yönetimi güvenli olmalı ve veri gizliliği korunmalıdır.
+
+### Şifreleme Gereksinimleri
+- Tüm hassas veriler için AES-256-GCM veya üstü şifreleme kullanın.
+- Anahtar türetme için Argon2id kullanın (minimum 3 passes, 64MB memory).
+- Her şifreleme işlemi için rastgele IV/nonce kullanın.
+- Şifreleme anahtarları asla düz metin olarak saklanmamalı.
+- Kullanıcıya özel anahtar türetme implementasyonu zorunlu.
+
+### Anahtar Yönetimi
+- Master password ile kullanıcı anahtarı türetimi.
+- OS keychain entegrasyonu (Windows Credential Store, macOS Keychain, Linux Secret Service).
+- Anahtar rotasyon mekanizması (minimum 90 günde bir).
+- Güvenli anahtar yedekleme ve kurtarma sistemi.
+- 2FA ile korumalı anahtar erişimi.
+
+### Veri Sınıflandırması
+**Ham Veri (RAW):**
+- Şifrelenmemiş veri gönderimi
+- AI analizleri ve geliştirilme için kullanım
+- Açık kullanıcı onayı gerekli
+
+**Şifrelenmiş+AI Destekli:**
+- Client-side şifreleme zorunlu
+- Edge AI processing için yerel çözme
+- Kötüye kullanım koruması aktif
+- Sıkı API rate limiting
+
+**Şifrelenmiş AI Desteksiz:**
+- Sadece depolama amaçlı
+- Hiçbir AI işlem yapılmaz
+- En yüksek gizlilik seviyesi
+
+### Dış Servis Entegrasyonları
+- Trello/Jira kimlik bilgileri şifreli saklanmalı.
+- OAuth token'ları şifrelenmeli.
+- API anahtarları asla düz metin olarak saklanmamalı.
+- Otomatik credential rotation uygulanmalı.
+
+### Anahtar Kurtarma
+- Güvenlik soruları (minimum 3, bcrypt hash).
+- 2FA backup kodları (şifreli saklama).
+- Email-based recovery (özel token ile).
+- WebAuthn/FIDO2 desteği.
+
+### Implementasyon Standartları
+```typescript
+// İyi - Güvenli şifreleme
+const encrypted = await encryptionService.encrypt(data, {
+  algorithm: 'AES-256-GCM',
+  keyDerivation: 'Argon2id',
+  iterations: 3,
+  memory: 65536
+});
+
+// Kötü - Güvensiz implementasyon
+const encrypted = CryptoJS.AES.encrypt(data, 'fixed-key');
+```
+
+### Test Gereksinimleri
+- Şifreleme servisleri için %95+ kod kapsamı.
+- Cross-platform uyumluluk testleri.
+- Security audit ve penetration testing.
+- Performance impact testleri.
+
+### Compliance
+- GDPR uyumlu veri işleme.
+- Kullanıcı onay yönetimi.
+- Veri portabilite hakları.
+- Unutulma hakkı implementasyonu.
+
+## 18. Kullanıcı Gizliliği ve Veri Paylaşım Kuralları
+
+### İlke
+Kullanıcı verilerinin gizliliği en üst öncelik olmalı ve tüm veri paylaşımı açık kullanıcı onayı ile yapılmalıdır.
+
+### Veri Toplama Seviyeleri
+**Seviye 1 - Anonim Sistem Verileri:**
+- API kullanım istatistikleri
+- Hata ve crash raporları
+- Performans metrikleri
+- Kullanıcı rızası olmadan toplanabilir
+
+**Seviye 2 - Anonimleştirilmiş Kullanım Verileri:**
+- Kategori bazlı ekran süreleri (başlık gizli)
+- Uygulama kullanım süreleri
+- AI önerilerine verilen tepkiler
+- Açık kullanıcı onayı gerekli
+
+**Seviye 3 - Hassas Kişisel Veriler:**
+- Pencere başlıkları
+- Detaylı aktivite logları
+- AI işleme için ham veriler
+- Özel rıza ve şifreleme gerekli
+
+### Onay Yönetimi
+- Granüler onay seçenekleri.
+- Kolay geri çekme mekanizması.
+- Onay geçmişi kayıtları.
+- Düzenli onay yenileme.
+
+### Veri Minimizasyonu
+- Sadece gerekli veri toplanmalı.
+- Otomatik veri temizleme (retention policy).
+- Anonimleştirme algoritmaları.
+- Pseudonymization teknikleri.
+
+## 19. Security-by-Design Prensipleri
+
+### İlke
+Güvenlik, ürün geliştirme sürecinin her aşamasında dikkate alınmalıdır.
+
+### Tasarım Prensipleri
+- Default security (güvenli varsayılanlar).
+- Fail-secure (hata durumunda güvenli çıkış).
+- Complete mediation (her erişim kontrol edilmeli).
+- Least privilege (en az yetki).
+- Defense in depth (çok katmanlı güvenlik).
+
+### Implementasyon Gereksinimleri
+- Secure coding standartları.
+- Regular security reviews.
+- Threat modeling.
+- Dependency scanning.
+- SAST/DAST integration.
+
+### Monitoring ve Response
+- Real-time security monitoring.
+- Anomaly detection.
+- Incident response procedures.
+- Security metrics tracking.
+- Regular security assessments. 
+
+### Raporlama
+- Her yapılandırma için test sonuçları ve kapsama raporları yayınlanmalıdır. 

@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "encryption": {
+      "title": "Encryption Settings",
+      "description": "Manage your encryption keys and security settings.",
+      "masterPassword": {
+        "title": "Master Password",
+        "description": "Set or change your master password to secure your encryption keys.",
+        "setupButton": "Set/Change Master Password"
+      },
+      "keyRotation": {
+        "title": "Key Rotation",
+        "description": "Rotate your encryption keys periodically for enhanced security.",
+        "rotateButton": "Rotate Keys"
+      },
+      "backupRecovery": {
+        "title": "Backup & Recovery",
+        "description": "Manage backup codes and key recovery options.",
+        "recoverButton": "Key Recovery Wizard"
+      }
+    },
+    "saving": "Saving settings...",
+    "saveSuccess": "Settings saved successfully!",
+    "saveError": "Failed to save settings."
+  }
+} 

@@ -1,0 +1,769 @@
+# Firebase AI Özellikleri Dokümantasyonu
+
+Bu belge, PeakActivity projesindeki Firebase tabanlı yapay zeka özelliklerini detaylandırmaktadır. Her bir özelliğin amacı, giriş/çıkış formatları ve kullanılan algoritmalar açıklanmaktadır.
+
+## 1. Anomaly Detection (Anomali Tespiti)
+
+### Purpose
+Identify days with activity patterns that significantly differ from the historical baseline.
+
+### Input
+```json
+{
+  "daily_totals": [
+    { "date": "YYYY-MM-DD", "total_seconds": 28800 },
+    ... 60 entries ...
+  ]
+}
+```
+
+### Output
+```json
+{
+  "anomalies": [
+    { "date": "YYYY-MM-DD", "z_score": 3.1, "deviation_percent": 45 }
+  ],
+  "baseline_mean": 27400,
+  "baseline_stddev": 2300,
+  "explanation": "Türkçe kısa açıklama"
+}
+```
+
+### Detection Algorithm
+1. Compute mean (μ) and standard deviation (σ) over the full dataset.
+2. Calculate z-score for each `total_seconds`.
+3. Flag an anomaly when |z| ≥ 2.
+4. Sort anomalies by absolute z-score, limit to top 10.
+
+### System Prompt
+Act as a statistical watchdog. Follow the Detection Algorithm strictly and reply ONLY with the JSON schema in Output. Explanation must be in Turkish. No additional text.
+
+## 2. Automatic Categorization & Labeling (Otomatik Kategorizasyon ve Etiketleme)
+
+### Purpose
+Assign a category to uncategorized activity events using heuristic + ML approaches aligned with community taxonomy.
+
+### Input
+```json
+{
+  "events": [
+    { "app": "chrome.exe", "title": "Stack Overflow - Question", "url": "https://stackoverflow.com/q/123" },
+    ...
+  ]
+}
+```
+
+### Output
+```json
+{
+  "labels": [
+    { "index": 0, "category": "research", "confidence": 0.92 },
+    ...
+  ]
+}
+```
+
+### Labeling Algorithm
+1. Tokenize `title` + domain of `url`.
+2. Use TF-IDF against curated corpus to get top 3 candidate categories.
+3. Boost score if `app`/process matches known mapping list (e.g., photoshop → design).
+4. Normalize scores; choose highest as label. Confidence = softmax probability.
+
+### System Prompt
+You are a classification engine. Use the Labeling Algorithm and the following fixed taxonomy: `coding`, `design`, `research`, `social`, `gaming`, `productivity`, `communication`. Return ONLY the JSON described in Output.
+
+### Kategorizasyon Sistemi Mimarisi
+Bu bölüm, kategorizasyon sisteminin mimari bileşenlerini ve kullanılan teknolojileri detaylandırır.
+
+| Katman         | Teknoloji               | Açıklama                                       |
+|----------------|-------------------------|------------------------------------------------|
+| Veri Toplama   | aw-watcher-window / web | URL & pencere başlığı yakalanır                |
+| Edge AI        | TensorFlow.js           | Hızlı “bilinen uygulama” sınıflandırması       |
+| Cloud AI       | Firebase ML + Vertex AI | Derin bağlam analizi & NLP                      |
+| Depolama       | Firestore               | `app_registry`, `categorization_suggestions`, `community_rulesets` |
+| Servisler      | Cloud Functions         | `suggestCategory`, `applySuggestion`, `importCommunityRules` |
+
+### Firestore Veri Modeli (Kategorizasyon Sistemi İçin)
+Aşağıdaki Firestore koleksiyonları kategorizasyon sistemi tarafından kullanılır:
+
+- `app_registry/{appId}`  
+  - `name` (string)  
+  - `defaultCategory` (string)  
+  - `aiConfidence` (number)  
+  - `source` ("ai" | "community" | "user")  
+- `categorization_suggestions/{suggestionId}`  
+  - `userId`, `activityId`, `suggestedCategory`, `confidence`, `status` (pending|accepted|rejected)  
+- `community_rulesets/{profile}`  
+  - `rules` (map<regex, category>)  
+  - `upvotes` (number)  
+  - `downloads` (number)
+
+### Cloud Functions (Kategorizasyon Sistemi İçin)
+Kategorizasyon sistemi için kullanılan ana Cloud Functions şunlardır:
+
+1.  **suggestCategory** (Firestore trigger `activity_events.onCreate`)  
+    *   Çağrı: Vertex AI `categorizeTitle(url, title)`  
+    *   Sonuç `categorization_suggestions` koleksiyonuna yazılır.
+2.  **applySuggestion** (Callable)  
+    *   Kullanıcı onayı aldığında `app_registry` güncellenir & kural eklenir.
+3.  **importCommunityRules (Scheduler günlük)**  
+    *   `community_rulesets` → popüler kurallar `app_registry`’ne kopyalanır.
+
+### Güvenlik & Gizlilik (Kategorizasyon Sistemi İçin)
+- AI taleplerinde yalnızca anonimleştirilmiş başlıklar gönderilir.
+- Topluluk kuralları isteğe bağlı, kullanıcı verisi paylaşılmaz.
+
+## 3. Behavioral Patterns & Trend Analysis (Davranışsal Örüntüler ve Eğilim Analizi)
+
+### Purpose
+Detect rising, falling, and periodic usage patterns over time to surface behavioral trends.
+
+### Input
+```json
+{
+  "daily_totals": [
+    { "date": "YYYY-MM-DD", "categories": { "coding": 14400, "browsing": 7200, "social": 900 } }
+  ],
+  "window": 30
+}
+```
+`daily_totals` contains seconds spent per category per day for the last *n* days (`window`).
+
+### Output
+```json
+{
+  "trending_categories": [
+    { "category": "coding", "trend": "rising", "slope_per_day": 320 },
+    { "category": "social", "trend": "falling", "slope_per_day": -110 }
+  ],
+  "seasonality": [
+    { "period": "weekly", "pattern": "focus decreases on Fridays" }
+  ],
+  "summary": "Short Turkish narrative explaining main findings"
+}
+```
+
+### Analysis Algorithm
+1. For each category, compute linear regression slope over the last *window* days.
+2. Classify `trend` as:
+   • `rising` if slope > +100 seconds/day
+   • `falling` if slope < −100 seconds/day
+   • `stable` otherwise.
+3. Detect seasonality via autocorrelation; flag weekly or monthly recurring dips/spikes.
+4. Limit to top 5 absolute slopes.
+
+### System Prompt
+You are an analytics engine that performs time-series trend detection per the algorithm above and returns ONLY the JSON described in the Output. Write the `summary` in Turkish, concise (≤280 chars).
+
+## 4. Community-Based Rule Sets (Topluluk Tabanlı Kural Setleri)
+
+### Purpose
+Leverage crowdsourced rules to improve categorization and analytics consistency.
+
+### Input
+```json
+{
+  "event": { "app": "slack.exe", "title": "#general", "url": null },
+  "community_rules": [
+    { "pattern": "slack.exe", "category": "communication" },
+    { "pattern": "meet.google.com", "category": "communication" }
+  ]
+}
+```
+
+### Output
+```json
+{
+  "matched_rule": { "pattern": "slack.exe", "category": "communication" },
+  "category": "communication",
+  "source": "community"
+}
+```
+
+### Matching Algorithm
+1. Iterate `community_rules` in order of popularity.
+2. Pattern supports glob `*` and simple regex. First match wins.
+3. If no match, return `null` for `matched_rule` & `category`.
+
+### System Prompt
+You are a rule-matching engine. Apply rules exactly as described; return ONLY the Output JSON. No extra commentary.
+
+## 5. Contextual Categorization (Title/Content Analysis) (Bağlamsal Kategorizasyon)
+
+### Purpose
+Enhance categorization accuracy by analysing natural-language context from window titles or scraped page text.
+
+### Input
+```json
+{
+  "context": "How to center a div in CSS – Stack Overflow",
+  "language": "en"
+}
+```
+
+### Output
+```json
+{
+  "category": "coding",
+  "confidence": 0.97,
+  "rationale": "Contains keywords: center, CSS, indicates web development question."
+}
+```
+
+### Categorization Algorithm
+1. Apply zero-shot classification using LLM with label set: `coding`, `design`, `research`, `social`, `news`, `entertainment`, `communication`, `shopping`.
+2. Use language detection if `language` unknown; translate to English for model.
+3. Choose top probability as `category`; provide short rationale.
+
+### System Prompt
+You are a zero-shot classifier. Return ONLY the JSON in Output. Rationale must be ≤140 characters and in English.
+
+## 6. Focus Quality Score (Odak Kalitesi Skoru)
+
+### Purpose
+Calculate a per-session and aggregated "Focus Quality Score (FQS)" from raw ActivityWatch event streams collected in Firebase.
+
+### Input
+Provide the assistant with a JSON object:
+```json
+{
+  "events": [
+    {
+      "timestamp_start": "ISO8601",
+      "timestamp_end": "ISO8601",
+      "duration_sec": 123,
+      "app": "Visual Studio Code",
+      "title": "app.js",
+      "category": "coding",
+      "window_change_count": 3,
+      "input_frequency": 0.83,
+      "is_afk": false
+    }
+  ],
+  "user_tz": "Europe/Istanbul"
+}
+```
+
+### Output
+The assistant MUST reply with ONLY the following JSON schema:
+```json
+{
+  "session_scores": [
+    {
+      "session_id": "ISO8601_START-ISO8601_END",
+      "focus_quality_score": 87,
+      "distractions": 2,
+      "context_switch_penalty": 5
+    }
+  ],
+  "daily_average": 82,
+  "explanations": "Natural-language description of main factors"
+}
+```
+
+### Scoring Algorithm
+1. Base score = 100 for each continuous session of non-AFK time ≥ 5 min.
+2. −1 point per context switch (window/app change) after the first.
+3. −0.5 point per minute where `input_frequency < 0.1` (passive consumption).
+4. −10 points if any social-media category app is used in the session.
+5. +5 points for sessions between 09:00-12:00 local time, −5 for sessions between 00:00-06:00.
+6. Clamp scores to the range 0-100.
+
+### System Prompt
+You are a strict analytics engine that calculates Focus Quality Scores exactly as specified above. Respond ONLY with valid JSON that conforms to the Output schema. Do NOT include any other text. If input contains no qualifying sessions, return `null` for `session_scores` and `daily_average`.
+
+## 7. AI Özellik Planlaması
+
+Bu bölüm, PeakActivity projesinde yapay zeka entegrasyonu için planlanmış özellik ve fonksiyonları içerir.
+
+### AI Mimarisi Genel Bakış
+```
+AI Services Architecture:
+├── Edge AI (Local Processing)
+│   ├── Activity Classification
+│   ├── Privacy-First Analysis
+│   └── Real-time Insights
+├── Cloud AI (Advanced Analytics)
+│   ├── Deep Pattern Analysis
+│   ├── Predictive Modeling
+│   └── Behavioral Insights
+└── Hybrid AI (Best of Both)
+    ├── Smart Data Filtering
+    ├── Context Understanding
+    └── Personalized Recommendations
+```
+
+### AI Özellik Kategorileri
+
+#### Akıllı Aktivite Sınıflandırma
+```typescript
+interface SmartClassification {
+  // Otomatik kategorizasyon
+  auto_categorize_activities: boolean;
+  
+  // Bağlam temelli sınıflandırma
+  context_aware_classification: {
+    window_title_analysis: boolean;
+    time_of_day_context: boolean;
+    duration_patterns: boolean;
+    user_behavior_patterns: boolean;
+  };
+  
+  // Öğrenme sistemi
+  machine_learning: {
+    user_feedback_learning: boolean;
+    pattern_recognition: boolean;
+    continuous_improvement: boolean;
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `classifyActivity(activity: ActivityEvent): Promise<ActivityCategory>`
+- `learnFromUserFeedback(activityId: string, userCategory: string): Promise<void>`
+- `adaptClassificationRules(userId: string): Promise<ClassificationRules>`
+
+#### Odaklanma ve Dikkat Analizi
+```typescript
+interface FocusAnalysis {
+  // Odaklanma metrik hesaplaması
+  focus_score_calculation: {
+    context_switches: number;
+    app_usage_patterns: AppUsagePattern[];
+    interruption_frequency: number;
+    deep_work_sessions: DeepWorkSession[];
+  };
+  
+  // Dikkat dağınıklığı tespiti
+  distraction_detection: {
+    social_media_usage: number;
+    non_productive_apps: string[];
+    multitasking_frequency: number;
+    notification_impact: NotificationImpact;
+  };
+  
+  // Verimlilik öngörüsü
+  productivity_prediction: {
+    daily_productivity_forecast: number;
+    optimal_work_hours: string[];
+    break_recommendations: BreakSuggestion[];
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `calculateFocusScore(activities: ActivityEvent[]): Promise<FocusMetrics>`
+- `detectDistractions(timeWindow: number): Promise<DistractionReport>`
+- `predictProductivity(userPattern: UserPattern): Promise<ProductivityForecast>`
+- `suggestOptimalSchedule(userHistory: ActivityHistory): Promise<ScheduleSuggestion>`
+
+#### Kişiselleştirilmiş İçgörüler ve Öneriler
+```typescript
+interface PersonalizedInsights {
+  // Davranış analizi
+  behavior_analysis: {
+    work_patterns: WorkPattern[];
+    productivity_rhythms: ProductivityRhythm[];
+    stress_indicators: StressIndicator[];
+    energy_levels: EnergyPattern[];
+  };
+  
+  // Özelleştirilmiş öneriler
+  personalized_recommendations: {
+    break_timing: BreakTimingSuggestion[];
+    focus_enhancement: FocusEnhancementTip[];
+    workflow_optimization: WorkflowOptimization[];
+    goal_adjustments: GoalAdjustment[];
+  };
+  
+  // Karşılaştırmalı analiz
+  comparative_analysis: {
+    peer_benchmarking: PeerBenchmark; // Anonim
+    personal_progress: PersonalProgress;
+    industry_standards: IndustryBenchmark;
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `generatePersonalInsights(userId: string, timeRange: number): Promise<PersonalInsights>`
+- `createRecommendations(userProfile: UserProfile): Promise<Recommendation[]>`
+- `analyzeBehaviorPatterns(activities: ActivityEvent[]): Promise<BehaviorPattern[]>`
+- `compareWithPeers(metrics: UserMetrics): Promise<PeerComparison>`
+
+#### Akıllı Bildirim Sistemi
+```typescript
+interface SmartNotifications {
+  // Bağlamsal bildirimler
+  contextual_notifications: {
+    work_mode_detection: boolean;
+    meeting_detection: boolean;
+    focus_state_awareness: boolean;
+    user_availability: AvailabilityStatus;
+  };
+  
+  // Adaptif zamanlama
+  adaptive_timing: {
+    optimal_notification_times: string[];
+    user_response_patterns: ResponsePattern[];
+    interruption_minimization: boolean;
+    priority_based_delivery: boolean;
+  };
+  
+  // Çoklu kanal desteği
+  multi_channel_delivery: {
+    desktop_notifications: boolean;
+    email_digest: boolean;
+    mobile_push: boolean;
+    slack_integration: boolean;
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `determineOptimalNotificationTime(userId: string): Promise<Date>`
+- `createContextualNotification(trigger: NotificationTrigger): Promise<SmartNotification>`
+- `adaptNotificationFrequency(userFeedback: NotificationFeedback): Promise<void>`
+- `prioritizeNotifications(notifications: Notification[]): Promise<PrioritizedNotification[]>`
+
+#### Ses Tanıma ve Doğal Dil İşleme
+```typescript
+interface VoiceAndNLP {
+  // Ses komutları
+  voice_commands: {
+    activity_logging: boolean;
+    quick_notes: boolean;
+    goal_updates: boolean;
+    mood_tracking: boolean;
+  };
+  
+  // Doğal dil analizi
+  natural_language_processing: {
+    window_title_analysis: boolean;
+    meeting_note_extraction: boolean;
+    project_identification: boolean;
+    sentiment_analysis: boolean;
+  };
+  
+  // Ses tabanlı geri bildirim
+  voice_feedback: {
+    daily_summary_narration: boolean;
+    productivity_tips_audio: boolean;
+    goal_progress_updates: boolean;
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `processVoiceCommand(audioInput: AudioBuffer): Promise<VoiceCommandResult>`
+- `extractMeetingInsights(windowTitle: string): Promise<MeetingInsights>`
+- `analyzeSentiment(textContent: string): Promise<SentimentScore>`
+- `generateAudioSummary(insights: DailyInsights): Promise<AudioBuffer>`
+
+#### Enerji ve Ruh Hali Tahminleme
+```typescript
+interface EnergyAndMoodPrediction {
+  // Enerji seviyesi tahmini
+  energy_prediction: {
+    circadian_rhythm_analysis: boolean;
+    activity_impact_correlation: boolean;
+    weather_correlation: boolean;
+    sleep_pattern_integration: boolean;
+  };
+  
+  // Ruh hali analizi
+  mood_analysis: {
+    productivity_mood_correlation: boolean;
+    app_usage_mood_indicators: boolean;
+    typing_pattern_analysis: boolean;
+    break_frequency_correlation: boolean;
+  };
+  
+  // Proaktif öneriler
+  proactive_suggestions: {
+    energy_optimization: EnergyOptimizationTip[];
+    mood_enhancement: MoodEnhancementSuggestion[];
+    work_schedule_adjustments: ScheduleAdjustment[];
+  };
+}
+```
+
+**Fonksiyonlar:**
+- `predictEnergyLevels(userHistory: UserHistory, timeRange: number): Promise<EnergyForecast>`
+- `analyzeMoodPatterns(activities: ActivityEvent[]): Promise<MoodPattern[]>`
+- `suggestEnergyOptimization(currentState: UserState): Promise<OptimizationSuggestion[]>`
+- `correlateActivityWithMood(userId: string): Promise<ActivityMoodCorrelation>`
+
+### AI Fonksiyon İmplementasyon Planı
+
+#### Aşama 1: Temel AI Altyapısı (v0.2.0)
+- [x] Firebase Cloud Functions AI servis katmanı
+- [x] Yerel veri işleme pipeline'ı
+- [ ] Temel aktivite sınıflandırma algoritması
+- [ ] Basit odaklanma skoru hesaplama
+- [ ] Kullanıcı geri bildirim sistemi
+
+#### Aşama 2: Akıllı Analitik (v0.3.0)
+- [ ] Gelişmiş pattern recognition
+- [ ] Kişiselleştirilmiş içgörü üretimi
+- [ ] Adaptif öğrenme sistemi
+- [ ] Bağlamsal bildirim sistemi
+- [ ] Temel ses komut desteği
+
+#### Aşama 3: Tahminleme ve Optimizasyon (v0.4.0)
+- [ ] Verimlilik tahmin modeli
+- [ ] Enerji seviyesi analizi
+- [ ] Proaktif öneri sistemi
+- [ ] Gelişmiş NLP entegrasyonu
+- [ ] Ruh hali korelasyon analizi
+
+#### Aşama 4: Gelişmiş AI Özellikleri (v0.5.0)
+- [ ] Deep learning modelleri
+
+## 8. AI Implementation Notes - PeakActivity
+
+Bu bölüm, AI servislerinin teknik implementasyon detaylarını ve kod örneklerini içerir.
+
+### 8.1 Firebase Cloud Functions AI Service Layer
+
+```typescript
+// cloud-functions/src/ai/ai-service.ts
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { TensorFlowService } from './tensorflow-service';
+import { OpenAIService } from './openai-service';
+
+export const classifyActivity = onCall({
+  memory: '1GiB',
+  timeoutSeconds: 30,
+}, async (request) => {
+  const { auth, data } = request;
+  
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Kullanıcı doğrulanmamış');
+  }
+
+  const { activity, userContext } = data;
+  
+  try {
+    // Hybrid AI approach: Edge + Cloud
+    const edgeClassification = await TensorFlowService.classifyLocally(activity);
+    const cloudInsights = await OpenAIService.enhanceClassification(
+      activity, 
+      edgeClassification, 
+      userContext
+    );
+    
+    return {
+      success: true,
+      classification: {
+        category: edgeClassification.category,
+        confidence: edgeClassification.confidence,
+        ai_insights: cloudInsights,
+        processing_time: Date.now() - request.timestamp,
+      }
+    };
+    
+  } catch (error) {
+    console.error('AI Classification error:', error);
+    throw new HttpsError('internal', 'AI sınıflandırma başarısız');
+  }
+});
+
+export const generatePersonalizedInsights = onCall({
+  memory: '2GiB',
+  timeoutSeconds: 60,
+}, async (request) => {
+  const { auth, data } = request;
+  const { timeRange, analysisType } = data;
+  
+  const userId = auth!.uid;
+  
+  try {
+    // Kullanıcı aktivitelerini al
+    const activities = await getRecentActivities(userId, timeRange);
+    
+    // AI analiz pipeline
+    const behaviorPatterns = await AnalyzePatterns(activities);
+    const focusMetrics = await CalculateFocusMetrics(activities);
+    const productivityTrends = await AnalyzeTrends(activities, timeRange);
+    
+    // Personalized recommendations
+    const recommendations = await OpenAIService.generateRecommendations({
+      behaviorPatterns,
+      focusMetrics,
+      productivityTrends,
+      userPreferences: await getUserPreferences(userId),
+    });
+    
+    return {
+      insights: {
+        behavior_patterns: behaviorPatterns,
+        focus_metrics: focusMetrics,
+        productivity_trends: productivityTrends,
+        recommendations: recommendations,
+        confidence_score: calculateConfidenceScore(activities.length),
+      },
+      generated_at: Date.now(),
+    };
+    
+  } catch (error) {
+    console.error('Insight generation error:', error);
+    throw new HttpsError('internal', 'İçgörü üretimi başarısız');
+  }
+});
+```
+
+### 8.2 TensorFlow.js Edge AI Implementation
+
+```typescript
+// desktop-app/src/services/ai/tensorflow-service.ts
+import * as tf from '@tensorflow/tfjs';
+import { invoke } from '@tauri-apps/api/tauri';
+
+export class EdgeAIService {
+  private static model: tf.LayersModel | null = null;
+  private static isModelLoaded = false;
+
+  static async initializeModel(): Promise<void> {
+    try {
+      // Load pre-trained activity classification model
+      this.model = await tf.loadLayersModel('/assets/models/activity-classifier.json');
+      this.isModelLoaded = true;
+      console.log('AI model yüklendi');
+    } catch (error) {
+      console.error('AI model yüklenemedi:', error);
+      throw error;
+    }
+  }
+
+  static async classifyActivity(activity: ActivityEvent): Promise<ActivityClassification> {
+    if (!this.isModelLoaded || !this.model) {
+      await this.initializeModel();
+    }
+
+    try {
+      // Feature extraction
+      const features = this.extractFeatures(activity);
+      
+      // Tensor conversion
+      const inputTensor = tf.tensor2d([features]);
+      
+      // Model prediction
+      const prediction = this.model!.predict(inputTensor) as tf.Tensor;
+      const probabilities = await prediction.data();
+      
+      // Cleanup tensors
+      inputTensor.dispose();
+      prediction.dispose();
+      
+      return this.interpretPrediction(probabilities, activity);
+      
+    } catch (error) {
+      console.error('Edge AI classification error:', error);
+      
+      // Fallback to rule-based classification
+      return this.ruleBasedClassification(activity);
+    }
+  }
+
+  private static extractFeatures(activity: ActivityEvent): number[] {
+    const features = [
+      // Temporal features
+      this.normalizeHour(new Date(activity.timestamp).getHours()),
+      this.normalizeDayOfWeek(new Date(activity.timestamp).getDay()),
+      this.normalizeDuration(activity.duration),
+      
+      // App name features (hashed)
+      this.hashAppName(activity.app_name),
+      
+      // Window title features
+      this.analyzeWindowTitle(activity.window_title),
+      
+      // Behavioral features
+      this.calculateSessionContext(activity),
+    ];
+    
+    return features;
+  }
+
+  private static interpretPrediction(
+    probabilities: Float32Array, 
+    activity: ActivityEvent
+  ): ActivityClassification {
+    const categories = [
+      'productive', 'communication', 'entertainment', 
+      'social', 'education', 'system', 'other'
+    ];
+    
+    const maxProbIndex = probabilities.indexOf(Math.max(...probabilities));
+    const confidence = probabilities[maxProbIndex];
+    
+    return {
+      category: categories[maxProbIndex],
+      confidence: confidence,
+      subcategory: this.determineSubcategory(activity, categories[maxProbIndex]),
+      ai_insights: {
+        processing_type: 'edge_ai',
+        model_version: '1.0.0',
+        features_used: 'temporal_app_window_behavioral',
+      }
+    };
+  }
+
+  private static ruleBasedClassification(activity: ActivityEvent): ActivityClassification {
+    // Fallback classification rules
+    const appName = activity.app_name.toLowerCase();
+    const windowTitle = activity.window_title.toLowerCase();
+    
+    let category = 'other';
+    let confidence = 0.6;
+    
+    // Productivity apps
+    if (['code', 'visual studio', 'vscode', 'intellij', 'sublime'].some(keyword => 
+        appName.includes(keyword))) {
+      category = 'productive';
+      confidence = 0.8;
+    }
+    // Communication apps
+    else if (['slack', 'teams', 'discord', 'zoom', 'skype'].some(keyword => 
+        appName.includes(keyword))) {
+      category = 'communication';
+      confidence = 0.7;
+    }
+    // Entertainment
+    else if (['youtube', 'netflix', 'spotify', 'game'].some(keyword => 
+        appName.includes(keyword) || windowTitle.includes(keyword))) {
+      category = 'entertainment';
+      confidence = 0.7;
+    }
+    
+    return {
+      category,
+      confidence,
+      subcategory: null,
+      ai_insights: {
+        processing_type: 'rule_based',
+        fallback_reason: 'edge_ai_unavailable',
+      }
+    };
+  }
+}
+```
+
+### 8.3 Rust Backend AI Integration
+
+```rust
+// desktop-app/src-tauri/src/ai/mod.rs
+use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
+use std::collections::HashMap;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ActivityPattern {
+    pub app_name: String,
+    pub typical_duration: u32,
+    pub frequency: u32,
+    pub productivity_score: f32,
+    pub time_patterns: Vec<u8>, // Hours of day (0-23)
+``` 

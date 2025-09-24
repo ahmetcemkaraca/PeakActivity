@@ -1,0 +1,832 @@
+---
+applyTo: "functions/**/*.ts,aw-server/**/*.py"
+description: "Firebase integration patterns, documentation, and data modeling guidelines"
+---
+
+# Firebase Entegrasyon Kılavuzu ve Veri Modelleme
+
+Bu dosya, ActivityWatch ile Firebase entegrasyonu için mimari kalıpları, dokümantasyon ve veri modelleme standartlarını tanımlar. firebase-integration-documentation.mdc, firebase-integration.instructions.mdc ve core-firebase-data-modeling.mdc içerikleri buraya entegre edilmiştir. Tekrarlar kaldırılmış, dil tutarlılığı sağlanmıştır (İngilizce kod, Türkçe geliştirici notları).
+
+## ActivityWatch Server Firebase Entegrasyonu
+
+### Mevcut aw-server Analizi
+
+#### Ana Bileşenler
+```python
+# Mevcut aw-server yapısı
+- ServerAPI: Core business logic (bucket/event management)
+- REST API: Flask-RESTful endpoints (/0/buckets, /0/events, etc.)
+- Datastore Interface: Abstract storage layer (memory, peewee)
+- Query Engine: Query2 processing system
+- WebUI Hosting: Static file serving ve SPA routing
+- Settings: Configuration management
+```
+
+#### Temel Endpoint'ler
+```python
+# api.py - Core Server Operations
+class ServerAPI:
+    def get_info() -> server_info
+    def get_buckets() -> Dict[bucket_id, bucket_metadata]
+    def create_bucket(bucket_id, type, client, hostname)
+    def get_events(bucket_id, limit, start, end) -> List[Event]
+    def create_events(bucket_id, events) -> Event
+    def heartbeat(bucket_id, event, pulsetime) -> Event
+    def query2(name, query, timeperiods, cache)
+    def export_all() / import_all() # Bulk operations
+    
+# rest.py - HTTP Endpoints
+- GET /0/info
+- GET/POST /0/buckets/{bucket_id}
+- GET/POST /0/buckets/{bucket_id}/events
+- POST /0/buckets/{bucket_id}/heartbeat
+- POST /0/query/
+- GET/POST /0/export, /0/import
+```
+
+### Firebase Server Architecture
+
+#### Cloud Functions Mimarisi
+```typescript
+// Firebase Cloud Functions Structure
+functions/
+├── api/
+│   ├── info.ts              // GET /api/info
+│   ├── buckets.ts           // Bucket CRUD operations
+│   ├── events.ts            // Event management
+│   ├── heartbeat.ts         // Real-time heartbeat processing
+│   ├── query.ts             // Query2 engine
+│   └── settings.ts          // User settings
+├── triggers/
+│   ├── onBucketCreate.ts    // Firestore triggers
+│   ├── onEventCreate.ts     // Real-time data processing
+│   └── onUserCreate.ts      // User initialization
+├── scheduled/
+│   ├── aggregation.ts       // Daily/hourly aggregations
+│   ├── cleanup.ts           // Data retention policies
+│   └── analytics.ts         // Usage analytics
+└── utils/
+    ├── auth.ts              // Authentication helpers
+    ├── firestore.ts         // Database utilities
+    └── validation.ts        // Data validation
+```
+
+#### Firebase Services Configuration
+```typescript
+// Firebase Services Configuration
+interface FirebaseServerConfig {
+  // Authentication
+  auth: {
+    providers: ['google', 'email', 'anonymous'];
+    customClaims: ['admin', 'premium', 'device_limit'];
+  };
+  
+  // Firestore Database
+  firestore: {
+    collections: {
+      users: '/users/{userId}';
+      buckets: '/users/{userId}/buckets/{bucketId}';
+      events: '/users/{userId}/buckets/{bucketId}/events/{eventId}';
+      aggregations: '/users/{userId}/aggregations/{period}';
+      settings: '/users/{userId}/settings';
+    };
+  };
+  
+  // Cloud Functions
+  functions: {
+    region: 'us-central1';
+    timeout: '540s';
+    memory: '2GB';
+    maxInstances: 1000;
+  };
+  
+  // Hosting
+  hosting: {
+    site: 'activitywatch-app';
+    customDomain: 'app.activitywatch.net';
+    headers: [
+      {source: '/api/**', headers: [{key: 'Cache-Control', value: 'no-cache'}]}
+    ];
+  };
+}
+```
+
+### Authentication & Authorization
+
+#### Firebase Auth Integration
+```typescript
+// auth.ts - Authentication Middleware
+import { auth } from 'firebase-admin';
+import { CallableContext, HttpsError } from 'firebase-functions/v2/https';
+
+interface AuthenticatedUser {
+  uid: string;
+  email?: string;
+  customClaims?: {
+    admin?: boolean;
+    premium?: boolean;
+    device_limit?: number;
+  };
+}
+
+export async function authenticateUser(context: CallableContext): Promise<AuthenticatedUser> {
+  if (!context.auth) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated');
+  }
+  
+  const user = await auth().getUser(context.auth.uid);
+  return {
+    uid: user.uid,
+    email: user.email,
+    customClaims: user.customClaims as any
+  };
+}
+
+export function requireAuth(handler: Function) {
+  return async (data: any, context: CallableContext) => {
+    const user = await authenticateUser(context);
+    return handler(data, context, user);
+  };
+}
+
+// Multi-device authorization
+export async function checkDeviceLimit(userId: string, deviceId: string): Promise<boolean> {
+  const userDoc = await firestore().collection('users').doc(userId).get();
+  const userData = userDoc.data();
+  
+  if (!userData) return false;
+  
+  const deviceLimit = userData.customClaims?.device_limit || 3;
+  const registeredDevices = userData.devices || [];
+  
+  if (registeredDevices.includes(deviceId)) return true;
+  if (registeredDevices.length < deviceLimit) {
+    // Register new device
+    await userDoc.ref.update({
+      devices: [...registeredDevices, deviceId],
+      lastSeen: new Date()
+    });
+    return true;
+  }
+  
+  return false;
+}
+```
+
+#### User Management
+```typescript
+// triggers/onUserCreate.ts - User Initialization
+export const onUserCreate = functions.auth.user().onCreate(async (user) => {
+  const defaultSettings = {
+    startOfDay: '06:00',
+    startOfWeek: 'monday',
+    timezone: 'UTC',
+    dataRetention: '1year',
+    privacyMode: false,
+    createdAt: new Date(),
+    lastActive: new Date()
+  };
+  
+  await firestore().collection('users').doc(user.uid).set({
+    email: user.email,
+    devices: [],
+    settings: defaultSettings,
+    quota: {
+      events: 0,
+      buckets: 0,
+      queries: 0
+    },
+    customClaims: {
+      device_limit: 3,
+      premium: false
+    }
+  });
+});
+```
+
+### Cloud Functions Endpoints
+
+#### Server Info Endpoint
+```typescript
+// api/info.ts
+import { onCall } from 'firebase-functions/v2/https';
+import { requireAuth } from '../utils/auth';
+
+export const getServerInfo = onCall(requireAuth(async (data, context, user) => {
+  const serverInfo = {
+    version: '0.13.0-firebase',
+    hostname: 'firebase-cloud',
+    testing: false,
+    device_id: await getOrCreateDeviceId(user.uid, data.deviceId),
+    userId: user.uid,
+    features: {
+      realtime: true,
+      multiDevice: true,
+      cloudSync: true,
+      analytics: true
+    },
+    limits: {
+      events_per_day: user.customClaims?.premium ? 100000 : 10000,
+      buckets_per_user: user.customClaims?.premium ? 50 : 10,
+      queries_per_day: user.customClaims?.premium ? 1000 : 100
+    }
+  };
+  
+  return serverInfo;
+}));
+
+async function getOrCreateDeviceId(userId: string, clientDeviceId?: string): Promise<string> {
+  if (clientDeviceId) {
+    const canUseDevice = await checkDeviceLimit(userId, clientDeviceId);
+    if (canUseDevice) return clientDeviceId;
+  }
+  
+  // Generate new device ID
+  const newDeviceId = `firebase-${userId}-${Date.now()}`;
+  await checkDeviceLimit(userId, newDeviceId);
+  return newDeviceId;
+}
+```
+
+#### Bucket Management
+```typescript
+// api/buckets.ts
+import { onCall } from 'firebase-functions/v2/https';
+import { firestore } from 'firebase-admin';
+
+export const createBucket = onCall(async (request) => {
+  const { auth, data } = request;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required');
+  }
+
+  const { type, client, hostname, name, data: bucketData } = data;
+  const userId = auth.uid;
+
+  const bucketRef = firestore().collection('users').doc(userId).collection('buckets').doc();
+  const bucketId = bucketRef.id;
+
+  await bucketRef.set({
+    id: bucketId,
+    type,
+    client,
+    hostname,
+    created: admin.firestore.FieldValue.serverTimestamp(),
+    name,
+    data: bucketData || {},
+    user_id: userId,
+    sync_status: 'active',
+    last_sync: admin.firestore.FieldValue.serverTimestamp()
+  });
+
+  return { bucketId, message: 'Bucket created successfully' };
+});
+```
+
+### Veri Modeli
+
+#### Firestore Collection Hierarchy
+```
+/metadata
+  /info -> { version, migration_status, last_update }
+
+/devices/{device_id}
+  - hostname: string
+  - device_id: string  
+  - created_at: timestamp
+  - last_seen: timestamp
+  - bucket_count: number
+
+/users/{userId}/buckets/{bucketId}
+  - id: string
+  - type: string              # "afk.status", "window.title", etc.
+  - client: string            # "aw-watcher-afk", "aw-watcher-window"
+  - hostname: string
+  - created: timestamp
+  - name?: string
+  - data?: map
+  - event_count: number       # Denormalized for quick access
+  - last_event_time?: timestamp
+  - user_id: string
+  - sync_status: 'active' | 'paused' | 'disabled'
+  - last_sync: timestamp
+
+/users/{userId}/buckets/{bucketId}/events/{eventId}
+  - id: string               # Auto-generated or from original
+  - timestamp: timestamp     # Firestore timestamp
+  - duration: number         # Seconds as number
+  - data: map               # Original event data
+  
+  # Firebase-specific optimization fields
+  - bucket_id: string       # Reference to parent bucket
+  - device_id: string       # For cross-bucket queries
+  - type: string           # Bucket type for filtering
+  - date_key: string       # "2025-01-21" for daily aggregations
+  - hour_key: string       # "2025-01-21-14" for hourly aggregations
+  - created_at: timestamp  # When record was created in Firebase
+  - updated_at?: timestamp # When record was last updated
+  - user_id: string
+
+/users/{userId}/buckets/{bucketId}/daily_stats/{date}
+  - date: string           # "2025-01-21"
+  - event_count: number
+  - total_duration: number
+  - first_event: timestamp
+  - last_event: timestamp
+  - data_summary: map      # Key statistics for the day
+  - user_id: string
+```
+
+#### Event Document Conversion
+```typescript
+function convertAWEventToFirebase(
+  event: AWEvent, 
+  bucketId: string, 
+  bucketType: string,
+  deviceId: string,
+  userId: string
+): FirebaseEvent {
+  const timestamp = admin.firestore.Timestamp.fromDate(new Date(event.timestamp));
+  const dateKey = timestamp.toDate().toISOString().split('T')[0];
+  const hourKey = `${dateKey}-${timestamp.toDate().getHours().toString().padStart(2, '0')}`;
+  
+  return {
+    id: event.id?.toString() || '',
+    timestamp,
+    duration: event.duration,
+    data: event.data,
+    bucket_id: bucketId,
+    device_id: deviceId,
+    type: bucketType,
+    date_key: dateKey,
+    hour_key: hourKey,
+    created_at: admin.firestore.Timestamp.now(),
+    user_id: userId
+  };
+}
+
+function convertFirebaseEventToAW(firebaseEvent: FirebaseEvent): AWEvent {
+  return {
+    id: firebaseEvent.id,
+    timestamp: firebaseEvent.timestamp.toDate().toISOString(),
+    duration: firebaseEvent.duration,
+    data: firebaseEvent.data
+  };
+}
+```
+
+### Query Optimization Strategies
+
+#### Composite Indexes
+```json
+{
+  "indexes": [
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "bucket_id", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION_GROUP", 
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "date_key", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "events", 
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "hour_key", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "ASCENDING" }
+      ]
+    }
+  ]
+}
+```
+
+#### Query Patterns
+
+##### Günlük Event Query
+```typescript
+async function getEventsForDay(
+  userId: string,
+  bucketId: string, 
+  date: string
+): Promise<AWEvent[]> {
+  const eventsRef = db.collection('users').doc(userId).collection('buckets').doc(bucketId).collection('events');
+  
+  // Use date_key for efficient daily queries
+  const snapshot = await eventsRef
+    .where('date_key', '==', date)
+    .orderBy('timestamp', 'asc')
+    .get();
+  
+  return snapshot.docs.map(doc => convertFirebaseEventToAW(doc.data()));
+}
+```
+
+##### Saatlik Aggregation Query
+```typescript
+async function getHourlyStats(
+  userId: string,
+  bucketId: string, 
+  startDate: string, 
+  endDate: string
+): Promise<HourlyStats[]> {
+  const eventsRef = db.collection('users').doc(userId).collection('buckets').doc(bucketId).collection('events');
+  
+  const snapshot = await eventsRef
+    .where('hour_key', '>=', `${startDate}-00`)
+    .where('hour_key', '<=', `${endDate}-23`)
+    .get();
+  
+  // Group by hour_key and aggregate
+  const hourlyMap = new Map<string, number>();
+  
+  snapshot.docs.forEach(doc => {
+    const event = doc.data();
+    const hourKey = event.hour_key;
+    const duration = event.duration;
+    
+    hourlyMap.set(hourKey, (hourlyMap.get(hourKey) || 0) + duration);
+  });
+  
+  return Array.from(hourlyMap.entries()).map(([hour, duration]) => ({
+    hour,
+    duration,
+    event_count: snapshot.docs.filter(d => d.data().hour_key === hour).length
+  }));
+}
+```
+
+##### Cross-Device Query
+```typescript
+async function getEventsAcrossDevices(
+  userId: string,
+  deviceIds: string[],
+  startTime: Date,
+  endTime: Date
+): Promise<AWEvent[]> {
+  const eventsRef = db.collectionGroup('events').where('user_id', '==', userId);
+  
+  const snapshot = await eventsRef
+    .where('device_id', 'in', deviceIds)
+    .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(startTime))
+    .where('timestamp', '<=', admin.firestore.Timestamp.fromDate(endTime))
+    .orderBy('timestamp', 'desc')
+    .get();
+  
+  return snapshot.docs.map(doc => convertFirebaseEventToAW(doc.data()));
+}
+```
+
+### Pagination Strategies
+
+#### Cursor-based Pagination
+```typescript
+async function getEventsPaginated(
+  userId: string,
+  bucketId: string,
+  pageSize: number = 100,
+  lastEventTimestamp?: admin.firestore.Timestamp
+): Promise<{ events: AWEvent[], nextCursor?: string }> {
+  let query = db.collection('users').doc(userId).collection('buckets').doc(bucketId).collection('events')
+    .orderBy('timestamp', 'desc')
+    .limit(pageSize);
+  
+  if (lastEventTimestamp) {
+    query = query.startAfter(lastEventTimestamp);
+  }
+  
+  const snapshot = await query.get();
+  const events = snapshot.docs.map(doc => convertFirebaseEventToAW(doc.data()));
+  
+  const nextCursor = snapshot.docs.length === pageSize 
+    ? snapshot.docs[snapshot.docs.length - 1].data().timestamp
+    : undefined;
+  
+  return {
+    events,
+    nextCursor: nextCursor?.toDate().toISOString()
+  };
+}
+```
+
+### Caching Layer
+
+#### Multi-Level Caching
+```typescript
+import { NodeCache } from 'node-cache';
+import { createHash } from 'crypto';
+
+// In-memory cache for frequently accessed data
+const memoryCache = new NodeCache({ 
+  stdTTL: 300,        // 5 minutes
+  maxKeys: 1000,      // Limit memory usage
+  checkperiod: 60 
+});
+
+// Firestore cache for query results
+async function cacheQuery(
+  queryKey: string, 
+  result: any, 
+  ttlMinutes: number = 30
+): Promise<void> {
+  const expiresAt = admin.firestore.Timestamp.fromDate(
+    new Date(Date.now() + ttlMinutes * 60 * 1000)
+  );
+  
+  await db.collection('query_cache').doc(queryKey).set({
+    query_hash: queryKey,
+    result,
+    created_at: admin.firestore.Timestamp.now(),
+    expires_at: expiresAt,
+    hit_count: 0
+  });
+}
+
+async function getCachedQuery(queryKey: string): Promise<any | null> {
+  // Check memory cache first
+  const memoryResult = memoryCache.get(queryKey);
+  if (memoryResult) {
+    return memoryResult;
+  }
+  
+  // Check Firestore cache
+  const cacheDoc = await db.collection('query_cache').doc(queryKey).get();
+  
+  if (cacheDoc.exists) {
+    const cacheData = cacheDoc.data()!;
+    
+    // Check if expired
+    if (cacheData.expires_at.toDate() > new Date()) {
+      // Update hit count
+      await cacheDoc.ref.update({
+        hit_count: admin.firestore.FieldValue.increment(1)
+      });
+      
+      // Store in memory cache
+      memoryCache.set(queryKey, cacheData.result);
+      
+      return cacheData.result;
+    } else {
+      // Remove expired cache
+      await cacheDoc.ref.delete();
+    }
+  }
+  
+  return null;
+}
+
+function generateQueryKey(params: any): string {
+  const queryString = JSON.stringify(params, Object.keys(params).sort());
+  return createHash('sha256').update(queryString).digest('hex');
+}
+```
+
+#### Smart Cache Invalidation
+```typescript
+// Trigger on event creation/update
+export const invalidateCache = functions.firestore
+  .document('users/{userId}/buckets/{bucketId}/events/{eventId}')
+  .onWrite(async (change, context) => {
+    const userId = context.params.userId;
+    const bucketId = context.params.bucketId;
+    
+    // Get all cache keys related to this user/bucket
+    const cacheSnapshot = await db.collection('query_cache')
+      .where('query_hash', '>=', `${userId}_${bucketId}`)
+      .where('query_hash', '<', `${userId}_${bucketId}\uf8ff`)
+      .get();
+    
+    // Delete related cache entries
+    const batch = db.batch();
+    cacheSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+    
+    // Clear memory cache for this user/bucket
+    const keys = memoryCache.keys();
+    keys.forEach(key => {
+      if (key.includes(`${userId}_${bucketId}`)) {
+        memoryCache.del(key);
+      }
+    });
+  });
+```
+
+### Data Aggregation
+
+#### Real-time Aggregations
+```typescript
+// Update daily stats on event creation
+export const updateDailyStats = functions.firestore
+  .document('users/{userId}/buckets/{bucketId}/events/{eventId}')
+  .onCreate(async (snap, context) => {
+    const event = snap.data();
+    const userId = context.params.userId;
+    const bucketId = context.params.bucketId;
+    const dateKey = event.date_key;
+    
+    const statsRef = db.doc(`users/${userId}/buckets/${bucketId}/daily_stats/${dateKey}`);
+    
+    await db.runTransaction(async (transaction) => {
+      const statsDoc = await transaction.get(statsRef);
+      
+      if (statsDoc.exists) {
+        const stats = statsDoc.data()!;
+        transaction.update(statsRef, {
+          event_count: stats.event_count + 1,
+          total_duration: stats.total_duration + event.duration,
+          last_event: event.timestamp > stats.last_event ? event.timestamp : stats.last_event,
+          first_event: event.timestamp < stats.first_event ? event.timestamp : stats.first_event
+        });
+      } else {
+        transaction.set(statsRef, {
+          date: dateKey,
+          event_count: 1,
+          total_duration: event.duration,
+          first_event: event.timestamp,
+          last_event: event.timestamp,
+          data_summary: {},
+          user_id: userId
+        });
+      }
+      
+      // Update bucket event count
+      const bucketRef = db.doc(`users/${userId}/buckets/${bucketId}`);
+      transaction.update(bucketRef, {
+        event_count: admin.firestore.FieldValue.increment(1),
+        last_event_time: event.timestamp
+      });
+    });
+  });
+```
+
+#### Scheduled Aggregations
+```typescript
+// Daily aggregation cleanup and optimization
+export const dailyAggregation = functions.pubsub
+  .schedule('0 2 * * *')  // Run at 2 AM daily
+  .timeZone('UTC')
+  .onRun(async (context) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateKey = yesterday.toISOString().split('T')[0];
+    
+    // Process each user/bucket
+    const usersSnapshot = await db.collection('users').get();
+    
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const bucketsSnapshot = await db.collection('users').doc(userId).collection('buckets').get();
+      
+      for (const bucketDoc of bucketsSnapshot.docs) {
+        const bucketId = bucketDoc.id;
+        
+        // Calculate comprehensive daily stats
+        const eventsSnapshot = await db
+          .collection('users').doc(userId).collection('buckets').doc(bucketId).collection('events')
+          .where('date_key', '==', dateKey)
+          .get();
+        
+        if (eventsSnapshot.empty) continue;
+        
+        const events = eventsSnapshot.docs.map(doc => doc.data());
+        
+        // Calculate detailed statistics
+        const stats = {
+          date: dateKey,
+          event_count: events.length,
+          total_duration: events.reduce((sum, e) => sum + e.duration, 0),
+          avg_duration: events.reduce((sum, e) => sum + e.duration, 0) / events.length,
+          first_event: Math.min(...events.map(e => e.timestamp.toDate().getTime())),
+          last_event: Math.max(...events.map(e => e.timestamp.toDate().getTime())),
+          data_summary: calculateDataSummary(events),
+          unique_data_keys: getUniqueDataKeys(events),
+          processing_completed_at: admin.firestore.Timestamp.now(),
+          user_id: userId
+        };
+        
+        await db.doc(`users/${userId}/buckets/${bucketId}/daily_stats/${dateKey}`).set(stats);
+      }
+    }
+    
+    // Cleanup old cache entries
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 7);  // Keep cache for 7 days
+    
+    const oldCacheSnapshot = await db.collection('query_cache')
+      .where('created_at', '<', admin.firestore.Timestamp.fromDate(cutoffDate))
+      .get();
+    
+    const batch = db.batch();
+    oldCacheSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+  });
+```
+
+### Performance Monitoring
+
+#### Query Performance Tracking
+```typescript
+async function executeTimedQuery<T>(
+  queryName: string,
+  queryFn: () => Promise<T>
+): Promise<T> {
+  const startTime = Date.now();
+  
+  try {
+    const result = await queryFn();
+    const duration = Date.now() - startTime;
+    
+    // Log performance metrics
+    await db.collection('performance_metrics').add({
+      query_name: queryName,
+      duration_ms: duration,
+      status: 'success',
+      timestamp: admin.firestore.Timestamp.now()
+    });
+    
+    return result;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    
+    await db.collection('performance_metrics').add({
+      query_name: queryName,
+      duration_ms: duration,
+      status: 'error',
+      error_message: error.message,
+      timestamp: admin.firestore.Timestamp.now()
+    });
+    
+    throw error;
+  }
+}
+```
+
+#### Storage Cost Optimization
+```typescript
+// Cleanup old events based on retention policy
+export const cleanupOldEvents = functions.pubsub
+  .schedule('0 3 * * 0')  // Weekly on Sunday at 3 AM
+  .onRun(async (context) => {
+    const retentionDays = 365;  // Keep 1 year of data
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    
+    const cutoffTimestamp = admin.firestore.Timestamp.fromDate(cutoffDate);
+    
+    // Get users to process
+    const usersSnapshot = await db.collection('users').get();
+    
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const bucketsSnapshot = await db.collection('users').doc(userId).collection('buckets').get();
+      
+      for (const bucketDoc of bucketsSnapshot.docs) {
+        const bucketId = bucketDoc.id;
+        
+        // Find old events
+        const oldEventsSnapshot = await db
+          .collection('users').doc(userId).collection('buckets').doc(bucketId).collection('events')
+          .where('timestamp', '<', cutoffTimestamp)
+          .limit(500)  // Process in batches
+          .get();
+        
+        if (!oldEventsSnapshot.empty) {
+          const batch = db.batch();
+          oldEventsSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          
+          await batch.commit();
+          
+          console.log(`Deleted ${oldEventsSnapshot.docs.length} old events from bucket ${bucketId} for user ${userId}`);
+        }
+      }
+    }
+  });
+```
+
+Bu kılavuz, ActivityWatch'un mevcut yapısına uyumlu, performanslı ve ölçeklenebilir bir Firebase entegrasyonu sağlar. Query optimizasyonu, caching ve aggregation stratejileri ile büyük veri setlerinde hızlı sorgu performansı elde edilir. Geliştirici notu: Kod İngilizce, yorumlar Türkçe olmalıdır.

@@ -1,0 +1,66 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "../dist",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "ActivityWatch Qt",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true,
+        "execute": true
+      },
+      "notification": {
+        "all": true
+      },
+      "fs": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
+      "http": {
+        "all": true
+      }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://your-update-server.com/update"
+      ],
+      "dialog": true,
+      "pubkey": "UPDATE_PUBKEY_HERE"
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.activitywatch.qt",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ]
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "ActivityWatch Qt",
+        "width": 800,
+        "height": 600
+      }
+    ]
+  }
+} 

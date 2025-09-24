@@ -1,0 +1,59 @@
+{
+  "name": "peakactivity-aw-fork",
+  "version": "0.1.0",
+  "description": "ActivityWatch fork with Firebase integration and AI analytics",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd aw-server && python -m aw_server",
+    "start:webui": "cd aw-server/aw-webui && npm run serve",
+    "build:webui": "cd aw-server/aw-webui && npm run build",
+    "start:qt": "cd aw-qt && python -m aw_qt",
+    "start:watcher-afk": "cd aw-watcher-afk && python -m aw_watcher_afk",
+    "start:watcher-window": "cd aw-watcher-window && python -m aw_watcher_window",
+    "start:notify": "cd aw-notify && python -m aw_notify",
+    "build:tauri": "cd aw-qt/src-tauri && cargo build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .js,.ts,.vue --fix",
+    "lint:check": "eslint . --ext .js,.ts,.vue",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "type-check:webui": "cd aw-server/aw-webui && tsc --noEmit",
+    "type-check:functions": "cd functions && tsc --noEmit",
+    "qa": "npm run lint:check && npm run format:check && npm run type-check",
+    "qa:fix": "npm run format && npm run lint && npm run type-check",
+    "pre-commit": "npm run qa:fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/peakactivity-aw-fork.git"
+  },
+  "keywords": [
+    "activitywatch",
+    "firebase",
+    "ai",
+    "analytics",
+    "time-tracking"
+  ],
+  "author": "PeakActivity",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/yourusername/peakactivity-aw-fork/issues"
+  },
+  "homepage": "https://github.com/yourusername/peakactivity-aw-fork#readme",
+  "dependencies": {
+    "@types/qrcode": "1.5.5",
+    "express-rate-limit": "^8.1.0",
+    "firebase": "10.5.0",
+    "firebase-admin": "12.0.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/jest": "30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "5.2.2"
+  }
+}

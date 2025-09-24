@@ -1,0 +1,303 @@
+# Copyright 2025 PeakActivity
+# Licensed under the Mozilla Public License, v. 2.0.
+# See LICENSE.txt for more details.
+- [ ] Temel altyapı ve bağımlılık yönetimi. Proje yapısını ve gerekli bağımlılıkları inceleyin.
+- [ ] aw-core modülünü inceleyin ve eksik bileşenleri belirleyin.
+- [ ] aw-notify modülünü inceleyin ve bildirim sistemini işlevsel hale getirin.
+- [ ] aw-qt modülünü inceleyin ve masaüstü uygulamasının temel işlevselliğini sağlayın.
+- [ ] aw-server modülünü inceleyin ve sunucu tarafı APIlerini ve statik dosyaları işlevsel hale getirin.
+- [ ] aw-webui modülünü inceleyin ve kullanıcı arayüzünü işlevsel hale getirin.
+- [ ] aw-watcher-afk modülünü inceleyin ve AFK izleyiciyi işlevsel hale getirin.
+- [ ] aw-watcher-input modülünü inceleyin ve girdi izleyiciyi işlevsel hale getirin.
+- [ ] aw-watcher-window modülünü inceleyin ve pencere izleyiciyi işlevsel hale getirin.
+- [ ] Firestore kurallarını ve depolama kurallarını inceleyin ve güvenlik açıklarını giderin.
+- [ ] `functions` dizinindeki tüm Firebase işlevlerini inceleyin ve dağıtıma hazır hale getirin.
+- [ ] `poetry.lock` dosyalarını kontrol edin ve tüm bağımlılıkların doğru bir şekilde kilitlendiğinden emin olun.
+- [ ] `pyproject.toml` dosyalarını kontrol edin ve tüm proje bağımlılıklarını güncelleyin.
+- [ ] `Makefile` dosyalarını inceleyin ve derleme/test süreçlerini otomatikleştirmek için gerekli düzenlemeleri yapın.
+- [ ] `README.md` dosyalarını güncelleyin ve her modül için doğru kurulum ve kullanım talimatlarını ekleyin.
+- [ ] Tüm `LICENSE.txt` dosyalarının doğru lisans bilgilerini içerdiğinden emin olun.
+- [ ] `SECURITY.md` ve `PRIVACY.md` belgelerini inceleyin ve güncel olduğundan emin olun.
+- [ ] `CONTRIBUTING.md` dosyasını inceleyin ve katkıda bulunma yönergelerini netleştirin.
+- [ ] Firebase emülatör yapılandırmalarını `apphosting.emulator.yaml` dosyasında inceleyin.
+- [ ] Tüm `.github/workflows` dosyalarını (varsa) inceleyin ve CI/CD süreçlerini optimize edin.
+- [ ] Tüm Python modülleri için statik tip denetimlerini (mypy) yapılandırın ve uygulayın.
+- [ ] Tüm JavaScript/TypeScript modülleri için linting (ESLint) ve biçimlendirme (Prettier) kurallarını yapılandırın ve uygulayın.
+- [ ] Sürekli entegrasyon (CI) ve sürekli dağıtım (CD) işlem hatlarını (örneğin GitHub Actions) yapılandırın.
+- [ ] Proje genelinde hata günlüğü (logging) mekanizmasını standartlaştırın.
+- [ ] `aw-server` ve `functions` için API belgelerini (OpenAPI/Swagger) oluşturun ve güncelleyin.
+- [ ] Test kapsamını artırın ve mevcut testlerin tüm kritik senaryoları kapsadığından emin olun.
+- [ ] Performans darboğazlarını belirleyin ve optimize edin.
+- [ ] Güvenlik denetimlerini düzenli olarak yapın ve güvenlik açıklarını giderin.
+- [ ] Firebase Kimlik Doğrulama (Authentication) entegrasyonunu kontrol edin ve eksiksiz olduğundan emin olun.
+- [ ] Cloud Firestore veri modelini ve sorgularını inceleyin ve optimize edin.
+- [ ] Firebase Gerçek Zamanlı Veritabanı (Realtime Database) kullanılıyorsa, entegrasyonu ve kuralları inceleyin.
+- [ ] Firebase Depolama (Storage) kullanımını ve güvenlik kurallarını kontrol edin.
+- [ ] Firebase Cloud Functions tetikleyicilerini (`functions/src/triggers`) inceleyin.
+- [ ] Firebase Admin SDK kullanımını (`functions/src/firebaseAdmin.ts`) gözden geçirin.
+- [ ] Sistem genelinde hata işleme mekanizmasını iyileştirin.
+- [ ] `aw-server/aw_server/encryption` dizinindeki şifreleme hizmetlerini doğrulayın.
+- [ ] `functions/src/services/encryption` dizinindeki şifreleme hizmetlerini doğrulayın.
+- [ ] `aw-webui/src/services/encryption` dizinindeki şifreleme hizmetlerini doğrulayın.
+- [ ] Anahtar yönetimi kılavuzunu (`docs/key-management-guide.md`) inceleyin ve uygulayın.
+- [ ] Kullanıcı gizliliği kılavuzunu (`docs/user-privacy-guide.md`) inceleyin ve uygulayın.
+- [ ] Güvenlik uygulama kılavuzunu (`docs/security-implementation-guide.md`) inceleyin ve uygulayın.
+- [ ] `aw-server/aw_server/data_anonymization/anonymizer.py` dosyasındaki veri anonimleştirme mantığını inceleyin.
+- [ ] `aw-webui/src/auth/AuthService.ts` dosyasındaki kimlik doğrulama akışını doğrulayın.
+- [ ] `aw-webui/src/stores/auth.ts` dosyasındaki kimlik doğrulama durum yönetimini doğrulayın.
+- [ ] Tüm `main.py` dosyalarını giriş noktaları olarak doğrulayın.
+- [ ] `aw-server/aw_server/static` dizinindeki statik dosya sunumunu inceleyin.
+- [ ] Vue.js bileşenlerini (`aw-webui/src/components`) doğrulayın ve eksik özellikleri uygulayın.
+- [ ] Vue.js görünümlerini (`aw-webui/src/views`) doğrulayın ve eksik özellikleri uygulayın.
+- [ ] Vuex/Pinia (eğer kullanılıyorsa) mağaza yönetimini (`aw-webui/src/stores`) doğrulayın.
+- [ ] `aw-webui/src/firebase.ts` dosyasındaki Firebase istemci tarafı yapılandırmasını doğrulayın.
+- [ ] `aw-webui/src/util/awclient.ts` dosyasındaki AWClient işlevselliğini inceleyin.
+- [ ] `aw-server/aw_server/api.py` dosyasındaki genel API tanımını inceleyin.
+- [ ] `aw-server/aw_server/rest.py` dosyasındaki REST API işlevselliğini doğrulayın.
+- [ ] `aw-server/aw_server/server.py` dosyasındaki sunucu başlatma ve yapılandırmayı inceleyin.
+- [ ] `aw-server/aw_server/config.py` ve `aw-qt/aw_qt/config.py` dosyalarındaki yapılandırma yönetimini inceleyin.
+- [ ] `aw-qt/aw_qt/manager.py` dosyasındaki QT uygulama yöneticisini inceleyin.
+- [ ] `aw-qt/aw_qt/trayicon.py` dosyasındaki tepsi simgesi işlevselliğini inceleyin.
+- [ ] `aw-qt/aw_qt/manual_activity_dialog.py` dosyasındaki manuel etkinlik iletişim kutusunu inceleyin.
+- [ ] `aw-notify/aw_notify/main.py` dosyasındaki bildirim gönderme mantığını inceleyin.
+- [ ] `aw-watcher-afk/aw_watcher_afk/afk.py` dosyasındaki AFK tespit mantığını inceleyin.
+- [ ] `aw-watcher-afk/aw_watcher_afk/listeners.py` dosyasındaki AFK dinleyicilerini inceleyin.
+- [ ] `aw-watcher-afk/aw_watcher_afk/windows.py` dosyasındaki Windows AFK implementasyonunu inceleyin.
+- [ ] `aw-watcher-window/aw_watcher_window/windows.py` dosyasındaki Windows pencere izleme implementasyonunu inceleyin.
+- [ ] `aw-server/aw_server/sync.py` dosyasındaki senkronizasyon mantığını inceleyin.
+- [ ] `aw-datastore/storages/peewee.py` dosyasındaki Peewee ORM entegrasyonunu inceleyin.
+- [ ] `aw-datastore/storages/memory.py` dosyasındaki bellek içi depolama implementasyonunu inceleyin.
+- [ ] `aw-datastore/storages/abstract.py` dosyasındaki soyut depolama arayüzünü inceleyin.
+- [ ] `aw-server/aw_server/firebase_datastore/firestore.py` dosyasındaki Firestore entegrasyonunu inceleyin.
+- [ ] `aw-server/praisonai_integration/agent_service.py` dosyasındaki AI entegrasyonunu inceleyin.
+- [ ] `functions/src/api` dizinindeki tüm API uç noktalarını inceleyin ve işlevselliği doğrulayın.
+- [ ] `functions/src/services` dizinindeki tüm hizmetleri inceleyin ve işlevselliği doğrulayın.
+- [ ] `functions/src/middlewares` dizinindeki tüm middleware'leri inceleyin.
+- [ ] `functions/src/security` dizinindeki güvenlik yardımcı programlarını inceleyin.
+- [ ] `functions/src/types` dizinindeki tüm TypeScript tür tanımlarını doğrulayın.
+- [ ] `functions/src/utils` dizinindeki tüm yardımcı programları inceleyin.
+- [ ] `aw-server/aw_server/data_anonymization/anonymizer.py` dosyasındaki veri anonimleştirme mantığını inceleyin.
+- [ ] `aw-webui/src/util/ai-feature-service.ts` dosyasındaki AI özellik hizmetini inceleyin.
+- [ ] `aw-webui/src/util/ai-processing-coordinator.ts` dosyasındaki AI işleme koordinatörünü inceleyin.
+- [ ] `aw-webui/src/views/ai-features` dizinindeki AI özellik görünümlerini inceleyin.
+- [ ] `aw-webui/src/components/AIInsightsDisplay.vue` dosyasındaki AI içgörülerini gösteren bileşeni inceleyin.
+- [ ] `aw-webui/src/components/AnomalyDetectionDisplay.vue` dosyasındaki anomali tespitini gösteren bileşeni inceleyin.
+- [ ] `aw-webui/src/components/AutoCategorizationDisplay.vue` dosyasındaki otomatik kategorizasyon gösteren bileşeni inceleyin.
+- [ ] `aw-webui/src/views/settings/AINotificationSettings.vue` dosyasındaki AI bildirim ayarlarını inceleyin.
+- [ ] `aw-server/aw_server/encryption/` dizinindeki şifreleme modüllerini inceleyin.
+- [ ] `functions/src/services/encryption/` dizinindeki şifreleme hizmetlerini inceleyin.
+- [ ] `aw-webui/src/services/encryption/` dizinindeki şifreleme hizmetlerini inceleyin.
+- [ ] `src-tauri/src/encryption_service.rs` dosyasındaki Rust şifreleme hizmetini inceleyin.
+- [ ] `src-tauri/src/key_derivation_service.rs` dosyasındaki Rust anahtar türetme hizmetini inceleyin.
+- [ ] `src-tauri/src/keyring_service.rs` dosyasındaki Rust anahtarlık hizmetini inceleyin.
+- [ ] `src-tauri/src/secure_memory.rs` dosyasındaki Rust güvenli bellek implementasyonunu inceleyin.
+- [ ] `src-tauri/tests/encryption_tests.rs` dosyasındaki Rust şifreleme testlerini inceleyin.
+- [ ] Genel kod kalitesini iyileştirin ve tutarlı kodlama standartları uygulayın.
+- [ ] Kullanılmayan kodları ve gereksiz dosyaları temizleyin.
+- [ ] Bağımlılıkları güncelleyin ve eski bağımlılıkları kaldırın.
+- [ ] Çevresel değişkenleri yönetmek için daha iyi bir sistem uygulayın.
+- [ ] Docker veya benzeri konteynerizasyon araçlarını kullanarak dağıtım sürecini basitleştirin.
+- [ ] Uygulama başlatma süresini optimize edin.
+- [ ] Bellek kullanımını azaltın.
+- [ ] Disk alanı kullanımını optimize edin.
+- [ ] Pil ömrü tüketimini optimize edin (masaüstü ve mobil uygulamalar için).
+- [ ] Uygulama içi güncellemeleri yönetmek için bir mekanizma ekleyin.
+- [ ] Hata raporlama ve izleme sistemini (örneğin Sentry) entegre edin.
+- [ ] Kullanıcı geri bildirim mekanizması ekleyin.
+- [ ] Çoklu dil desteği (i18n) uygulayın.
+- [ ] Erişilebilirlik (accessibility) standartlarına uygunluk sağlayın.
+- [ ] Tasarım sistemini veya stil rehberini tutarlı hale getirin.
+- [ ] Yeni özellikler için yol haritası oluşturun.
+- [ ] Teknik borçları azaltmak için plan yapın.
+- [ ] Dokümantasyonu iyileştirin ve eksik kısımları tamamlayın.
+- [ ] Topluluk katkılarını teşvik etmek için rehberler oluşturun.
+- [ ] Pazarlama ve tanıtım materyallerini güncelleyin.
+- [ ] Yasal uyumlulukları (GDPR, CCPA vb.) gözden geçirin.
+- [ ] Veri yedekleme ve geri yükleme stratejisi geliştirin.
+- [ ] Felaket kurtarma planı oluşturun.
+- [ ] Denetim günlüklerini (audit logs) uygulayın.
+- [ ] API hız sınırlaması uygulayın.
+- [ ] DDoS saldırılarına karşı koruma önlemleri alın.
+- [ ] Güvenlik duvarı (firewall) kurallarını optimize edin.
+- [ ] Veri hassasiyetine göre şifreleme katmanları ekleyin.
+- [ ] En az ayrıcalık ilkesini (principle of least privilege) uygulayın.
+- [ ] Bağımlılık taraması (dependency scanning) araçları kullanın.
+- [ ] Statik kod analizi (static code analysis) araçları kullanın.
+- [ ] Dinamik kod analizi (dynamic code analysis) araçları kullanın.
+- [ ] Sızma testi (penetration testing) düzenleyin.
+- [ ] Güvenlik bilinci eğitimi düzenleyin.
+- [ ] Acil durum müdahale planı oluşturun.
+- [ ] Tüm hizmetler için otomatik yeniden başlatma mekanizmaları uygulayın.
+- [ ] Veritabanı bağlantı havuzunu optimize edin.
+- [ ] Önbellekleme (caching) stratejileri uygulayın.
+- [ ] Uygulama seviyesi önbellekleme (application-level caching) kullanın.
+- [ ] Veritabanı seviyesi önbellekleme (database-level caching) kullanın.
+- [ ] CDN (Content Delivery Network) entegrasyonu yapın.
+- [ ] Resim ve medya optimizasyonu yapın.
+- [ ] Kod bölme (code splitting) ve tembel yükleme (lazy loading) uygulayın.
+- [ ] HTTP/2 veya HTTP/3 protokollerini etkinleştirin.
+- [ ] Veritabanı indekslerini optimize edin.
+- [ ] Sorgu optimizasyonu yapın.
+- [ ] Arka plan görevleri için kuyruk sistemi (queue system) kullanın.
+- [ ] Sunucu tarafı oluşturma (SSR) veya statik site oluşturma (SSG) stratejilerini değerlendirin.
+- [ ] Gereksiz render işlemlerini azaltmak için Vue.js bileşenlerini optimize edin.
+- [ ] `aw-server/aw_server/static` dizinindeki CSS ve JS dosyalarını küçültün ve birleştirin.
+- [ ] Firebase Hosting için performans optimizasyonlarını uygulayın.
+- [ ] Cloud Functions için soğuk başlatma (cold start) sürelerini azaltın.
+- [ ] Sunucu tarafı günlük kaydı (server-side logging) ve izleme (monitoring) sistemini geliştirin.
+- [ ] Müşteri tarafı günlük kaydı (client-side logging) ve izleme (monitoring) sistemini geliştirin.
+- [ ] Uçtan uca (end-to-end) testleri uygulayın.
+- [ ] Birim testlerini (unit tests) genişletin.
+- [ ] Entegrasyon testlerini (integration tests) genişletin.
+- [ ] Performans testlerini (performance tests) uygulayın.
+- [ ] Yük testlerini (load tests) uygulayın.
+- [ ] Güvenlik testlerini otomatikleştirin.
+- [ ] Tüm API uç noktaları için kapsamlı testler yazın.
+- [ ] Veritabanı işlemlerini test edin.
+- [ ] Önbellekleme mekanizmalarını test edin.
+- [ ] Şifreleme ve şifre çözme işlemlerini test edin.
+- [ ] Hata işleme senaryolarını test edin.
+- [ ] Kullanıcı kimlik doğrulama ve yetkilendirme akışlarını test edin.
+- [ ] Veri anonimleştirme işlevselliğini test edin.
+- [ ] UI bileşenlerinin etkileşimini test edin.
+- [ ] Çeşitli tarayıcılar ve cihazlarda uyumluluk testleri yapın.
+- [ ] Erişilebilirlik (accessibility) testleri yapın.
+- [ ] Sürekli test (continuous testing) stratejileri uygulayın.
+- [ ] Tauri uygulamasının (Rust tabanlı) derleme ve paketleme sürecini optimize edin.
+- [ ] Tauri uygulamasında platforma özel optimizasyonlar uygulayın (Windows, macOS, Linux).
+- [ ] Tauri uygulamasının IPC (işlemler arası iletişim) mekanizmasını optimize edin.
+- [ ] Tauri uygulamasındaki Rust ve TypeScript/JavaScript kodları arasındaki birlikte çalışabilirliği iyileştirin.
+- [ ] Tauri uygulamasının başlangıçta küçültülmüş bir pencere ile başlatılması sorununu düzeltin.
+- [ ] Tauri uygulamasında otomatik güncelleme mekanizması uygulayın.
+- [ ] Tauri uygulamasının kaynak kullanımını (CPU, bellek) optimize edin.
+- [ ] Tauri uygulamasında bildirimlerin düzgün çalıştığından emin olun.
+- [ ] `aw-qt` içindeki `src-tauri/Cargo.toml` dosyasındaki bağımlılıkları güncelleyin.
+- [ ] `aw-qt` içindeki `src-tauri/src/main.rs` dosyasındaki Tauri uygulama mantığını inceleyin.
+- [ ] `aw-qt` içindeki `src-tauri/src/commands.rs` dosyasındaki komut işleyicilerini inceleyin.
+- [ ] `aw-qt` içindeki `src-tauri/src/tray.rs` dosyasındaki tepsi simgesi olaylarını inceleyin.
+- [ ] `aw-qt` içindeki `src-tauri/src/notifications.rs` dosyasındaki yerel bildirim implementasyonunu inceleyin.
+- [ ] `aw-qt` içindeki `src-tauri/src/speech_recognition.rs` dosyasındaki konuşma tanıma özelliğini inceleyin.
+- [ ] Firebase Cloud Firestore için çevrimdışı kalıcılığı (offline persistence) uygulayın.
+- [ ] Firebase Depolama (Storage) için istemci tarafı yüklemeleri optimize edin.
+- [ ] Firebase Kimlik Doğrulama için çok faktörlü kimlik doğrulamayı (MFA) uygulayın.
+- [ ] Firebase Uzaktan Yapılandırma (Remote Config) kullanarak dinamik özellik bayrakları (feature flags) uygulayın.
+- [ ] Firebase Cloud Messaging (FCM) için bildirim stratejilerini optimize edin.
+- [ ] Firebase Performans İzleme (Performance Monitoring) entegrasyonu yapın.
+- [ ] Firebase Crashlytics entegrasyonu yapın.
+- [ ] Firebase için özel alan adları yapılandırın.
+- [ ] Firebase Barındırma (Hosting) için yeniden yazma (rewrites) ve yönlendirme (redirects) kurallarını optimize edin.
+- [ ] Firebase Uygulama Barındırma (App Hosting) kullanılıyorsa, backend dağıtımlarını optimize edin.
+- [ ] `aw-server/aw_server/settings.py` dosyasındaki genel sunucu ayarlarını inceleyin.
+- [ ] `aw-server/aw_server/log.py` dosyasındaki günlük kaydı yapılandırmasını inceleyin.
+- [ ] `aw-server/aw_server/exceptions.py` dosyasındaki özel istisna tanımlarını inceleyin.
+- [ ] `aw-server/aw_server/custom_static.py` dosyasındaki özel statik dosya işleme mantığını inceleyin.
+- [ ] `aw-server/aw_server/__main__.py` dosyasındaki ana sunucu başlatma komut dosyasını inceleyin.
+- [ ] `aw-notify/aw_notify/__main__.py` dosyasındaki ana bildirim başlatma komut dosyasını inceleyin.
+- [ ] `aw-qt/aw_qt/__main__.py` dosyasındaki ana QT uygulama başlatma komut dosyasını inceleyin.
+- [ ] `aw-watcher-afk/aw_watcher_afk/__main__.py` dosyasındaki ana AFK izleyici başlatma komut dosyasını inceleyin.
+- [ ] `aw-watcher-input/src/aw_watcher_input/__main__.py` dosyasındaki ana girdi izleyici başlatma komut dosyasını inceleyin.
+- [ ] `aw-watcher-window/aw_watcher_window/__main__.py` dosyasındaki ana pencere izleyici başlatma komut dosyasını inceleyin.
+- [ ] `functions/src/index.ts` dosyasındaki Firebase Functions ana giriş noktasını inceleyin.
+- [ ] `aw-webui/src/main.js` dosyasındaki Vue.js uygulamasının ana giriş noktasını inceleyin.
+- [ ] `aw-webui/babel.config.js`, `jest.config.js`, `vite.config.js`, `vue.config.js` dosyalarını inceleyin ve ön uç derleme ve test yapılandırmasını doğrulayın.
+- [ ] `functions/eslint.config.mjs`, `jest.config.js`, `vitest.config.ts` dosyalarını inceleyin ve Firebase Functions derleme ve test yapılandırmasını doğrulayın.
+- [ ] Tüm `aw-datastore/storages` dizinindeki depolama arka uçlarını (`abstract.py`, `memory.py`, `peewee.py`) inceleyin ve tutarlı bir API sağladığından emin olun.
+- [ ] `aw-server/aw_server/firebase_datastore/__init__.py` dosyasındaki Firebase Datastore başlatmasını inceleyin.
+- [ ] `aw-webui/src/queries.ts` dosyasındaki GraphQL veya API sorgularını inceleyin.
+- [ ] `aw-webui/src/globals.d.ts` dosyasındaki genel TypeScript tür tanımlarını inceleyin.
+- [ ] `aw-webui/src/locales/` dizinindeki çeviri dosyalarını ve uluslararasılaşma stratejisini inceleyin.
+- [ ] `aw-webui/src/mixins/asyncErrorCaptured.js` dosyasındaki asenkron hata yakalama mixin'ini inceleyin.
+- [ ] `aw-webui/src/style/_globals.scss` ve `style.scss` dosyalarındaki genel stil tanımlarını inceleyin.
+- [ ] `aw-webui/src/types/` dizinindeki tüm TypeScript tür tanımlarını doğrulayın.
+- [ ] `aw-webui/src/visualizations/` dizinindeki tüm görselleştirme bileşenlerini inceleyin.
+- [ ] `aw-webui/test/` dizinindeki tüm ön uç testlerini inceleyin ve çalıştığından emin olun.
+- [ ] `aw-server/tests/` dizinindeki tüm sunucu testlerini inceleyin ve çalıştığından emin olun.
+- [ ] `aw-notify/tests/` dizinindeki bildirim testlerini inceleyin.
+- [ ] `aw-watcher-afk/tests/` dizinindeki AFK izleyici testlerini inceleyin.
+- [ ] `aw-qt/tests/` dizinindeki QT testlerini inceleyin.
+- [ ] `aw-watcher-window/tests/` dizinindeki pencere izleyici testlerini inceleyin.
+- [ ] `scripts/` dizinindeki tüm yardımcı komut dosyalarını inceleyin ve amaçlarını anlayın.
+- [ ] `docs/` dizinindeki tüm belgeleri (ADR, kılavuzlar vb.) inceleyin ve güncel olduğundan emin olun.
+- [ ] `public/index.html` dosyasını inceleyin ve uygulamanın genel yapısını anlayın.
+- [ ] `public-md/` dizinindeki genel markdown belgelerini inceleyin.
+- [ ] `version.md` dosyasını güncelleyin ve projenin mevcut sürümünü doğru bir şekilde yansıttığından emin olun.
+- [ ] `CITATION.cff` dosyasını inceleyin ve alıntı bilgilerinin doğru olduğundan emin olun.
+- [ ] `diagram.svg` dosyasını inceleyin ve proje mimarisinin görsel bir temsilini anlayın.
+- [ ] Gereksiz bağımlılıkları veya çakışan bağımlılıkları belirleyin ve çözün.
+- [ ] API yanıt sürelerini izlemek için metrikler ekleyin.
+- [ ] Veritabanı bağlantılarının sızmasını önleyin.
+- [ ] Kullanıcı oturum yönetimini geliştirin.
+- [ ] Kimlik doğrulama tokenlarının geçerliliğini ve yenilenmesini yönetin.
+- [ ] Parola politikalarını güçlendirin.
+- [ ] Oturum ele geçirme saldırılarına karşı önlemler alın.
+- [ ] Çapraz site komut dosyası (XSS) saldırılarına karşı koruma sağlayın.
+- [ ] Çapraz site istek sahteciliği (CSRF) saldırılarına karşı koruma sağlayın.
+- [ ] SQL enjeksiyonu ve NoSQL enjeksiyonu saldırılarına karşı koruma sağlayın.
+- [ ] Komut enjeksiyonu saldırılarına karşı koruma sağlayın.
+- [ ] Güvenli dosya yükleme mekanizması uygulayın.
+- [ ] Hassas verileri istemci tarafında depolamaktan kaçının.
+- [ ] Sunucu ve istemci arasındaki tüm iletişimi HTTPS üzerinden şifreleyin.
+- [ ] API anahtarları ve sırları gibi hassas bilgileri güvenli bir şekilde saklayın.
+- [ ] Bağımlılıkların güvenlik açıklarını düzenli olarak tarayın.
+- [ ] Günlük dosyalarını güvenli bir şekilde saklayın ve erişimi kısıtlayın.
+- [ ] Bulut kaynakları için uygun IAM (Kimlik ve Erişim Yönetimi) politikaları uygulayın.
+- [ ] Sunucuları ve hizmetleri en son güvenlik yamalarıyla güncel tutun.
+- [ ] Tesis dışı (off-site) yedekleme stratejisi uygulayın.
+- [ ] Veritabanı yedeklemelerini otomatikleştirin.
+- [ ] Yedeklemelerin bütünlüğünü düzenli olarak test edin.
+- [ ] Geri yükleme prosedürlerini belgeleyin.
+- [ ] Erişim kontrol listelerini (ACL) uygulayın.
+- [ ] Güvenli önyükleme (secure boot) ve güvenilir platform modülü (TPM) kullanın.
+- [ ] Web sunucusu yapılandırmalarını (Nginx, Apache vb.) güvenli hale getirin.
+- [ ] İşletim sistemi seviyesinde güvenlik sertleştirmesi yapın.
+- [ ] Uzaktan erişim için VPN veya SSH tünelleri kullanın.
+- [ ] Tüm varsayılan kimlik bilgilerini değiştirin.
+- [ ] Gereksiz portları kapatın.
+- [ ] Ağ segmentasyonu uygulayın.
+- [ ] Veri şifreleme anahtarlarının rotasyonunu uygulayın.
+- [ ] Kötü amaçlı yazılım taraması ve tespiti uygulayın.
+- [ ] Sistemlerde yetkisiz değişiklikleri tespit etmek için izinsiz giriş tespit sistemleri (IDS) kullanın.
+- [ ] Sistem erişimini izlemek ve kaydetmek için izinsiz giriş önleme sistemleri (IPS) kullanın.
+- [ ] Fiziksel güvenlik önlemlerini gözden geçirin.
+- [ ] Uygulama beyaz listelemeyi uygulayın.
+- [ ] Gerekli olmayan hizmetleri devre dışı bırakın.
+- [ ] Uygulama güvenliği duvarı (WAF) uygulayın.
+- [ ] Kimlik avı (phishing) saldırılarına karşı kullanıcıları eğitin.
+- [ ] Sosyal mühendislik saldırılarına karşı bilinçlendirme yapın.
+- [ ] Güvenlik olaylarına müdahale ekibi oluşturun.
+- [ ] Periyodik güvenlik denetimleri yapın.
+- [ ] Uygulama günlüklerini merkezi bir günlük yönetimi sistemine entegre edin.
+- [ ] Hassas bilgilerin maskelenmesi veya şifrelenmesini sağlayın.
+- [ ] Güvenli kodlama uygulamalarını geliştirme sürecine entegre edin.
+- [ ] Tedarikçi risk yönetimini uygulayın.
+- [ ] Uygulama kullanımını izlemek için analitik entegrasyonu yapın.
+- [ ] Kullanıcı deneyimini (UX) iyileştirin.
+- [ ] Kullanıcı arayüzünü (UI) modernleştirin.
+- [ ] Kullanıcıların genel faaliyetlerini görüntülemesini sağlayan bir faaliyet özeti özelliği ekleyin.
+- [ ] Zaman çizelgesi görünümünü (timeline view) iyileştirin.
+- [ ] Kategori yönetimi arayüzünü iyileştirin.
+- [ ] Kural yönetimi arayüzünü iyileştirin.
+- [ ] Etkinlik sınıflandırma doğruluğunu artırın.
+- [ ] Periyodik olarak yinelenen görevler için zamanlanmış görevler özelliği ekleyin.
+- [ ] Performans istatistiklerini (örneğin uygulama başlatma süresi, CPU kullanımı) görüntüleyen bir bölüm ekleyin.
+- [ ] Kullanıcı verilerini dışa aktarma (export) ve içe aktarma (import) özelliği ekleyin.
+- [ ] Veritabanı temizleme ve arşivleme mekanizmaları ekleyin.
+- [ ] Kullanıcılar arası veri paylaşımı (isteğe bağlı ve güvenli) özelliği ekleyin.
+- [ ] Farklı veri kaynaklarından (örneğin diğer uygulamalar) veri entegrasyonu özelliği ekleyin.
+- [ ] API anahtarı ve belirteç yönetimi için bir UI ekleyin.
+- [ ] Geliştirici modu ve hata ayıklama araçları ekleyin.
+- [ ] Uygulama içi ipuçları ve öğreticiler (tutorials) ekleyin.
+- [ ] Yeni başlayanlar için kolay kurulum sihirbazı ekleyin.
+- [ ] Çevrimdışı modu geliştirin.
+- [ ] Dinamik tema değiştirme (örneğin koyu/açık mod) özelliği ekleyin.
+- [ ] Özelleştirilebilir gösterge tabloları (dashboards) ekleyin.
+- [ ] Raporlama ve analiz araçlarını geliştirin.
+- [ ] Webhook entegrasyonları için destek ekleyin.
+- [ ] Eklenti (plugin) veya uzantı (extension) mimarisi düşünün.
+- [ ] Uygulama içi satın almalar veya abonelikler için destek ekleyin (varsa).
+- [ ] Sosyal medya entegrasyonları ekleyin (isteğe bağlı).
+- [ ] Makine öğrenimi modellerini güncellemek için bir mekanizma uygulayın.
+- [ ] Eğitim verilerini yönetmek için bir UI ekleyin (AI özellikleri için).
+- [ ] AI modellerinin performansını izlemek için metrikler ekleyin.
+- [ ] AI modellerinin açıklanabilirliğini (explainability) iyileştirin.
+- [ ] AI tarafından belirlenen kategoriler için kullanıcı onay akışı uygulayın.
