@@ -13,6 +13,7 @@ import apiRoutes from './api/routes'; // API rotalarını import et
 import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi import et
 import { generateAgent } from './api/agent-api'; // Yeni eklenen import
 import rateLimit from 'express-rate-limit'; // Rate limiting için
+import { GeminiService } from './services/gemini-service'; // Gemini service
 
 // Rate limiting middleware
 const limiter = rateLimit({
@@ -35,6 +36,9 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
+
+// Gemini service instance
+const geminiService = new GeminiService();
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -140,13 +144,24 @@ export const callGenkitFlow = onCall(
   }
 );
 
+// Gemini integration for activity insights
+export const generateActivityInsight = onCall(async (request) => {
+  const { auth, data } = request;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required');
+  }
+  const { activityData } = data;
+  const insight = await geminiService.generateInsight(JSON.stringify(activityData));
+  return { insight };
+});
+
 // Mevcut dışa aktarımlar (API ile ilgili olanlar artık Express uygulaması tarafından yönetiliyor)
 export { onActivityCreated, generateAgent, scheduleAgentGeneration };
 
 // GenKit instance'ını dışa aktar
 export { ai as genkitInstance };
 
-// Eski API dışa aktarımları kaldırılıyor veya Express rotalarına taşındığı için yorum satırı yapılıyor.
+// Eski API dışa aktarımlar kaldırılıyor veya Express rotalarına taşındığı için yorum satırı yapılıyor.
 // export const activityApi = { saveActivity: saveActivity };
 // export const aiInsightApi = { generateAIInsights: generateAIInsights, };
 // export const aiNotificationApi = { sendAINotification: sendAIRecommendationNotification, };
@@ -197,18 +212,4 @@ setGlobalOptions({
 // Zaman Serisi Analizi ve Tahminleme için potansiyel entegrasyon noktaları:
 // Cloud Functions, zaman serisi verilerini işlemek ve tahmin modellerini (LSTM, Transformer vb.) çalıştırmak için kullanılabilir.
 // Örnek: Gelecekteki aktivite desenlerini veya odaklanma seviyelerini tahmin etme.
-// Örnek: Aktivite verilerindeki ani düşüşler veya artışlar gibi anomali ve değişim noktalarını tespit etme.
-
-// Harici Servis Entegrasyonları için potansiyel entegrasyon noktaları:
-// Cloud Functions, Google Calendar, Trello, Jira gibi harici takvim ve görev yönetimi araçlarıyla entegrasyon için kullanılabilir.
-// Örnek: Kullanıcının Google Takvim etkinliklerini senkronize etme, boş zamanlarını tespit etme veya otomatik etkinlikler oluşturma.
-// Örnek: Trello/Jira'daki görev durumlarını senkronize etme, proje ilerlemesini takip etme veya görev tamamlama tahminleri yapma.
-
-// İletişim Araçları Entegrasyonları için potansiyel entegrasyon noktaları:
-// Cloud Functions, Slack, Microsoft Teams veya e-posta servisleri gibi harici iletişim araçlarıyla entegrasyon için kullanılabilir.
-// Örnek: Slack/Teams'e bildirim gönderme, mesajlaşma analizi yapma veya sanal toplantı katılımını izleme.
-
-// Sağlık ve Zindelik Uygulamaları Entegrasyonları için potansiyel entegrasyon noktaları:
-// Cloud Functions, uyku takip cihazları (örn. Fitbit, Oura) veya meditasyon uygulamaları gibi harici sağlık ve zindelik uygulamalarıyla entegrasyon için kullanılabilir.
-// Örnek: Uyku kalitesi verilerini senkronize etme, enerji seviyeleriyle korelasyon kurma veya uyku düzeni önerileri sunma.
-// Örnek: Meditasyon süresi takibi, zihinsel durumla korelasyon veya stres seviyesi analizi yapma.
+// Örnek: Aktivite verilerindeki ani düşüşler veya artışlar gibi anomali ve değiş

@@ -27,6 +27,7 @@
     "@fullcalendar/timegrid": "^5.10.1",
     "@fullcalendar/vue": "^5.10.1",
     "@pinia/testing": "^0.0.16",
+    "@tensorflow/tfjs": "^4.12.0",
     "@types/chart.js": "^2.9.23",
     "@types/chrome": "0.0.89",
     "@types/color": "^3.0.1",
