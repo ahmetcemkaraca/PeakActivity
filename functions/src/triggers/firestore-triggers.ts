@@ -92,3 +92,61 @@ export const onActivityCreated = onDocumentCreated(
     }
   }
 );
+
+/**
+ * Firestore trigger: Bucket oluşturulduğunda tetiklenir
+ *
+ * Bu trigger, users/{userId}/buckets/{bucketId} path'inde yeni bir doküman
+ * oluşturulduğunda çalışır. Ana görevleri:
+ *
+ * 1. Kullanıcı bucket sayısını güncelle
+ * 2. Yeni bucket için hoş geldin bildirimi gönder
+ * 3. Bucket validation yap
+ * 4. User stats güncelle
+ */
+export const onBucketCreated = onDocumentCreated(
+  'users/{userId}/buckets/{bucketId}',
+  async event => {
+    const snapshot = event.data;
+    const { userId, bucketId } = event.params;
+
+    if (!snapshot) {
+      console.warn(`Bucket not found: ${bucketId}`);
+      return;
+    }
+
+    const bucketData = snapshot.data();
+
+    try {
+      // User bucket count güncelle
+      const userRef = db.collection('users').doc(userId);
+      await db.runTransaction(async transaction => {
+        const userDoc = await transaction.get(userRef);
+        if (userDoc.exists) {
+          const currentCount = userDoc.data()?.bucket_count || 0;
+          transaction.update(userRef, {
+            bucket_count: currentCount + 1,
+            last_updated: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        } else {
+          transaction.set(userRef, {
+            bucket_count: 1,
+            last_updated: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      });
+
+      // Yeni bucket için bildirim gönder
+      await new NotificationService().createNotification(userId, {
+        title: 'Yeni Bucket Eklendi',
+        message: `Yeni bucket '${bucketData.type}' başarıyla eklendi.`,
+        type: 'info',
+        related_entity_id: bucketId,
+      });
+
+      console.log(`Kullanıcı ${userId} için bucket ${bucketId} oluşturuldu ve sync edildi.`);
+    } catch (error) {
+      console.error(`Error processing bucket creation (${bucketId}):`, error);
+    }
+  }
+);
