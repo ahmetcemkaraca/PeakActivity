@@ -3,6 +3,7 @@ import { onActivityCreated } from './triggers/firestore-triggers';
 import { scheduleAgentGeneration } from './triggers/scheduler-triggers'; // Yeni eklenen import
 import * as functions from 'firebase-functions'; // 'firebase-functions' paketini import et
 import express from 'express'; // Express'i import et
+import cors from 'cors'; // CORS için
 import { Request, Response } from 'express';
 import { z } from 'zod';
 
@@ -21,6 +22,17 @@ const limiter = rateLimit({
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
+
+// CORS middleware
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://app.peakactivity.com',
+    'https://staging.app.peakactivity.com',
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -68,6 +80,7 @@ admin.initializeApp();
 const app = express();
 
 // Middleware'ler
+app.use(cors(corsOptions)); // CORS middleware
 app.use(express.json()); // JSON body parsing
 app.use(limiter); // Rate limiting middleware
 
@@ -456,6 +469,62 @@ export const syncGoogleCalendars = onSchedule('every 24 hours', async event => {
   console.log('Google Takvim senkronizasyonu başlatılıyor...');
   // calendarSyncService.syncAllUsersCalendars(); // Bu servis artık Express rotaları içinde kullanılıyor
   console.log('Google Takvim senkronizasyonu tamamlandı.');
+});
+
+// Backup function
+export const dailyBackup = onSchedule('0 2 * * *', async (event) => {
+  const db = admin.firestore();
+  const bucket = admin.storage().bucket('peakactivity-backups');
+  const date = new Date().toISOString().split('T')[0];
+  const backupId = `backup-${date}`;
+  
+  try {
+    // Backup all collections
+    const collections = ['users', 'buckets', 'events', 'insights'];
+    const backupData = {};
+    
+    for (const collection of collections) {
+      const snapshot = await db.collectionGroup(collection).get();
+      backupData[collection] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data(),
+        ref: doc.ref.path
+      }));
+    }
+    
+    // Write to storage
+    const file = bucket.file(`${backupId}.json`);
+    await file.save(JSON.stringify(backupData), {
+      metadata: { contentType: 'application/json' },
+    });
+    
+    logger.info('Daily backup completed', { backupId });
+  } catch (error) {
+    logger.error('Backup failed', { error: error.message });
+  }
+});
+
+// Retention policy function
+export const retentionCleanup = onSchedule('0 3 * * 0', async (event) => {
+  const db = admin.firestore();
+  const cutoffDate = new Date();
+  cutoffDate.setFullYear(cutoffDate.getFullYear() - 1); // 365 days ago
+  
+  try {
+    // Delete old events
+    const oldEvents = await db.collectionGroup('events')
+      .where('timestamp', '<', cutoffDate)
+      .limit(500)
+      .get();
+    
+    const batch = db.batch();
+    oldEvents.docs.forEach(doc => batch.delete(doc.ref));
+    
+    await batch.commit();
+    logger.info('Retention cleanup completed', { deleted: oldEvents.size });
+  } catch (error) {
+    logger.error('Retention cleanup failed', { error: error.message });
+  }
 });
 
 // HTTP Fonksiyonları (API Endpoints)
