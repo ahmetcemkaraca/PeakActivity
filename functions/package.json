@@ -36,7 +36,6 @@
     "moment": "^2.30.0",
     "jira-client": "^8.2.2",
     "googleapis": "^128.0.0",
-    "@tensorflow/tfjs-node": "^4.15.0",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {

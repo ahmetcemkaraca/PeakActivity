@@ -1,14 +1,15 @@
-import * as functions from 'firebase-functions';
-import { CallableContext } from 'firebase-functions/v1/https'; // Correct import path for CallableContext
+import { HttpsError } from 'firebase-functions/v2/https';
+import type { CallableRequest } from 'firebase-functions/v2/https';
 
-export const requireAuth = (handler: Function) => {
-    return async (data: any, context: CallableContext) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError(
-                'unauthenticated',
-                'The function must be called while authenticated.'
-            );
-        }
-        return handler(data, context);
-    };
-}; 
+/**
+ * Require authentication for v2 callable functions
+ * Throws error if request is not authenticated
+ */
+export function requireAuth(request: CallableRequest): void {
+  if (!request.auth) {
+    throw new HttpsError(
+      'unauthenticated',
+      'The function must be called while authenticated.'
+    );
+  }
+} 
