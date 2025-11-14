@@ -8,7 +8,7 @@ const activityQueryService = new ActivityQueryService();
  * @param data Sorgulama seçenekleri (QueryOptions arayüzüne uygun).
  * @returns Sorgu sonuçları (QueryResult arayüzüne uygun).
  */
-export const queryActivities = functions.https.onCall(async (request: functions.https.CallableRequest) => {
+export const queryActivities = functions.https.onCall(async (request: any) => {
   if (!request.auth) {
     throw new functions.https.HttpsError("unauthenticated", "Bu API yalnızca kimliği doğrulanmış kullanıcılar tarafından erişilebilir.");
   }
