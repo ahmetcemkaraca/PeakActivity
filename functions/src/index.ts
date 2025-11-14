@@ -43,18 +43,16 @@ import {
 // import { queryActivities } from "./api/activity-query-api";
 // import { CommunityRulesService } from './services/community-rules-service';
 // import { CalendarSyncService } from './services/calendar-sync-service';
-import { linearRegression, linearRegressionLine, mean, standardDeviation } from './services/utils/math-utils';
+import { mean, standardDeviation } from './services/utils/math-utils';
 // import { FocusQualityScoreService } from './services/focus-quality-score-service';
 // import { createProject, getProject, updateProject, getAllProjects, deleteProject } from './api/project-prediction-api';
 
-// Yeni GenKit importları
-import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/googleai';
-import { onCall, onRequest, hasClaim, HttpsError } from 'firebase-functions/v2/https'; // v2'den onCall, onRequest, hasClaim ve HttpsError'ı import et
+// Firebase Functions v2 imports
+import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { setGlobalOptions } from 'firebase-functions/v2';
-import { logger } from 'firebase-functions'; // functions.logger yerine logger kullanmak için
+import { logger } from 'firebase-functions';
 
 // Firebase Admin SDK başlatılıyor
 admin.initializeApp();
@@ -77,45 +75,15 @@ export const api = functions.https.onRequest(app);
 // Firebase Secret olarak Google AI API Anahtarı tanımlanıyor
 const googleAIapiKey = defineSecret("GEMINI_API_KEY");
 
-// GenKit başlatılıyor
-const ai = genkit({
-  plugins: [googleAI()],
-  // Gemini modelini varsayılan olarak kullan
-  // TODO: Gelecekte model konfigürasyonunu daha dinamik hale getirilebilir
-  model: googleAI.model('gemini-2.5-flash'),
-});
-
-// Örnek bir GenKit akışı tanımlama
-// Bu akış, verilen bir konu hakkında yapay zeka tarafından şiir oluşturur.
-export const generatePoemFlow = ai.defineFlow(
-  {
-    name: 'generatePoem',
-    inputSchema: z.string(),
-    outputSchema: z.string(),
-  },
-  async (subject: string) => {
-    const { text } = await ai.generate(`Compose a poem about ${subject}.`);
-    return text;
-  },
-);
-
-// GenKit akışını bir Firebase Callable Cloud Function olarak dışa aktarma
-// Kimlik doğrulama politikası ve App Check zorunluluğu ile güvenlik sağlanıyor.
-export const callGenkitFlow = onCall(
-  {
-    secrets: [googleAIapiKey],
-    authPolicy: hasClaim('email_verified'), // Sadece e-postası doğrulanmış kullanıcıların erişmesine izin ver
-    enforceAppCheck: true,
-  },
-  async (request) => {
-    if (typeof request.data !== 'string') {
-        throw new HttpsError('invalid-argument', 'Konu bir string olmalıdır.');
-    }
-    const subject = request.data;
-    const result = await generatePoemFlow(subject);
-    return { text: result };
-  }
-);
+// GenKit entegrasyonu - Şu anda direkt AI API kullanımı tercih edilmektedir
+// GenKit kullanımı için ai-analysis-api.ts bakınız
+// 
+// Note: GenKit v0.5+ API değişiklikleri nedeniyle örnek flow kodları geçici olarak devre dışı
+// AI servisleri için functions/src/api/ai-analysis-api.ts kullanılmaktadır
+//
+// TODO: GenKit v0.5+ için flow örnekleri güncellenecek
+// import { configureGenkit } from '@genkit-ai/core';
+// import { googleAI } from '@genkit-ai/googleai';
 
 // Mevcut dışa aktarımlar (API ile ilgili olanlar artık Express uygulaması tarafından yönetiliyor)
 export {
@@ -146,8 +114,8 @@ export {
   processAgentSchedules
 };
 
-// GenKit instance'ını dışa aktar
-export { ai as genkitInstance };
+// GenKit instance export (temporarily disabled pending API update)
+// export { ai as genkitInstance };
 
 // Eski API dışa aktarımları kaldırılıyor veya Express rotalarına taşındığı için yorum satırı yapılıyor.
 // export const activityApi = { saveActivity: saveActivity };
@@ -229,37 +197,39 @@ interface Event {
   is_afk: boolean;
 }
 
-interface FocusQualityScoreInput {
-  events: Event[];
-  user_tz: string;
-}
-
-interface SessionScore {
-  session_id: string;
-  focus_quality_score: number;
-  distractions: number;
-  context_switch_penalty: number;
-}
-
-interface FocusQualityScoreOutput {
-  session_scores: SessionScore[];
-  daily_average: number | null;
-  explanations: string;
-}
+// Moved to services - keeping for backwards compatibility
+// interface FocusQualityScoreInput {
+//   events: Event[];
+//   user_tz: string;
+// }
+// 
+// interface SessionScore {
+//   session_id: string;
+//   focus_quality_score: number;
+//   distractions: number;
+//   context_switch_penalty: number;
+// }
+// 
+// interface FocusQualityScoreOutput {
+//   session_scores: SessionScore[];
+//   daily_average: number | null;
+//   explanations: string;
+// }
 
 interface DailyTotal {
   date: string;
   categories: { [key: string]: number };
 }
 
+// Anomaly detection types - used by analyzeBehavioralTrends
 interface AnomalyDailyTotal {
   date: string;
   total_seconds: number;
 }
 
-interface AnomalyDetectionInput {
-  daily_totals: AnomalyDailyTotal[];
-}
+// interface AnomalyDetectionInput {
+//   daily_totals: AnomalyDailyTotal[];
+// }
 
 interface Anomaly {
   date: string;
@@ -267,12 +237,12 @@ interface Anomaly {
   deviation_percent: number;
 }
 
-interface AnomalyDetectionOutput {
-  anomalies: Anomaly[];
-  baseline_mean: number;
-  baseline_stddev: number;
-  explanation: string;
-}
+// interface AnomalyDetectionOutput {
+//   anomalies: Anomaly[];
+//   baseline_mean: number;
+//   baseline_stddev: number;
+//   explanation: string;
+// }
 
 interface BehavioralTrendsInput {
   daily_totals: DailyTotal[];
@@ -291,25 +261,26 @@ interface BehavioralTrendsOutput {
   summary: string;
 }
 
-interface AutoCatEvent {
-  app: string;
-  title: string;
-  url: string | null;
-}
-
-interface AutoCategorizationInput {
-  events: AutoCatEvent[];
-}
-
-interface LabelResult {
-  index: number;
-  category: string;
-  confidence: number;
-}
-
-interface AutoCategorizationOutput {
-  labels: LabelResult[];
-}
+// Auto-categorization types - moved to services
+// interface AutoCatEvent {
+//   app: string;
+//   title: string;
+//   url: string | null;
+// }
+// 
+// interface AutoCategorizationInput {
+//   events: AutoCatEvent[];
+// }
+// 
+// interface LabelResult {
+//   index: number;
+//   category: string;
+//   confidence: number;
+// }
+// 
+// interface AutoCategorizationOutput {
+//   labels: LabelResult[];
+// }
 
 interface CommunityRuleEvent {
   app: string;
@@ -339,22 +310,24 @@ interface ContextualCategorizationInput {
   language?: string;
 }
 
-interface ContextualCategorizationOutput {
-  category: string;
-  confidence: number;
-  rationale: string;
-}
+// interface ContextualCategorizationOutput {
+//   category: string;
+//   confidence: number;
+//   rationale: string;
+// }
 
-const CATEGORY_KEYWORDS: { [key: string]: string[] } = {
-  "coding": ["code", "github", "stack overflow", "bug", "develop", "programming", "ide", "visual studio code", "jira", "gitlab"],
-  "design": ["photoshop", "figma", "sketch", "illustrator", "design", "ui/ux", "blender"],
-  "research": ["researchgate", "wikipedia", "journal", "academic", "study", "analyze"],
-  "social": ["facebook", "instagram", "twitter", "linkedin", "reddit", "whatsapp", "slack"],
-  "gaming": ["steam", "epic games", "league of legends", "csgo", "game"],
-  "productivity": ["notion", "todoist", "trello", "asana", "excel", "word", "powerpoint"],
-  "communication": ["outlook", "gmail", "teams", "zoom", "google meet", "discord"],
-  "shopping": ["amazon", "ebay", "trendyol", "n11"]
-};
+// Keyword mapping for categorization (used by mockZeroShotClassify)
+// Kept here for backwards compatibility with existing functions
+// const CATEGORY_KEYWORDS: { [key: string]: string[] } = {
+//   "coding": ["code", "github", "stack overflow", "bug", "develop", "programming", "ide", "visual studio code", "jira", "gitlab"],
+//   "design": ["photoshop", "figma", "sketch", "illustrator", "design", "ui/ux", "blender"],
+//   "research": ["researchgate", "wikipedia", "journal", "academic", "study", "analyze"],
+//   "social": ["facebook", "instagram", "twitter", "linkedin", "reddit", "whatsapp", "slack"],
+//   "gaming": ["steam", "epic games", "league of legends", "csgo", "game"],
+//   "productivity": ["notion", "todoist", "trello", "asana", "excel", "word", "powerpoint"],
+//   "communication": ["outlook", "gmail", "teams", "zoom", "google meet", "discord"],
+//   "shopping": ["amazon", "ebay", "trendyol", "n11"]
+// };
 
 const CLASSIFICATION_LABELS = [
   "coding", "design", "research", "social", "news", "entertainment", "communication", "shopping"
@@ -434,14 +407,16 @@ export const analyzeBehavioralTrends = onRequest(async (request: Request, respon
     return;
   }
 
-  const { daily_totals, window } = request.body as BehavioralTrendsInput;
+  const { daily_totals } = request.body as BehavioralTrendsInput;
+  // window parameter available but not used in current implementation
 
   if (!daily_totals || !Array.isArray(daily_totals) || daily_totals.length === 0) {
     response.status(400).send("Invalid input: 'daily_totals' array is required and must not be empty.");
     return;
   }
 
-  const trendingCategories: TrendingCategory[] = [];
+  // Trending categories calculation (currently disabled, moved to service layer)
+  // const trendingCategories: TrendingCategory[] = [];
   const allCategories: Set<string> = new Set();
 
   for (const day of daily_totals) {
@@ -536,7 +511,8 @@ export const contextualCategorization = onRequest(async (request: Request, respo
     return;
   }
 
-  const { context, language } = request.body as ContextualCategorizationInput;
+  const { context } = request.body as ContextualCategorizationInput;
+  // language parameter available for future i18n support
 
   if (typeof context !== 'string' || context.trim() === '') {
     response.status(400).send("Invalid input: 'context' must be a non-empty string.");
