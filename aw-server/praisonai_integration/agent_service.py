@@ -5,6 +5,7 @@ import importlib
 import importlib.util
 import inspect
 from pathlib import Path
+from typing import Dict, List, Any, Optional, Callable
 
 # Langchain import for Google Generative AI
 try:
@@ -21,6 +22,30 @@ try:
 except ImportError:
     PRAISONAI_AVAILABLE = False
     logging.warning("praisonaiagents not found. Please install with 'pip install praisonaiagents'")
+
+# Import custom tools
+try:
+    from .tools import (
+        query_activity_data,
+        get_user_buckets,
+        get_focus_score,
+        get_productivity_metrics,
+        read_user_data,
+        write_user_data,
+        update_user_goals,
+        create_automation_rule,
+        send_notification,
+        send_ai_recommendation,
+        schedule_reminder,
+        generate_productivity_report,
+        analyze_behavior_patterns,
+        detect_anomalies,
+        predict_task_completion
+    )
+    CUSTOM_TOOLS_AVAILABLE = True
+except ImportError as e:
+    CUSTOM_TOOLS_AVAILABLE = False
+    logging.warning(f"Custom tools not available: {e}")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO').upper(), format='%(asctime)s - %(levelname)s - %(message)s')
@@ -80,53 +105,114 @@ class AgentsGenerator:
     def _is_function_or_decorated(self, obj):
         return inspect.isfunction(obj) or hasattr(obj, '__call__')
 
-    def load_tools(self, tools_config: list):
+    def get_builtin_tools(self) -> Dict[str, Callable]:
+        """
+        Returns a dictionary of built-in custom tools for PeakActivity agents.
+        """
+        if not CUSTOM_TOOLS_AVAILABLE:
+            self.logger.warning("Custom tools are not available. Agents will have limited capabilities.")
+            return {}
+
+        return {
+            # ActivityWatch tools
+            "query_activity_data": query_activity_data,
+            "get_user_buckets": get_user_buckets,
+            "get_focus_score": get_focus_score,
+            "get_productivity_metrics": get_productivity_metrics,
+
+            # Firestore tools
+            "read_user_data": read_user_data,
+            "write_user_data": write_user_data,
+            "update_user_goals": update_user_goals,
+            "create_automation_rule": create_automation_rule,
+
+            # Notification tools
+            "send_notification": send_notification,
+            "send_ai_recommendation": send_ai_recommendation,
+            "schedule_reminder": schedule_reminder,
+
+            # Analytics tools
+            "generate_productivity_report": generate_productivity_report,
+            "analyze_behavior_patterns": analyze_behavior_patterns,
+            "detect_anomalies": detect_anomalies,
+            "predict_task_completion": predict_task_completion
+        }
+
+    def load_tools(self, tools_config: list, user_id: Optional[str] = None):
         """
         Loads tools based on the provided configuration.
-        This simplified version expects tools to be directly importable or within a specified path.
+        Now supports built-in PeakActivity tools and custom file-based tools.
+
+        Args:
+            tools_config: List of tool configurations
+            user_id: User ID for context-aware tools
         """
         loaded_tools = []
+        builtin_tools = self.get_builtin_tools()
+
         for tool_entry in tools_config:
-            tool_name = tool_entry.get('name')
-            tool_path = tool_entry.get('path') # Assuming a path to a module/file if not a standard tool
-            
+            if isinstance(tool_entry, str):
+                # Simple string format: just tool name
+                tool_name = tool_entry
+                tool_path = None
+            elif isinstance(tool_entry, dict):
+                # Dictionary format with name and optional path
+                tool_name = tool_entry.get('name')
+                tool_path = tool_entry.get('path')
+            else:
+                self.logger.warning(f"Invalid tool configuration: {tool_entry}")
+                continue
+
+            # First, check if it's a built-in tool
+            if tool_name in builtin_tools:
+                tool_func = builtin_tools[tool_name]
+
+                # If user_id is provided, create a partial function with user_id pre-filled
+                if user_id and 'user_id' in inspect.signature(tool_func).parameters:
+                    from functools import partial
+                    tool_func = partial(tool_func, user_id=user_id)
+
+                loaded_tools.append(tool_func)
+                self.logger.info(f"Loaded built-in tool: {tool_name}")
+                continue
+
+            # If not built-in and has a path, try to load from file
             if tool_path:
                 try:
-                    # Attempt to load from a specific file path
                     spec = importlib.util.spec_from_file_location("custom_tool_module", tool_path)
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
+
                     for name, obj in inspect.getmembers(module, self._is_function_or_decorated):
                         if name == tool_name:
                             loaded_tools.append(obj)
+                            self.logger.info(f"Loaded custom tool '{tool_name}' from '{tool_path}'")
                             break
                 except Exception as e:
                     self.logger.warning(f"Error loading tool '{tool_name}' from '{tool_path}': {e}")
             else:
-                # Assume it's an inbuilt tool from praisonai_tools or similar structure
-                # For this simplified integration, we'll assume tools are handled by PraisonAIAgents internally
-                # Or, if we need specific tools, they should be explicitly passed
-                self.logger.info(f"Tool '{tool_name}' configured without a path. Assuming it's an inbuilt tool or will be handled by the agent framework.")
-                # In a full implementation, you'd dynamically import praisonai_tools or other tool modules
-                # For now, we rely on praisonaiagents to handle tool instantiation if needed.
+                self.logger.warning(f"Tool '{tool_name}' not found in built-in tools and no path provided")
+
         return loaded_tools
 
-    def generate_and_run_agents(self, topic: str):
+    def generate_and_run_agents(self, topic: str, user_id: Optional[str] = None):
         """
         Generates and runs agents and tasks using the PraisonAI framework.
 
         Parameters:
             topic (str): The topic or goal for the agents.
+            user_id (str, optional): User ID for context-aware tool execution.
         """
         agents_data = self.agent_config_data.get("agents", [])
         tasks_data = self.agent_config_data.get("tasks", [])
-        
+
         praison_agents = []
         for agent_config in agents_data:
-            model = PraisonAIModel(model_name="gemini-pro", api_key=self.api_key).get_model()
-            # Assuming 'tools' can be a list of tool functions or classes
-            agent_tools = self.load_tools(agent_config.get("tools", []))
-            
+            model = PraisonAIModel(model_name="gemini-1.5-flash-8b", api_key=self.api_key).get_model()
+
+            # Load tools with user_id context
+            agent_tools = self.load_tools(agent_config.get("tools", []), user_id=user_id)
+
             praison_agent = PraisonAgent(
                 llm=model,
                 name=agent_config.get("name"),
@@ -134,10 +220,11 @@ class AgentsGenerator:
                 goal=agent_config.get("goal"),
                 backstory=agent_config.get("backstory"),
                 tools=agent_tools,
+                verbose=True,
                 # Other potential parameters from agent_config if needed
             )
             praison_agents.append(praison_agent)
-            self.logger.info(f"PraisonAI Agent '{praison_agent.name}' created.")
+            self.logger.info(f"PraisonAI Agent '{praison_agent.name}' created with {len(agent_tools)} tools.")
 
         praison_tasks = []
         for task_config in tasks_data:
@@ -145,7 +232,7 @@ class AgentsGenerator:
             if not task_agent:
                 self.logger.error(f"Agent '{task_config.get('agent')}' not found for task '{task_config.get('name')}'")
                 continue
-            
+
             praison_task = PraisonTask(
                 agent=task_agent,
                 description=task_config.get("description"),
@@ -153,11 +240,16 @@ class AgentsGenerator:
                 # Other potential parameters from task_config if needed
             )
             praison_tasks.append(praison_task)
-            self.logger.info(f"PraisonAI Task '{praison_task.name}' created.")
+            self.logger.info(f"PraisonAI Task created for agent '{task_agent.name}'.")
 
         if not praison_agents or not praison_tasks:
             self.logger.error("No PraisonAI agents or tasks were successfully created. Aborting execution.")
-            return
+            return {
+                "success": False,
+                "error": "No agents or tasks created",
+                "agents_count": len(praison_agents),
+                "tasks_count": len(praison_tasks)
+            }
 
         try:
             praison_ai_agents_instance = PraisonAIAgents(
@@ -165,11 +257,24 @@ class AgentsGenerator:
                 tasks=praison_tasks,
                 process="sequential" # Or "hierarchical", depending on your needs
             )
-            
+
             self.logger.info(f"Starting PraisonAI Agents process for topic: {topic}")
             result = praison_ai_agents_instance.kickoff()
             self.logger.info(f"PraisonAI Agents process finished. Result: {result}")
-            return result
+
+            return {
+                "success": True,
+                "topic": topic,
+                "user_id": user_id,
+                "agents_count": len(praison_agents),
+                "tasks_count": len(praison_tasks),
+                "result": str(result)
+            }
         except Exception as e:
             self.logger.error(f"Error during PraisonAI Agents kickoff: {e}")
-            raise 
+            return {
+                "success": False,
+                "error": str(e),
+                "topic": topic,
+                "user_id": user_id
+            } 

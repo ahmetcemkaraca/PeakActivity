@@ -8,7 +8,8 @@ import { z } from 'zod';
 
 import apiRoutes from './api/routes'; // API rotalarını import et
 import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi import et
-import { generateAgent } from './api/agent-api'; // Yeni eklenen import
+import { generateAgent } from './api/agent-api'; // Agent generation API
+import { getAgentRun, listAgentRuns, getAgentRunStats, retryAgentRun, cleanupOldAgentRuns } from './api/agent-run-api'; // Agent run management API
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -106,7 +107,19 @@ export const callGenkitFlow = onCall(
 );
 
 // Mevcut dışa aktarımlar (API ile ilgili olanlar artık Express uygulaması tarafından yönetiliyor)
-export { onActivityCreated, generateAgent, scheduleAgentGeneration };
+export {
+  // Triggers
+  onActivityCreated,
+  scheduleAgentGeneration,
+
+  // Agent APIs
+  generateAgent,
+  getAgentRun,
+  listAgentRuns,
+  getAgentRunStats,
+  retryAgentRun,
+  cleanupOldAgentRuns
+};
 
 // GenKit instance'ını dışa aktar
 export { ai as genkitInstance };
