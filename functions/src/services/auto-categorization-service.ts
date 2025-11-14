@@ -1,12 +1,4 @@
-import { genkit } from 'genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
-
-const genkitApp = genkit({
-  plugins: [
-    googleAI(),
-  ],
-});
 
 interface ActivityEvent {
   app: string;
@@ -104,20 +96,17 @@ export class AutoCategorizationService {
    * @returns Etiketlenmiş etkinlikleri içeren bir çıktı nesnesi.
    */
   public async categorizeEvents(events: ActivityEvent[]): Promise<AutoCategorizationOutput> {
-    // GenKit akışını çağır
-    const result = await autoCategorizeFlow({ events });
+    // Call keyword-based categorization function
+    const result = await autoCategorizeFlow(events);
     return result;
   }
 }
 
-// GenKit otomatik kategorizasyon akışı
-export const autoCategorizeFlow = genkitApp.defineFlow(
-  {
-    name: 'autoCategorize',
-    inputSchema: z.object({ events: z.array(ActivityEventSchema) }),
-    outputSchema: AutoCategorizationOutputSchema,
-  },
-  async ({ events }: { events: ActivityEvent[] }) => {
+/**
+ * Automatic categorization using keyword-based classification
+ * GenKit AI features temporarily disabled for compatibility
+ */
+export async function autoCategorizeFlow(events: ActivityEvent[]): Promise<AutoCategorizationOutput> {
     const labels: LabelResult[] = [];
     // Artık servis örneğine gerek yok, doğrudan sabitlere erişilebilir
 
@@ -172,34 +161,26 @@ export const autoCategorizeFlow = genkitApp.defineFlow(
         confidence = 0;
       }
 
-      // Eğer mevcut mantıkla tatmin edici bir sonuç bulunamazsa veya AI'dan daha iyi bir tahmin isteniyorsa
-      // AI modelini kullan
-      if (confidence < 0.7 || assignedCategory === 'uncategorized') { // Güven eşiği ayarlanabilir
-        try {
-          const eventUrlHostname = event.url ? new URL(event.url).hostname : '';
-          const prompt = `Aşağıdaki etkinliği en uygun kategoriye ayırın. Mevcut kategoriler: ${TAXONOMY.join(', ')}. Etkinlik uygulaması: ${event.app}, başlık: ${event.title}, URL/Alan Adı: ${eventUrlHostname}. Sadece tek bir kategori adı döndürün.`;
-          const { text } = await genkitApp.generate({
-            model: googleAI.model('gemini-2.5-flash'),
-            prompt: prompt,
-            config: {
-              temperature: 0.2,
-            },
-          });
-
-          const aiCategory = text.trim().toLowerCase();
-          // AI tarafından döndürülen kategorinin TAXONOMY içinde olup olmadığını kontrol et
-          if (TAXONOMY.includes(aiCategory)) {
-            assignedCategory = aiCategory;
-            confidence = 0.8; // AI tahmini için daha yüksek güven atayabiliriz
-          } else {
-            // Eğer AI geçerli bir kategori döndürmezse, tekrar uncategorized'a dön veya varsayılan bir kategori ata
-            assignedCategory = 'uncategorized';
-            confidence = 0.5;
+      // AI-based categorization temporarily disabled (GenKit compatibility issue)
+      // Using keyword-based classification only
+      // For AI enhancement, use ai-analysis-api.ts with custom prompts
+      
+      if (confidence < 0.5 || assignedCategory === 'uncategorized') {
+        // Apply secondary heuristics for better categorization
+        const appLower = event.app.toLowerCase();
+        
+        // Browser apps -> check URL domain
+        if (appLower.includes('chrome') || appLower.includes('firefox') || appLower.includes('safari')) {
+          if (event.url) {
+            const urlLower = event.url.toLowerCase();
+            if (urlLower.includes('github') || urlLower.includes('stackoverflow')) {
+              assignedCategory = 'coding';
+              confidence = 0.6;
+            } else if (urlLower.includes('youtube') || urlLower.includes('netflix')) {
+              assignedCategory = 'entertainment';
+              confidence = 0.6;
+            }
           }
-        } catch (error) {
-          console.error("GenKit AI kategorizasyon sırasında hata oluştu:", error);
-          assignedCategory = 'uncategorized'; // Hata durumunda varsayılan
-          confidence = 0.3;
         }
       }
       
@@ -211,5 +192,4 @@ export const autoCategorizeFlow = genkitApp.defineFlow(
     }
 
     return { labels };
-  }
-); 
+} 

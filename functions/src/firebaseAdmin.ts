@@ -10,7 +10,8 @@ const auth = admin.auth();
 
 export { admin, db, auth };
 
-export const authenticate = (context: functions.https.CallableRequest) => {
+// Moved to middlewares/requireAuth.ts for v2 compatibility
+export const authenticate = (context: any) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       'unauthenticated',

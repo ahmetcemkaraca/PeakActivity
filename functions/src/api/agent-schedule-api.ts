@@ -253,11 +253,6 @@ export const processAgentSchedules = onSchedule(
 
       console.log('Agent schedules processed', result);
 
-      return {
-        success: true,
-        ...result
-      };
-
     } catch (error: any) {
       console.error('Failed to process agent schedules', error);
       throw error;

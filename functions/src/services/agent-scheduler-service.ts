@@ -68,7 +68,8 @@ export class AgentSchedulerService {
       description: request.description,
       agentConfig: {
         agentConfigYaml: request.agentConfigYaml,
-        topic: request.topic
+        topic: request.topic,
+        scheduledRun: true
       },
       schedule: request.schedule,
       enabled: request.enabled ?? true,
@@ -122,7 +123,8 @@ export class AgentSchedulerService {
     if (updates.agentConfigYaml || updates.topic) {
       updateData.agentConfig = {
         agentConfigYaml: updates.agentConfigYaml || currentSchedule.agentConfig.agentConfigYaml,
-        topic: updates.topic || currentSchedule.agentConfig.topic
+        topic: updates.topic || currentSchedule.agentConfig.topic,
+        scheduledRun: true
       };
     }
 
@@ -148,14 +150,14 @@ export class AgentSchedulerService {
   /**
    * Get a specific schedule
    */
-  async getSchedule(userId: string, scheduleId: string): Promise<AgentSchedule | null> {
+  async getSchedule(userId: string, scheduleId: string): Promise<(AgentSchedule & { id: string }) | null> {
     const doc = await this.db.doc(`users/${userId}/agent_schedules/${scheduleId}`).get();
 
     if (!doc.exists) {
       return null;
     }
 
-    return { ...doc.data(), id: doc.id } as AgentSchedule;
+    return { ...(doc.data() as AgentSchedule), id: doc.id };
   }
 
   /**
@@ -167,7 +169,7 @@ export class AgentSchedulerService {
       enabled?: boolean;
       limit?: number;
     } = {}
-  ): Promise<AgentSchedule[]> {
+  ): Promise<Array<AgentSchedule & { id: string }>> {
     let query = this.db
       .collection(`users/${userId}/agent_schedules`)
       .orderBy('createdAt', 'desc');
@@ -183,9 +185,9 @@ export class AgentSchedulerService {
     const snapshot = await query.get();
 
     return snapshot.docs.map(doc => ({
-      ...doc.data(),
+      ...(doc.data() as AgentSchedule),
       id: doc.id
-    } as AgentSchedule));
+    }));
   }
 
   /**
@@ -382,8 +384,10 @@ export class AgentSchedulerService {
    * Simplified implementation for common patterns
    */
   private parseNextCronTime(expression: string, from: Date): Timestamp {
-    const parts = expression.split(' ');
-    const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
+    // Parse cron expression parts (keeping for future expansion)
+    // Format: minute hour dayOfMonth month dayOfWeek
+    // const parts = expression.split(' ');
+    // const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
 
     const next = new Date(from);
     next.setSeconds(0);

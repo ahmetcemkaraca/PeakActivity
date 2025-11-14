@@ -1,7 +1,5 @@
 import { db } from "../firebaseAdmin";
-import { genkitInstance } from '../index';
 import { z } from 'zod'; // Zod'u import et
-import { googleAI } from '@genkit-ai/googleai'; // Google AI'yı import et
 
 interface DailyTotal {
   date: string;
@@ -76,8 +74,8 @@ export class AnomalyDetectionService {
    * @returns Tespit edilen anomalileri ve model istatistiklerini içeren bir AnomalyOutput nesnesi.
    */
   public async detectAnomalies(dailyTotals: DailyTotal[]): Promise<AnomalyOutput> {
-    // GenKit akışını çağır
-    const result = await detectAnomaliesFlow({ dailyTotals });
+    // Call statistical detection function
+    const result = await detectAnomaliesFlow(dailyTotals);
     return result;
   }
 
@@ -96,14 +94,11 @@ export class AnomalyDetectionService {
   }
 }
 
-// GenKit anomali tespiti akışı
-export const detectAnomaliesFlow = genkitInstance.defineFlow(
-  {
-    name: 'detectAnomalies',
-    inputSchema: z.object({ dailyTotals: z.array(DailyTotalSchema) }),
-    outputSchema: AnomalyOutputSchema,
-  },
-  async ({ dailyTotals }: { dailyTotals: DailyTotal[] }) => {
+/**
+ * Statistical anomaly detection function (GenKit-free implementation)
+ * Detects anomalies using Z-score statistical method
+ */
+export async function detectAnomaliesFlow(dailyTotals: DailyTotal[]): Promise<AnomalyOutput> {
     const totalSecondsValues = dailyTotals.map((d: DailyTotal) => d.total_seconds);
 
     if (totalSecondsValues.length < 5) {
@@ -158,31 +153,23 @@ export const detectAnomaliesFlow = genkitInstance.defineFlow(
 
     anomalies.sort((a, b) => (b.anomaly_score || 0) - (a.anomaly_score || 0));
 
-    // GenKit'in AI modelini kullanarak ek analiz veya açıklama alma (placeholder)
-    // Bu kısım, AI modelinin daha karmaşık anomali kalıplarını tanıması için kullanılabilir.
-    let aiExplanation = "Yapay zeka analizi bekleniyor...";
-    try {
-      const prompt = `Aşağıdaki günlük aktivite verilerini inceleyin ve herhangi bir anormallik olup olmadığını, nedenini ve potansiyel etkilerini açıklayın: ${JSON.stringify(dailyTotals)}. Anomali olarak kabul edilecek bir durum, normalden önemli ölçüde sapan bir aktivite süresi olacaktır.`;
-      const { text } = await genkitInstance.generate({
-        model: googleAI.model('gemini-2.5-flash'), // GenKit içinde tanımlanan modeli kullan
-        prompt: prompt,
-        config: {
-          temperature: 0.2, // Daha tutarlı sonuçlar için düşük sıcaklık
-        }
-      });
-      aiExplanation = text;
-    } catch (error) {
-      console.error("GenKit AI analizi sırasında hata oluştu:", error);
-      aiExplanation = "Yapay zeka analizi sırasında bir hata oluştu.";
+    // Statistical summary without AI (GenKit removed for compatibility)
+    const avgHours = (mean / 3600).toFixed(2);
+    const stdDevHours = (stdDev / 3600).toFixed(2);
+    
+    let explanation = `${anomalies.length} adet anomali tespit edildi. Ortalama: ${avgHours} saat, Standart sapma: ${stdDevHours} saat.`;
+    
+    if (anomalies.length > 0) {
+      explanation += ` En yüksek anomali skoru: ${anomalies[0].anomaly_score}`;
+    } else {
+      explanation += " Tüm aktiviteler normal aralıkta.";
     }
-
 
     return {
       anomalies: anomalies.slice(0, 10),
       baseline_mean: parseFloat(mean.toFixed(2)),
       baseline_stddev: parseFloat(stdDev.toFixed(2)),
-      explanation: anomalies.length > 0 ? "Belirlenen aktivite verilerinde anormal günler tespit edildi. " + aiExplanation : "Anormal aktivite verisi tespit edilmedi. " + aiExplanation,
-      model_version: "v2.0-genkit-statistical-hybrid"
+      explanation,
+      model_version: "v2.0-statistical"
     };
-  }
-); 
+} 
