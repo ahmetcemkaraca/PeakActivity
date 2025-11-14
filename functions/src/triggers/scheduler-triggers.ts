@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { httpsCallable } from 'firebase/functions';
 import * as admin from 'firebase-admin';
 import axios from 'axios';
 

@@ -4,7 +4,6 @@ import { scheduleAgentGeneration } from "./triggers/scheduler-triggers"; // Yeni
 import * as functions from "firebase-functions"; // 'firebase-functions' paketini import et
 import express from 'express'; // Express'i import et
 import { Request, Response } from 'express';
-import { z } from 'zod';
 
 import apiRoutes from './api/routes'; // API rotalarını import et
 import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi import et
@@ -48,8 +47,7 @@ import { mean, standardDeviation } from './services/utils/math-utils';
 // import { createProject, getProject, updateProject, getAllProjects, deleteProject } from './api/project-prediction-api';
 
 // Firebase Functions v2 imports
-import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
-import { defineSecret } from 'firebase-functions/params';
+import { onRequest } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { logger } from 'firebase-functions';
@@ -71,9 +69,6 @@ app.use(errorHandler);
 
 // Firebase Functions olarak Express uygulamasını dışa aktar
 export const api = functions.https.onRequest(app);
-
-// Firebase Secret olarak Google AI API Anahtarı tanımlanıyor
-const googleAIapiKey = defineSecret("GEMINI_API_KEY");
 
 // GenKit entegrasyonu - Şu anda direkt AI API kullanımı tercih edilmektedir
 // GenKit kullanımı için ai-analysis-api.ts bakınız
