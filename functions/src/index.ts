@@ -10,6 +10,7 @@ import apiRoutes from './api/routes'; // API rotalarını import et
 import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi import et
 import { generateAgent } from './api/agent-api'; // Agent generation API
 import { getAgentRun, listAgentRuns, getAgentRunStats, retryAgentRun, cleanupOldAgentRuns } from './api/agent-run-api'; // Agent run management API
+import { analyzeWithAI, getAIUsageStats } from './api/ai-analysis-api'; // Server-side AI analysis (fallback)
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -118,7 +119,11 @@ export {
   listAgentRuns,
   getAgentRunStats,
   retryAgentRun,
-  cleanupOldAgentRuns
+  cleanupOldAgentRuns,
+
+  // AI Analysis APIs (Server-side fallback)
+  analyzeWithAI,
+  getAIUsageStats
 };
 
 // GenKit instance'ını dışa aktar
