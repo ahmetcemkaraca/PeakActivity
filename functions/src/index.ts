@@ -11,6 +11,16 @@ import { errorHandler } from './middlewares/errorHandler'; // Hata işleyiciyi i
 import { generateAgent } from './api/agent-api'; // Agent generation API
 import { getAgentRun, listAgentRuns, getAgentRunStats, retryAgentRun, cleanupOldAgentRuns } from './api/agent-run-api'; // Agent run management API
 import { analyzeWithAI, getAIUsageStats } from './api/ai-analysis-api'; // Server-side AI analysis (fallback)
+import {
+  createAgentSchedule,
+  updateAgentSchedule,
+  deleteAgentSchedule,
+  getAgentSchedule,
+  listAgentSchedules,
+  getAgentScheduleStats,
+  triggerAgentSchedule,
+  processAgentSchedules
+} from './api/agent-schedule-api'; // Agent scheduling API
 
 // Mevcut API importları (bunlar artık routes.ts içinde kullanılacağı için doğrudan burada kullanılmayacak)
 // import { saveActivity } from "./api/activity-api";
@@ -123,7 +133,17 @@ export {
 
   // AI Analysis APIs (Server-side fallback)
   analyzeWithAI,
-  getAIUsageStats
+  getAIUsageStats,
+
+  // Agent Scheduling APIs
+  createAgentSchedule,
+  updateAgentSchedule,
+  deleteAgentSchedule,
+  getAgentSchedule,
+  listAgentSchedules,
+  getAgentScheduleStats,
+  triggerAgentSchedule,
+  processAgentSchedules
 };
 
 // GenKit instance'ını dışa aktar
