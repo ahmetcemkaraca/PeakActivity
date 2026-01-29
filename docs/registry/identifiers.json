@@ -1,0 +1,25 @@
+{
+  "modules": {
+    "python": {
+      "core": ["aw-core", "aw-client", "aw-datastore", "aw-query", "aw-transform"],
+      "watchers": ["aw-watcher-afk", "aw-watcher-window", "aw-watcher-input"],
+      "ui": ["aw-qt", "aw-webui"],
+      "server": ["aw-server", "aw-notify"]
+    },
+    "typescript": {
+      "firebase": ["firebase-admin", "firebase-functions"],
+      "frontend": ["react", "react-dom", "vue"],
+      "ai": ["@tensorflow/tfjs", "@genkit-ai/googleai"],
+      "other": ["chart.js", "date-fns"]
+    }
+  },
+  "exports": {
+    "typescript": ["api", "generateActivityInsight", "createAutomationRule", "detectAnomalies", "autoCategorize", "generateAIInsights", "saveActivity", "queryActivities"],
+    "python": ["Event", "Bucket", "Datastore", "ServerAPI"]
+  },
+  "variables": {
+    "python": ["EventType", "BucketType" from aw-core/constants.py],
+    "typescript": ["API_ERROR_CODES", "PerformanceMetrics"]
+  },
+  "config_keys": ["FIREBASE_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY", "TRELLO_API_KEY", "JIRA_API_TOKEN", "NODE_ENV", "DEBUG"]
+}

@@ -1,0 +1,52 @@
+{
+  "prompts": {
+    "anomaly_detection": {
+      "purpose": "Identify anomalies in daily activity totals",
+      "input": "JSON with daily_totals array",
+      "output": "JSON with anomalies, baseline_mean, baseline_stddev, Turkish explanation",
+      "algorithm": "Z-score calculation, |z| ≥ 2 threshold, top 10 sorted",
+      "system_prompt": "Act as a statistical watchdog. Follow the Detection Algorithm strictly and reply ONLY with the JSON schema in Output. Explanation must be in Turkish. No additional text."
+    },
+    "auto_categorization": {
+      "purpose": "Assign categories to events using heuristics and ML",
+      "input": "JSON with events array (app, title, url)",
+      "output": "JSON with labels array (index, category, confidence)",
+      "algorithm": "TF-IDF on title/url domain, boost by app mapping, softmax confidence, taxonomy: coding, design, research, social, gaming, productivity, communication",
+      "system_prompt": "You are a classification engine. Use the Labeling Algorithm and the following fixed taxonomy: `coding`, `design`, `research`, `social`, `gaming`, `productivity`, `communication`. Return ONLY the JSON described in Output."
+    },
+    "behavioral_trends": {
+      "purpose": "Detect trends and seasonality in daily totals",
+      "input": "JSON with daily_totals (date, categories), window",
+      "output": "JSON with trending_categories, seasonality, Turkish summary ≤280 chars",
+      "algorithm": "Linear regression slope per category (>+100 rising, <-100 falling), autocorrelation for seasonality, top 5 slopes",
+      "system_prompt": "You are an analytics engine that performs time-series trend detection per the algorithm above and returns ONLY the JSON described in the Output. Write the `summary` in Turkish, concise (≤280 chars)."
+    },
+    "community_rules": {
+      "purpose": "Match event to community rules",
+      "input": "JSON with event (app, title, url), community_rules array",
+      "output": "JSON with matched_rule, category, source (or null)",
+      "algorithm": "Iterate rules by popularity, glob/regex match, first match wins",
+      "system_prompt": "You are a rule-matching engine. Apply rules exactly as described; return ONLY the Output JSON. No extra commentary."
+    },
+    "contextual_categorization": {
+      "purpose": "Categorize context with zero-shot LLM",
+      "input": "JSON with context string, language",
+      "output": "JSON with category, confidence, English rationale ≤140 chars",
+      "algorithm": "Zero-shot classification with labels: coding, design, research, social, news, entertainment, communication, shopping; translate if needed",
+      "system_prompt": "You are a zero-shot classifier. Return ONLY the JSON in Output. Rationale must be ≤140 characters and in English."
+    },
+    "focus_quality_score": {
+      "purpose": "Calculate Focus Quality Score from events",
+      "input": "JSON with events array, user_tz",
+      "output": "JSON with session_scores array, daily_average, explanations",
+      "algorithm": "Base 100, -1 per switch after first, -0.5/min low input, -10 social, +5/-5 time bonuses, clamp 0-100",
+      "system_prompt": "You are a strict analytics engine that calculates Focus Quality Scores exactly as specified above. Respond ONLY with valid JSON that conforms to the Output schema. Do NOT include any other text. If input contains no qualifying sessions, return `null` for `session_scores` and `daily_average`."
+    }
+  },
+  "templates": {
+    "ai_service_layer": "cloud-functions/src/ai/ai-service.ts template with onCall for classifyActivity and generatePersonalizedInsights",
+    "tensorflow_edge": "desktop-app/src/services/ai/tensorflow-service.ts with model loading and fallback",
+    "rust_backend_ai": "desktop-app/src-tauri/src/ai/mod.rs with ActivityPattern struct"
+  },
+  "libraries": ["@tensorflow/tfjs", "@genkit-ai/googleai", "Vertex AI", "Gemini/OpenAI"]
+}

@@ -1,6 +1,6 @@
 /**
  * Advanced Frontend Caching Strategies (146-150)
- *
+ * 
  * Intelligent caching system ile memory management, cache invalidation,
  * ve multi-level cache hierarchy implementation.
  */
@@ -47,9 +47,9 @@ export class AdvancedCacheManager {
     evictions: 0,
     totalSize: 0,
     entryCount: 0,
-    hitRate: 0,
+    hitRate: 0
   });
-
+  
   private config: CacheConfig;
   private cleanupInterval: number | null = null;
 
@@ -60,7 +60,7 @@ export class AdvancedCacheManager {
       maxEntries: 1000,
       enableLRU: true,
       enableStats: true,
-      ...config,
+      ...config
     };
 
     this.startCleanupScheduler();
@@ -107,7 +107,7 @@ export class AdvancedCacheManager {
   async set<T>(key: string, value: T, ttl?: number, tags: string[] = []): Promise<void> {
     const actualTTL = ttl || this.config.defaultTTL;
     const size = this.estimateSize(value);
-
+    
     // Check cache size limits
     if (this.stats.totalSize + size > this.config.maxSize) {
       await this.evictLRU(size);
@@ -120,7 +120,7 @@ export class AdvancedCacheManager {
       accessCount: 1,
       lastAccessed: Date.now(),
       size,
-      tags,
+      tags
     };
 
     // Level 1: Memory cache
@@ -128,14 +128,12 @@ export class AdvancedCacheManager {
     this.updateStats(size);
 
     // Level 2: SessionStorage (for smaller items)
-    if (size < 1024 * 100) {
-      // 100KB threshold
+    if (size < 1024 * 100) { // 100KB threshold
       await this.setToSessionStorage(key, value);
     }
 
     // Level 3: IndexedDB (for larger items or persistent cache)
-    if (tags.includes('persistent') || size > 1024 * 10) {
-      // 10KB threshold
+    if (tags.includes('persistent') || size > 1024 * 10) { // 10KB threshold
       await this.setToIndexedDB(key, value, actualTTL);
     }
   }
@@ -145,7 +143,7 @@ export class AdvancedCacheManager {
    */
   async invalidateByTag(tag: string): Promise<void> {
     const keysToInvalidate: string[] = [];
-
+    
     // Find entries with matching tag
     for (const [key, entry] of this.memoryCache.entries()) {
       if (entry.tags.includes(tag)) {
@@ -204,7 +202,7 @@ export class AdvancedCacheManager {
 
     for (const chunk of chunks) {
       await Promise.all(
-        chunk.map(async key => {
+        chunk.map(async (key) => {
           try {
             const value = await fetcher(key);
             await this.set(key, value, this.config.defaultTTL, ['warmed']);
@@ -251,9 +249,8 @@ export class AdvancedCacheManager {
   }
 
   private async evictLRU(requiredSize: number): Promise<void> {
-    const entries = Array.from(this.memoryCache.entries()).sort(
-      ([, a], [, b]) => a.lastAccessed - b.lastAccessed
-    );
+    const entries = Array.from(this.memoryCache.entries())
+      .sort(([, a], [, b]) => a.lastAccessed - b.lastAccessed);
 
     let freedSize = 0;
     for (const [key, entry] of entries) {
@@ -307,7 +304,7 @@ export class AdvancedCacheManager {
       const item = {
         value,
         timestamp: Date.now(),
-        ttl: this.config.defaultTTL,
+        ttl: this.config.defaultTTL
       };
       sessionStorage.setItem(`aw_cache_${key}`, JSON.stringify(item));
     } catch (error) {
@@ -346,7 +343,7 @@ export class AdvancedCacheManager {
 
   private cleanupExpiredEntries(): void {
     const expiredKeys: string[] = [];
-
+    
     for (const [key, entry] of this.memoryCache.entries()) {
       if (this.isExpired(entry)) {
         expiredKeys.push(key);
@@ -377,7 +374,7 @@ export function useAdvancedCache() {
   const stats = computed(() => cacheManager.getStats());
 
   const cachedFetch = async <T>(
-    key: string,
+    key: string, 
     fetcher: () => Promise<T>,
     options: { ttl?: number; tags?: string[] } = {}
   ): Promise<T> => {
@@ -404,7 +401,7 @@ export function useAdvancedCache() {
     clearCache,
     warmCache,
     stats,
-    cacheManager,
+    cacheManager
   };
 }
 
@@ -433,13 +430,12 @@ export class CachePreloader {
     cacheManager: AdvancedCacheManager
   ): Promise<void> {
     if (this.isPreloading) return;
-
+    
     this.isPreloading = true;
 
     // Sort by priority (access frequency)
-    const sortedKeys = Array.from(this.preloadQueue).sort(
-      (a, b) => (this.preloadHistory.get(b) || 0) - (this.preloadHistory.get(a) || 0)
-    );
+    const sortedKeys = Array.from(this.preloadQueue)
+      .sort((a, b) => (this.preloadHistory.get(b) || 0) - (this.preloadHistory.get(a) || 0));
 
     for (const key of sortedKeys) {
       try {
@@ -449,11 +445,12 @@ export class CachePreloader {
           const value = await fetcher(key);
           await cacheManager.set(key, value, undefined, ['preloaded']);
         }
-
+        
         this.preloadQueue.delete(key);
-
+        
         // Throttle preloading to avoid overwhelming the system
         await new Promise(resolve => setTimeout(resolve, 100));
+        
       } catch (error) {
         console.warn(`Preload failed for ${key}:`, error);
       }

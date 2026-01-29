@@ -1,6 +1,6 @@
 /**
  * Services Barrel Export
- *
+ * 
  * Bu dosya tüm service modüllerini merkezi bir noktadan export eder.
  * Service layer organization için barrel exports kullanılır.
  */
@@ -30,21 +30,21 @@ export const serviceUtils = {
     try {
       // Check basic API connectivity
       const apiHealthy = true; // TODO: Implement actual health check
-
+      
       // Check activity service
       const activityHealthy = true; // TODO: Implement actual health check
-
+      
       return {
         api: apiHealthy,
         activity: activityHealthy,
-        overall: apiHealthy && activityHealthy,
+        overall: apiHealthy && activityHealthy
       };
     } catch (error) {
       console.error('Service health check failed:', error);
       return {
         api: false,
         activity: false,
-        overall: false,
+        overall: false
       };
     }
   },
@@ -63,7 +63,7 @@ export const serviceUtils = {
     activity: ReturnType<typeof activityService.getCacheStats>;
   } {
     return {
-      activity: activityService.getCacheStats(),
+      activity: activityService.getCacheStats()
     };
-  },
+  }
 };

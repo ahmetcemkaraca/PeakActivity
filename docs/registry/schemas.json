@@ -1,0 +1,117 @@
+{
+  "schemas": {
+    "typescript": {
+      "ActivityEvent": {
+        "description": "Activity event model",
+        "properties": {
+          "id": { "type": "string" },
+          "timestamp": { "type": "number" },
+          "duration": { "type": "number" },
+          "data": { "type": "object" },
+          "bucket_id": { "type": "string" },
+          "device_id": { "type": "string" },
+          "type": { "type": "string" },
+          "date_key": { "type": "string" },
+          "hour_key": { "type": "string" },
+          "created_at": { "type": "timestamp" }
+        }
+      },
+      "Goal": {
+        "description": "User goal model",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "type": { "type": "string" },
+          "target": { "type": "object" },
+          "progress": { "type": "object" }
+        }
+      },
+      "Insight": {
+        "description": "AI insight model",
+        "properties": {
+          "id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "insights": { "type": "object" },
+          "recommendations": { "type": "array" },
+          "createdAt": { "type": "timestamp" }
+        }
+      },
+      "AutomationRule": {
+        "description": "Automation rule model",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "trigger": { "type": "object" },
+          "action": { "type": "object" },
+          "cooldownSeconds": { "type": "number" }
+        }
+      },
+      "FocusMode": {
+        "description": "Focus mode model",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "configuration": { "type": "object" }
+        }
+      },
+      "UserDocument": {
+        "description": "User profile model",
+        "properties": {
+          "uid": { "type": "string" },
+          "email": { "type": "string" },
+          "subscription": { "type": "object" },
+          "notificationSettings": { "type": "object" },
+          "privacySettings": { "type": "object" },
+          "appSettings": { "type": "object" },
+          "stats": { "type": "object" }
+        }
+      },
+      "Bucket": {
+        "description": "ActivityWatch bucket model",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "client": { "type": "string" },
+          "hostname": { "type": "string" },
+          "created": { "type": "timestamp" }
+        }
+      }
+    },
+    "python": {
+      "Event": {
+        "description": "ActivityWatch event model",
+        "properties": {
+          "id": { "type": "optional" },
+          "timestamp": { "type": "timestamp" },
+          "duration": { "type": "timedelta" },
+          "data": { "type": "dict" }
+        }
+      },
+      "Bucket": {
+        "description": "ActivityWatch bucket model",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "client": { "type": "string" },
+          "hostname": { "type": "string" },
+          "created": { "type": "timestamp" }
+        }
+      }
+    },
+    "database": {
+      "firestore_collections": {
+        "users": "User profiles and settings",
+        "activities": "Activity events",
+        "goals": "User goals",
+        "insights": "AI-generated insights",
+        "automation_rules": "Automation rules",
+        "buckets": "ActivityWatch buckets",
+        "events": "Activity events in buckets"
+      },
+      "migrations": "Handled by scripts/migrate.py for schema changes"
+    }
+  }
+}

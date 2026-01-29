@@ -1,0 +1,1067 @@
+{
+  "endpoints": [
+    {
+      "name": "createAutomationRule",
+      "method": "callable",
+      "path": "createAutomationRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleName": "string",
+        "conditions": "object",
+        "actions": "object"
+      },
+      "output_schema": {
+        "ruleId": "string",
+        "message": "string"
+      },
+      "description": "Create a new automation rule"
+    },
+    {
+      "name": "getAutomationRule",
+      "method": "callable",
+      "path": "getAutomationRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleId": "string"
+      },
+      "output_schema": {
+        "rule": "object"
+      },
+      "description": "Get automation rule by ID"
+    },
+    {
+      "name": "getAllAutomationRules",
+      "method": "callable",
+      "path": "getAllAutomationRules",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "rules": "array"
+      },
+      "description": "Get all automation rules for user"
+    },
+    {
+      "name": "updateAutomationRule",
+      "method": "callable",
+      "path": "updateAutomationRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedRule": "object"
+      },
+      "description": "Update an automation rule"
+    },
+    {
+      "name": "deleteAutomationRule",
+      "method": "callable",
+      "path": "deleteAutomationRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete an automation rule"
+    },
+    {
+      "name": "createAutomaticCalendarEvents",
+      "method": "callable",
+      "path": "createAutomaticCalendarEvents",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "events": "array"
+      },
+      "output_schema": {
+        "createdEvents": "array"
+      },
+      "description": "Create automatic calendar events"
+    },
+    {
+      "name": "autoCategorize",
+      "method": "callable",
+      "path": "autoCategorize",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "events": "array"
+      },
+      "output_schema": {
+        "labels": "array"
+      },
+      "description": "Auto categorize events"
+    },
+    {
+      "name": "detectAnomalies",
+      "method": "callable",
+      "path": "detectAnomalies",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "dailyTotals": "array"
+      },
+      "output_schema": {
+        "anomalies": "array",
+        "baseline_mean": "number",
+        "baseline_stddev": "number",
+        "explanation": "string"
+      },
+      "description": "Detect anomalies in daily totals"
+    },
+    {
+      "name": "getAnomalyAlerts",
+      "method": "callable",
+      "path": "getAnomalyAlerts",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "alerts": "array"
+      },
+      "description": "Get anomaly alerts"
+    },
+    {
+      "name": "sendAIRecommendationNotification",
+      "method": "callable",
+      "path": "sendAIRecommendationNotification",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "recommendation": "object"
+      },
+      "output_schema": {
+        "sent": "boolean"
+      },
+      "description": "Send AI recommendation notification"
+    },
+    {
+      "name": "generateAIInsights",
+      "method": "callable",
+      "path": "generateAIInsights",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "timeRange": "string",
+        "categories": "array"
+      },
+      "output_schema": {
+        "insights": "array"
+      },
+      "description": "Generate AI insights"
+    },
+    {
+      "name": "generateAgent",
+      "method": "callable",
+      "path": "generateAgent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "agent_config_data": "string"
+      },
+      "output_schema": {
+        "agent": "object"
+      },
+      "description": "Generate PraisonAI agent"
+    },
+    {
+      "name": "queryActivities",
+      "method": "callable",
+      "path": "queryActivities",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "keywords": "string",
+        "startDate": "number",
+        "endDate": "number",
+        "categories": "array",
+        "appNames": "array",
+        "minDuration": "number",
+        "maxDuration": "number",
+        "limit": "number",
+        "offset": "number",
+        "sortBy": "string",
+        "sortOrder": "string"
+      },
+      "output_schema": {
+        "events": "array",
+        "total": "number"
+      },
+      "description": "Query activities with filters"
+    },
+    {
+      "name": "saveActivity",
+      "method": "callable",
+      "path": "saveActivity",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "activityData": "object"
+      },
+      "output_schema": {
+        "saved": "boolean"
+      },
+      "description": "Save activity event"
+    },
+    {
+      "name": "trelloJiraWebhookHandler",
+      "method": "http",
+      "path": "/trello-jira-webhook",
+      "version": "v1",
+      "auth": "none",
+      "input_schema": {
+        "payload": "object"
+      },
+      "output_schema": {
+        "status": "string"
+      },
+      "description": "Handle Trello/Jira webhook"
+    },
+    {
+      "name": "getTrelloTaskStatus",
+      "method": "callable",
+      "path": "getTrelloTaskStatus",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "boardId": "string",
+        "cardId": "string"
+      },
+      "output_schema": {
+        "status": "object"
+      },
+      "description": "Get Trello task status"
+    },
+    {
+      "name": "getJiraTaskStatus",
+      "method": "callable",
+      "path": "getJiraTaskStatus",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectKey": "string",
+        "issueKey": "string"
+      },
+      "output_schema": {
+        "status": "object"
+      },
+      "description": "Get Jira task status"
+    },
+    {
+      "name": "updateTrelloTaskStatus",
+      "method": "callable",
+      "path": "updateTrelloTaskStatus",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "boardId": "string",
+        "cardId": "string",
+        "status": "string"
+      },
+      "output_schema": {
+        "updated": "boolean"
+      },
+      "description": "Update Trello task status"
+    },
+    {
+      "name": "updateJiraTaskStatus",
+      "method": "callable",
+      "path": "updateJiraTaskStatus",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectKey": "string",
+        "issueKey": "string",
+        "status": "string"
+      },
+      "output_schema": {
+        "updated": "boolean"
+      },
+      "description": "Update Jira task status"
+    },
+    {
+      "name": "getTrelloProjectProgress",
+      "method": "callable",
+      "path": "getTrelloProjectProgress",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "boardId": "string"
+      },
+      "output_schema": {
+        "progress": "object"
+      },
+      "description": "Get Trello project progress"
+    },
+    {
+      "name": "getJiraProjectProgress",
+      "method": "callable",
+      "path": "getJiraProjectProgress",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectKey": "string"
+      },
+      "output_schema": {
+        "progress": "object"
+      },
+      "description": "Get Jira project progress"
+    },
+    {
+      "name": "predictTaskCompletion",
+      "method": "callable",
+      "path": "predictTaskCompletion",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "taskData": "object"
+      },
+      "output_schema": {
+        "prediction": "object"
+      },
+      "description": "Predict task completion"
+    },
+    {
+      "name": "createReport",
+      "method": "callable",
+      "path": "createReport",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "name": "string",
+        "description": "string",
+        "type": "string",
+        "configuration": "object"
+      },
+      "output_schema": {
+        "reportId": "string"
+      },
+      "description": "Create a report"
+    },
+    {
+      "name": "getReport",
+      "method": "callable",
+      "path": "getReport",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "reportId": "string"
+      },
+      "output_schema": {
+        "report": "object"
+      },
+      "description": "Get a report"
+    },
+    {
+      "name": "updateReport",
+      "method": "callable",
+      "path": "updateReport",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "reportId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedReport": "object"
+      },
+      "description": "Update a report"
+    },
+    {
+      "name": "deleteReport",
+      "method": "callable",
+      "path": "deleteReport",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "reportId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a report"
+    },
+    {
+      "name": "listReports",
+      "method": "callable",
+      "path": "listReports",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "reports": "array"
+      },
+      "description": "List reports"
+    },
+    {
+      "name": "generateReportData",
+      "method": "callable",
+      "path": "generateReportData",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "reportId": "string"
+      },
+      "output_schema": {
+        "data": "object"
+      },
+      "description": "Generate report data"
+    },
+    {
+      "name": "createProject",
+      "method": "callable",
+      "path": "createProject",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "title": "string",
+        "description": "string"
+      },
+      "output_schema": {
+        "projectId": "string"
+      },
+      "description": "Create a project"
+    },
+    {
+      "name": "getProject",
+      "method": "callable",
+      "path": "getProject",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectId": "string"
+      },
+      "output_schema": {
+        "project": "object"
+      },
+      "description": "Get a project"
+    },
+    {
+      "name": "updateProject",
+      "method": "callable",
+      "path": "updateProject",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedProject": "object"
+      },
+      "description": "Update a project"
+    },
+    {
+      "name": "getAllProjects",
+      "method": "callable",
+      "path": "getAllProjects",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "projects": "array"
+      },
+      "description": "Get all projects"
+    },
+    {
+      "name": "deleteProject",
+      "method": "callable",
+      "path": "deleteProject",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a project"
+    },
+    {
+      "name": "predictProjectCompletion",
+      "method": "callable",
+      "path": "predictProjectCompletion",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "projectId": "string"
+      },
+      "output_schema": {
+        "prediction": "object"
+      },
+      "description": "Predict project completion"
+    },
+    {
+      "name": "createNotification",
+      "method": "callable",
+      "path": "createNotification",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "title": "string",
+        "message": "string",
+        "type": "string"
+      },
+      "output_schema": {
+        "notificationId": "string"
+      },
+      "description": "Create a notification"
+    },
+    {
+      "name": "getNotification",
+      "method": "callable",
+      "path": "getNotification",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "notificationId": "string"
+      },
+      "output_schema": {
+        "notification": "object"
+      },
+      "description": "Get a notification"
+    },
+    {
+      "name": "updateNotification",
+      "method": "callable",
+      "path": "updateNotification",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "notificationId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedNotification": "object"
+      },
+      "description": "Update a notification"
+    },
+    {
+      "name": "deleteNotification",
+      "method": "callable",
+      "path": "deleteNotification",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "notificationId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a notification"
+    },
+    {
+      "name": "listNotifications",
+      "method": "callable",
+      "path": "listNotifications",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "notifications": "array"
+      },
+      "description": "List notifications"
+    },
+    {
+      "name": "prepareMLTrainingData",
+      "method": "callable",
+      "path": "prepareMLTrainingData",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "data": "array"
+      },
+      "output_schema": {
+        "preparedData": "object"
+      },
+      "description": "Prepare ML training data"
+    },
+    {
+      "name": "generateInsight",
+      "method": "callable",
+      "path": "generateInsight",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "timeRange": "string",
+        "analysisType": "string"
+      },
+      "output_schema": {
+        "insights": "array"
+      },
+      "description": "Generate insight"
+    },
+    {
+      "name": "listInsights",
+      "method": "callable",
+      "path": "listInsights",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "insights": "array"
+      },
+      "description": "List insights"
+    },
+    {
+      "name": "getInsight",
+      "method": "callable",
+      "path": "getInsight",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "insightId": "string"
+      },
+      "output_schema": {
+        "insight": "object"
+      },
+      "description": "Get insight"
+    },
+    {
+      "name": "deleteInsight",
+      "method": "callable",
+      "path": "deleteInsight",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "insightId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete insight"
+    },
+    {
+      "name": "getGoogleCalendarEvents",
+      "method": "callable",
+      "path": "getGoogleCalendarEvents",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "timeMin": "string",
+        "timeMax": "string",
+        "calendarId": "string"
+      },
+      "output_schema": {
+        "events": "array"
+      },
+      "description": "Get Google Calendar events"
+    },
+    {
+      "name": "createGoogleCalendarEvent",
+      "method": "callable",
+      "path": "createGoogleCalendarEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "event": "object",
+        "calendarId": "string"
+      },
+      "output_schema": {
+        "event": "object"
+      },
+      "description": "Create Google Calendar event"
+    },
+    {
+      "name": "updateGoogleCalendarEvent",
+      "method": "callable",
+      "path": "updateGoogleCalendarEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "eventId": "string",
+        "event": "object",
+        "calendarId": "string"
+      },
+      "output_schema": {
+        "event": "object"
+      },
+      "description": "Update Google Calendar event"
+    },
+    {
+      "name": "deleteGoogleCalendarEvent",
+      "method": "callable",
+      "path": "deleteGoogleCalendarEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "eventId": "string",
+        "calendarId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete Google Calendar event"
+    },
+    {
+      "name": "listGoogleCalendars",
+      "method": "callable",
+      "path": "listGoogleCalendars",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "calendars": "array"
+      },
+      "description": "List Google Calendars"
+    },
+    {
+      "name": "createGoal",
+      "method": "callable",
+      "path": "createGoal",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "name": "string",
+        "description": "string",
+        "targetValue": "number",
+        "currentValue": "number",
+        "startDate": "string",
+        "endDate": "string",
+        "category": "string"
+      },
+      "output_schema": {
+        "goal": "object"
+      },
+      "description": "Create a goal"
+    },
+    {
+      "name": "getGoal",
+      "method": "callable",
+      "path": "getGoal",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "goalId": "string"
+      },
+      "output_schema": {
+        "goal": "object"
+      },
+      "description": "Get a goal"
+    },
+    {
+      "name": "updateGoal",
+      "method": "callable",
+      "path": "updateGoal",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "goalId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "goal": "object"
+      },
+      "description": "Update a goal"
+    },
+    {
+      "name": "deleteGoal",
+      "method": "callable",
+      "path": "deleteGoal",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "goalId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a goal"
+    },
+    {
+      "name": "listGoals",
+      "method": "callable",
+      "path": "listGoals",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "goals": "array"
+      },
+      "description": "List goals"
+    },
+    {
+      "name": "calculateFocusQualityScore",
+      "method": "callable",
+      "path": "calculateFocusQualityScore",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "events": "array",
+        "user_tz": "string"
+      },
+      "output_schema": {
+        "session_scores": "array",
+        "daily_average": "number",
+        "explanations": "string"
+      },
+      "description": "Calculate focus quality score"
+    },
+    {
+      "name": "createFocusMode",
+      "method": "callable",
+      "path": "createFocusMode",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "name": "string",
+        "description": "string",
+        "configuration": "object"
+      },
+      "output_schema": {
+        "focusModeId": "string"
+      },
+      "description": "Create a focus mode"
+    },
+    {
+      "name": "getFocusMode",
+      "method": "callable",
+      "path": "getFocusMode",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "focusModeId": "string"
+      },
+      "output_schema": {
+        "focusMode": "object"
+      },
+      "description": "Get a focus mode"
+    },
+    {
+      "name": "updateFocusMode",
+      "method": "callable",
+      "path": "updateFocusMode",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "focusModeId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedFocusMode": "object"
+      },
+      "description": "Update a focus mode"
+    },
+    {
+      "name": "deleteFocusMode",
+      "method": "callable",
+      "path": "deleteFocusMode",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "focusModeId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a focus mode"
+    },
+    {
+      "name": "listFocusModes",
+      "method": "callable",
+      "path": "listFocusModes",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "focusModes": "array"
+      },
+      "description": "List focus modes"
+    },
+    {
+      "name": "setActiveFocusMode",
+      "method": "callable",
+      "path": "setActiveFocusMode",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "focusModeId": "string"
+      },
+      "output_schema": {
+        "active": "boolean"
+      },
+      "description": "Set active focus mode"
+    },
+    {
+      "name": "createCustomEvent",
+      "method": "callable",
+      "path": "createCustomEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "name": "string",
+        "description": "string",
+        "type": "string",
+        "details": "object"
+      },
+      "output_schema": {
+        "eventId": "string"
+      },
+      "description": "Create a custom event"
+    },
+    {
+      "name": "getCustomEvent",
+      "method": "callable",
+      "path": "getCustomEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "eventId": "string"
+      },
+      "output_schema": {
+        "event": "object"
+      },
+      "description": "Get a custom event"
+    },
+    {
+      "name": "updateCustomEvent",
+      "method": "callable",
+      "path": "updateCustomEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "eventId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedEvent": "object"
+      },
+      "description": "Update a custom event"
+    },
+    {
+      "name": "deleteCustomEvent",
+      "method": "callable",
+      "path": "deleteCustomEvent",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "eventId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete a custom event"
+    },
+    {
+      "name": "listCustomEvents",
+      "method": "callable",
+      "path": "listCustomEvents",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "events": "array"
+      },
+      "description": "List custom events"
+    },
+    {
+      "name": "categorizeContext",
+      "method": "callable",
+      "path": "categorizeContext",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "textContext": "string"
+      },
+      "output_schema": {
+        "category": "string",
+        "confidence": "number"
+      },
+      "description": "Categorize by context"
+    },
+    {
+      "name": "getCustomContextualRules",
+      "method": "callable",
+      "path": "getCustomContextualRules",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {},
+      "output_schema": {
+        "rules": "array"
+      },
+      "description": "Get custom contextual rules"
+    },
+    {
+      "name": "createCustomContextualRule",
+      "method": "callable",
+      "path": "createCustomContextualRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "rule": "object"
+      },
+      "output_schema": {
+        "ruleId": "string"
+      },
+      "description": "Create custom contextual rule"
+    },
+    {
+      "name": "updateCustomContextualRule",
+      "method": "callable",
+      "path": "updateCustomContextualRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleId": "string",
+        "updates": "object"
+      },
+      "output_schema": {
+        "updatedRule": "object"
+      },
+      "description": "Update custom contextual rule"
+    },
+    {
+      "name": "deleteCustomContextualRule",
+      "method": "callable",
+      "path": "deleteCustomContextualRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "ruleId": "string"
+      },
+      "output_schema": {
+        "message": "string"
+      },
+      "description": "Delete custom contextual rule"
+    },
+    {
+      "name": "matchCommunityRule",
+      "method": "callable",
+      "path": "matchCommunityRule",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "event": "object",
+        "community_rules": "array"
+      },
+      "output_schema": {
+        "matched_rule": "object",
+        "category": "string",
+        "source": "string"
+      },
+      "description": "Match community rule"
+    },
+    {
+      "name": "analyzeRealtimeBehavioralPattern",
+      "method": "callable",
+      "path": "analyzeRealtimeBehavioralPattern",
+      "version": "v1",
+      "auth": "firebase-auth",
+      "input_schema": {
+        "activityEvent": "object"
+      },
+      "output_schema": {
+        "pattern": "object"
+      },
+      "description": "Analyze realtime behavioral pattern"
+    }
+  ]
+}

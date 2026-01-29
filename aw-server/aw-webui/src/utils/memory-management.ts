@@ -1,6 +1,6 @@
 /**
  * Memory Management and Optimization (151-155)
- *
+ * 
  * Frontend memory monitoring, leak detection ve optimization strategies.
  * Large dataset processing ve memory-efficient algorithms.
  */
@@ -43,7 +43,7 @@ export class FrontendMemoryMonitor {
   private alerts: MemoryAlert[] = [];
   private monitoringInterval: number | null = null;
   private callbacks = new Map<string, (stats: MemoryStats) => void>();
-
+  
   // Memory thresholds
   private readonly MEMORY_WARNING_THRESHOLD = 0.7; // 70%
   private readonly MEMORY_CRITICAL_THRESHOLD = 0.9; // 90%
@@ -88,11 +88,12 @@ export class FrontendMemoryMonitor {
     const memory = performance.memory || {
       usedJSHeapSize: 0,
       totalJSHeapSize: 0,
-      jsHeapSizeLimit: 0,
+      jsHeapSizeLimit: 0
     };
 
-    const usedPercentage =
-      memory.jsHeapSizeLimit > 0 ? (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100 : 0;
+    const usedPercentage = memory.jsHeapSizeLimit > 0 
+      ? (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100 
+      : 0;
 
     const trend = this.calculateTrend();
 
@@ -102,7 +103,7 @@ export class FrontendMemoryMonitor {
       jsHeapSizeLimit: memory.jsHeapSizeLimit,
       usedPercentage,
       trend,
-      lastChecked: new Date(),
+      lastChecked: new Date()
     };
   }
 
@@ -156,7 +157,7 @@ export class FrontendMemoryMonitor {
         arrays.push(new Array(1000000).fill(0));
       }
       arrays.length = 0;
-
+      
       // Wait for next tick
       await nextTick();
     }
@@ -174,7 +175,7 @@ export class FrontendMemoryMonitor {
       return {
         isLikelyLeak: false,
         confidence: 0,
-        details: 'Insufficient data for leak detection',
+        details: 'Insufficient data for leak detection'
       };
     }
 
@@ -193,13 +194,13 @@ export class FrontendMemoryMonitor {
     return {
       isLikelyLeak,
       confidence,
-      details: `Memory ${increasing ? 'continuously increasing' : 'stable'}, growth: ${(growthRate * 100).toFixed(1)}%`,
+      details: `Memory ${increasing ? 'continuously increasing' : 'stable'}, growth: ${(growthRate * 100).toFixed(1)}%`
     };
   }
 
   private addMemoryStats(stats: MemoryStats): void {
     this.memoryHistory.push(stats);
-
+    
     if (this.memoryHistory.length > this.HISTORY_MAX_LENGTH) {
       this.memoryHistory.shift();
     }
@@ -228,7 +229,7 @@ export class FrontendMemoryMonitor {
         message: 'Critical memory usage detected',
         currentUsage: percentage,
         threshold: this.MEMORY_CRITICAL_THRESHOLD,
-        timestamp: new Date(),
+        timestamp: new Date()
       });
     } else if (percentage > this.MEMORY_WARNING_THRESHOLD) {
       this.addAlert({
@@ -236,14 +237,14 @@ export class FrontendMemoryMonitor {
         message: 'High memory usage detected',
         currentUsage: percentage,
         threshold: this.MEMORY_WARNING_THRESHOLD,
-        timestamp: new Date(),
+        timestamp: new Date()
       });
     }
   }
 
   private addAlert(alert: MemoryAlert): void {
     this.alerts.push(alert);
-
+    
     // Keep only last 50 alerts
     if (this.alerts.length > 50) {
       this.alerts.shift();
@@ -332,7 +333,7 @@ export class ObjectPool<T> {
       created: this.created,
       acquired: this.acquired,
       released: this.released,
-      hitRate: this.acquired > 0 ? ((this.acquired - this.created) / this.acquired) * 100 : 0,
+      hitRate: this.acquired > 0 ? ((this.acquired - this.created) / this.acquired) * 100 : 0
     };
   }
 
@@ -372,13 +373,13 @@ export class MemoryEfficientProcessor<T, R> {
     // Process chunks in batches to control memory usage
     for (let i = 0; i < data.length; i += this.chunkSize * this.maxConcurrent) {
       const batch: Promise<R[]>[] = [];
-
+      
       // Create batch of concurrent chunk processes
       for (let j = 0; j < this.maxConcurrent && i + j * this.chunkSize < data.length; j++) {
         const start = i + j * this.chunkSize;
         const end = Math.min(start + this.chunkSize, data.length);
         const chunk = data.slice(start, end);
-
+        
         batch.push(Promise.resolve(processor(chunk)));
       }
 
@@ -387,7 +388,7 @@ export class MemoryEfficientProcessor<T, R> {
       for (const chunkResult of batchResults) {
         results.push(...chunkResult);
         processedChunks++;
-
+        
         if (onProgress) {
           onProgress((processedChunks / totalChunks) * 100);
         }
@@ -408,16 +409,16 @@ export class MemoryEfficientProcessor<T, R> {
     processor: (item: TInput) => Promise<TOutput> | TOutput
   ): AsyncGenerator<TOutput> {
     const buffer: TInput[] = [];
-
+    
     for await (const item of dataStream) {
       buffer.push(item);
-
+      
       if (buffer.length >= this.chunkSize) {
         const chunk = buffer.splice(0, this.chunkSize);
         for (const chunkItem of chunk) {
           yield await Promise.resolve(processor(chunkItem));
         }
-
+        
         // Allow other tasks to run
         await this.waitNextTick();
       }
@@ -446,7 +447,7 @@ export function useMemoryManagement() {
   monitor.startMonitoring();
 
   // Register callback
-  monitor.onMemoryChange('component', stats => {
+  monitor.onMemoryChange('component', (stats) => {
     currentStats.value = stats;
     alerts.value = monitor.getAlerts();
   });
@@ -470,7 +471,7 @@ export function useMemoryManagement() {
     forceGC,
     detectLeaks,
     clearAlerts,
-    monitor,
+    monitor
   };
 }
 
@@ -508,7 +509,7 @@ export function useVirtualScrolling<T>(items: Ref<T[]>, itemHeight = 50) {
     visibleStart,
     visibleEnd,
     totalHeight,
-    updateVisibleRange,
+    updateVisibleRange
   };
 }
 
@@ -520,18 +521,16 @@ export const objectPools = {
   arrays: new ObjectPool<any[]>({
     maxSize: 50,
     createFn: () => [],
-    resetFn: arr => {
-      arr.length = 0;
-    },
+    resetFn: (arr) => { arr.length = 0; }
   }),
-
+  
   objects: new ObjectPool<Record<string, any>>({
     maxSize: 50,
     createFn: () => ({}),
-    resetFn: obj => {
+    resetFn: (obj) => {
       for (const key in obj) {
         delete obj[key];
       }
-    },
-  }),
+    }
+  })
 };
