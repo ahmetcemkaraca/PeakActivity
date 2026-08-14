@@ -11,7 +11,17 @@
 
 SHELL := /usr/bin/env bash
 
-SUBMODULES := aw-core aw-client aw-qt aw-server aw-server-rust aw-watcher-afk aw-watcher-window
+OS := $(shell uname -s)
+
+ifeq ($(TAURI_BUILD),true)
+	SUBMODULES := aw-core aw-client aw-server aw-server-rust aw-watcher-afk aw-watcher-window aw-tauri
+	# Include awatcher on Linux (Wayland-compatible window watcher)
+	ifeq ($(OS),Linux)
+		SUBMODULES := $(SUBMODULES) awatcher
+	endif
+else
+	SUBMODULES := aw-core aw-client aw-qt aw-server aw-server-rust aw-watcher-afk aw-watcher-window
+endif
 
 # Exclude aw-server-rust if SKIP_SERVER_RUST is true
 ifeq ($(SKIP_SERVER_RUST),true)
@@ -34,6 +44,19 @@ PACKAGEABLES := $(foreach dir,$(SUBMODULES),$(call has_target,$(dir),package))
 LINTABLES := $(foreach dir,$(SUBMODULES),$(call has_target,$(dir),lint))
 TYPECHECKABLES := $(foreach dir,$(SUBMODULES),$(call has_target,$(dir),typecheck))
 
+# When building with Tauri, aw-server-rust is built as aw-sync only (not full server),
+# so exclude it from the standard package target
+ifeq ($(TAURI_BUILD),true)
+	PACKAGEABLES := $(filter-out aw-server-rust aw-server, $(PACKAGEABLES))
+endif
+
+# Build mode: release vs debug
+ifeq ($(RELEASE), false)
+	targetdir := debug
+else
+	targetdir := release
+endif
+
 # The `build` target
 # ------------------
 #
@@ -44,17 +67,13 @@ build: aw-core/.git
 #	needed due to https://github.com/pypa/setuptools/issues/1963
 #	would ordinarily be specified in pyproject.toml, but is not respected due to https://github.com/pypa/setuptools/issues/1963
 	pip install 'setuptools>49.1.1'
-	@if [ "$(SKIP_SERVER_RUST)" = "false" ]; then \
-		if (which cargo); then \
-			echo 'Rust found!'; \
-		else \
-			echo 'ERROR: Rust not found, try running with SKIP_SERVER_RUST=true'; \
-			exit 1; \
-		fi \
-	fi
 	for module in $(SUBMODULES); do \
 		echo "Building $$module"; \
-		make --directory=$$module build SKIP_WEBUI=$(SKIP_WEBUI) || { echo "Error in $$module build"; exit 2; }; \
+		if [ "$$module" = "aw-server-rust" ] && [ "$(TAURI_BUILD)" = "true" ]; then \
+			make --directory=$$module aw-sync SKIP_WEBUI=$(SKIP_WEBUI) || { echo "Error in $$module aw-sync"; exit 2; }; \
+		else \
+			make --directory=$$module build SKIP_WEBUI=$(SKIP_WEBUI) || { echo "Error in $$module build"; exit 2; }; \
+		fi; \
 	done
 #   The below is needed due to: https://github.com/ActivityWatch/activitywatch/issues/173
 	make --directory=aw-client build
@@ -68,11 +87,13 @@ build: aw-core/.git
 #
 # Installs things like desktop/menu shortcuts.
 # Might in the future configure autostart on the system.
+ifneq ($(TAURI_BUILD),true)
 install:
 	make --directory=aw-qt install
 # Installation is already happening in the `make build` step currently.
 # We might want to change this.
 # We should also add some option to install as user (pip3 install --user)
+endif
 
 # Update
 # ------
@@ -110,8 +131,12 @@ uninstall:
 test:
 	@for module in $(TESTABLES); do \
 		echo "Running tests for $$module"; \
-		poetry run make -C $$module test || { echo "Error in $$module tests"; exit 2; }; \
-    done
+		if [ -f "$$module/pyproject.toml" ]; then \
+			(cd $$module && poetry run make test) || { echo "Error in $$module tests"; exit 2; }; \
+		else \
+			make -C $$module test || { echo "Error in $$module tests"; exit 2; }; \
+		fi; \
+	done
 
 test-integration:
 	# TODO: Move "integration tests" to aw-client
@@ -120,15 +145,15 @@ test-integration:
 	# aw-server-python
 	@echo "== Integration testing aw-server =="
 	@pytest ./scripts/tests/integration_tests.py ./aw-server/tests/ -v
-	# aw-server-rust
-	@echo "== Integration testing aw-server-rust =="
-	@export PATH=aw-server-rust/target/release:aw-server-rust/target/debug:${PATH}; \
-		 pytest ./scripts/tests/integration_tests.py ./aw-server/tests/ -v
 
 %/.git:
 	git submodule update --init --recursive
 
-ICON := "aw-qt/media/logo/logo.png"
+ifeq ($(TAURI_BUILD),true)
+	ICON := "aw-tauri/src-tauri/icons/icon.png"
+else
+	ICON := "aw-qt/media/logo/logo.png"
+endif
 
 aw-qt/media/logo/logo.icns:
 	mkdir -p build/MyIcon.iconset
@@ -147,12 +172,26 @@ aw-qt/media/logo/logo.icns:
 	mv build/MyIcon.icns aw-qt/media/logo/logo.icns
 
 dist/ActivityWatch.app: aw-qt/media/logo/logo.icns
+ifeq ($(TAURI_BUILD),true)
+	scripts/package/build_app_tauri.sh
+else
 	pyinstaller --clean --noconfirm aw.spec
+endif
 
 dist/ActivityWatch.dmg: dist/ActivityWatch.app
 	# NOTE: This does not codesign the dmg, that is done in the CI config
 	pip install dmgbuild
-	dmgbuild -s scripts/package/dmgbuild-settings.py -D app=dist/ActivityWatch.app "ActivityWatch" dist/ActivityWatch.dmg
+	@for attempt in 1 2 3; do \
+		rm -f dist/ActivityWatch.dmg; \
+		if dmgbuild -s scripts/package/dmgbuild-settings.py -D app=dist/ActivityWatch.app "ActivityWatch" dist/ActivityWatch.dmg; then \
+			exit 0; \
+		fi; \
+		if [ $$attempt -eq 3 ]; then \
+			exit 1; \
+		fi; \
+		echo "dmgbuild attempt $$attempt failed; retrying after macOS releases the disk image" >&2; \
+		sleep $$((5 * attempt)); \
+	done
 
 dist/notarize:
 	./scripts/notarize.sh
@@ -164,13 +203,25 @@ package:
 		make --directory=$$dir package; \
 		cp -r $$dir/dist/$$dir dist/activitywatch; \
 	done
+ifeq ($(TAURI_BUILD),true)
+# Copy aw-sync binary for Tauri builds
+	mkdir -p dist/activitywatch/aw-server-rust
+	cp aw-server-rust/target/$(targetdir)/aw-sync dist/activitywatch/aw-server-rust/aw-sync
+else
 # Move aw-qt to the root of the dist folder
 	mv dist/activitywatch/aw-qt aw-qt-tmp
 	mv aw-qt-tmp/* dist/activitywatch
 	rmdir aw-qt-tmp
+endif
 # Remove problem-causing binaries
 	rm -f dist/activitywatch/libdrm.so.2       # see: https://github.com/ActivityWatch/activitywatch/issues/161
 	rm -f dist/activitywatch/libharfbuzz.so.0  # see: https://github.com/ActivityWatch/activitywatch/issues/660#issuecomment-959889230
+ifeq ($(shell uname),Linux)
+# PyInstaller's Qt bundle may include an older Wayland client than Qt requires.
+# All portable Linux packages are built from this directory, so remove it here
+# and use the distro library instead. See: https://github.com/ActivityWatch/activitywatch/issues/939
+	find dist/activitywatch -name 'libwayland-client.so*' -delete
+endif
 # These should be provided by the distro itself
 # Had to be removed due to otherwise causing the error:
 #   aw-qt: symbol lookup error: /opt/activitywatch/libQt5XcbQpa.so.5: undefined symbol: FT_Get_Font_Format

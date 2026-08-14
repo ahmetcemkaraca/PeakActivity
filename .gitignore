@@ -1,194 +1,22 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+build
+dist
+docs
+other
+old
 
-# C extensions
-*.so
+# Coverage
+*coverage*
+htmlcov
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmyp.json
-
-# IDE
-.vscode/
-.idea/
-
-# ========================= PeakActivity Specific =========================
-
-# Cursor IDE Rules - GitHub'da paylaşılmasın
-.cursor/
-.cursor/rules/
-chatcontext/
-
-# Environment files
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-
-# Firebase configuration - Güvenlik için
-firebase-config.json
-serviceAccountKey.json
-firebase-adminsdk-*.json
-
-# ========================= AI/ML Related Files =========================
-# AI model dosyaları
-models/
-*.pkl
-*.joblib
-*.h5
-*.pb
-*.onnx
-*.tflite
-
-# AI eğitim verileri
-training_data/
-datasets/
-data/
-*.csv
-*.json
-*.parquet
-
-# AI experiment sonuçları
-experiments/
-logs/
-tensorboard_logs/
-mlruns/
-wandb/
-
-# Jupyter notebook checkpoints
-.ipynb_checkpoints/
-
-# ========================= Desktop App (Tauri/Electron) =========================
-# Node modules
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
-dist/
-build/
-out/
-target/
-
-# Tauri specific
-src-tauri/target/
-src-tauri/WiX/
-
-# Electron specific
-app/
-packages/
-
-# ========================= Web Panel (Vue.js) =========================
-# Build outputs
-dist/
-.output/
-.nuxt/
-
-# Dependencies
-node_modules/
-
-# Environment
-.env.*
-
-# ========================= Cloud Functions =========================
-# Firebase functions
-functions/node_modules/
-functions/lib/
-functions/.env
-
-# Cloud function artifacts
-*.zip
-*.tar.gz
-
-# ========================= Database & Local Storage =========================
-# Local database files
-*.db
-*.sqlite
-*.sqlite3
-
-# ActivityWatch local data
-~/.local/share/activitywatch/
-%APPDATA%/activitywatch/
-
-# ========================= API Keys & Secrets =========================
-# API keys
-api-keys.json
-secrets.json
-credentials.json
-
-# ========================= Temporary & Cache Files =========================
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-*.log
+# Editor/IDEs
+.idea
 *.swp
-*.swo
 
-# Cache directories
-.cache/
-.parcel-cache/
-.next/
-.vite/
+# Python
+*venv*
+__pycache__
+.python-version
 
-# ========================= Testing =========================
-# Test results
-test-results/
-coverage/
-.nyc_output/
-
-# ========================= AI Feature Development Notes =========================
-# AI özellik geliştirme notları
-prompts/
-ai-research/
-
-# User data samples (privacy)
-sample-user-data/
-test-data/
-user-activity-samples/
-
-# ========================= Production Builds =========================
-# Production builds - development aşamasında GitHub'a yüklenmesin
-*.exe
-*.dmg
-*.app
-*.deb
-*.rpm
-*.msi
-*.pkg
-
-# ========================= Documentation Drafts =========================
-# Taslak dökümanlar
-docs/drafts/
-documentation/private/
+# Misc
+.*cache
+.DS_Store
