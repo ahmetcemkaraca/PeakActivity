@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "prices_published": false,
+  "always_available_feature_ids": [
+    "browser",
+    "desktop",
+    "desktop-update-integrity",
+    "deterministic-rules",
+    "encrypted-default",
+    "insights-reports",
+    "local-api",
+    "local-capture",
+    "manual-time-entry",
+    "notification-history",
+    "privacy-firewall",
+    "sqlcipher",
+    "storage-filter",
+    "web-interface"
+  ],
+  "packages": [
+    {
+      "id": "community",
+      "label": "Community",
+      "status": "Available",
+      "purchase_model": "free",
+      "feature_ids": [],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "plus",
+      "label": "Plus",
+      "status": "Planned",
+      "purchase_model": "subscription",
+      "feature_ids": [
+        "android",
+        "e2ee-sync",
+        "ios"
+      ],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "pro",
+      "label": "Pro",
+      "status": "Planned",
+      "purchase_model": "subscription",
+      "feature_ids": [
+        "advanced-reports",
+        "android",
+        "e2ee-sync",
+        "integrations",
+        "ios"
+      ],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "freelancer",
+      "label": "Freelancer",
+      "status": "Planned",
+      "purchase_model": "subscription",
+      "feature_ids": [
+        "advanced-reports",
+        "android",
+        "e2ee-sync",
+        "freelancer-workspace",
+        "integrations",
+        "ios"
+      ],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "local-pro",
+      "label": "Local Pro",
+      "status": "Planned",
+      "purchase_model": "one-time-license",
+      "feature_ids": [
+        "advanced-reports"
+      ],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "peak-ai",
+      "label": "Peak AI credits",
+      "status": "Planned",
+      "purchase_model": "usage-credits",
+      "feature_ids": [
+        "peak-ai"
+      ],
+      "device_limit": null,
+      "grace_period_seconds": null
+    },
+    {
+      "id": "custom-endpoint",
+      "label": "Custom Endpoint",
+      "status": "Decision required",
+      "purchase_model": "decision-required",
+      "feature_ids": [],
+      "device_limit": null,
+      "grace_period_seconds": null
+    }
+  ]
+}

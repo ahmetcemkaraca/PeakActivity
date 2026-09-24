@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible non-sensitive problem in the source baseline.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Read SECURITY.md for vulnerability reporting. Use synthetic data only.
+  - type: input
+    id: revision
+    attributes:
+      label: Source revision
+      description: Commit and component revisions used.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and version
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps and expected behavior
+      description: Exclude real activity, credentials and personal data.
+    validations:
+      required: true

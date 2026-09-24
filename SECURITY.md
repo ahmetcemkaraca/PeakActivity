@@ -1,25 +1,14 @@
-# Security Policy
+# Security policy
 
-<!--
-## Supported Versions
+This is a pre-alpha source bootstrap. There is no supported PeakActivity binary
+release, response-time commitment, verified security mailbox or published signing
+key yet. Do not use it for sensitive production activity data.
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Do not post vulnerabilities, credentials, activity titles, URLs, raw exports or
+personal information in public issues. Use the repository's private vulnerability
+reporting control only if it is available. If no private channel is shown, retain
+the details until a verified contact is published; do not send PeakActivity reports
+to upstream maintainers by default.
 
-| Version    | Supported          |
-| ---------- | ------------------ |
-| 0.11.0     | :white_check_mark: |
-| <= 0.10.0  | :x:                |
--->
-
-## Reporting a Vulnerability
-
-<!--
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
--->
-
-If you discover a vulnerability, please send a PGP encrypted email with details to [erik@bjareho.lt](mailto:erik@bjareho.lt) (preferably PGP encrypted using [this key](https://erik.bjareholt.com/erikbjare.asc)).
+[Current technical limits](docs/security.md) describe the development baseline.
+Only reviewed, release-specific evidence may establish security properties.
