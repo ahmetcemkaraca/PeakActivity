@@ -1,0 +1,33 @@
+name: Public source policy
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: recursive
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Check public source policy
+        run: python3 scripts/public_policy.py --root . --format json
+      - name: Check Markdown structure
+        run: python3 scripts/public_policy.py --root . --rules markdown-structure --format json
+      - name: Check patch whitespace
+        run: git diff --check 25e34c71882fd4cf054731bf7f74ca92b934b0d6 HEAD
+      - name: Check egress boundary
+        if: ${{ hashFiles('aw-server-rust/aw-egress/Cargo.toml') != '' }}
+        run: python3 scripts/validate_egress_boundary.py --root .
+      - name: Install policy test dependency
+        run: python3 -m pip install --disable-pip-version-check pytest==8.3.3
+      - name: Check policy and source export contracts
+        run: python3 -m pytest -q scripts/tests/test_public_policy.py scripts/tests/test_export_source.py scripts/tests/test_validate_experience.py scripts/tests/test_validate_egress_boundary.py

@@ -1,6 +1,5 @@
 build
 dist
-docs
 other
 old
 
@@ -20,3 +19,10 @@ __pycache__
 # Misc
 .*cache
 .DS_Store
+
+# Local-only recovery, research and implementation material.
+.peakactivity-backup/
+.peakactivity-private/
+.peakactivity-research/
+.peakactivity-staging/
+.superpowers/

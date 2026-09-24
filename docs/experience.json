@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "language": "en",
+  "terms": [
+    {
+      "id": "activity",
+      "label": "Activity",
+      "definition": "A captured time interval and its minimized context."
+    },
+    {
+      "id": "timeline",
+      "label": "Timeline",
+      "definition": "A chronological view of activities."
+    },
+    {
+      "id": "category",
+      "label": "Category",
+      "definition": "A user-defined classification such as Work or Communication."
+    },
+    {
+      "id": "project",
+      "label": "Project",
+      "definition": "A user-controlled grouping for reports and timesheets."
+    },
+    {
+      "id": "rule",
+      "label": "Rule",
+      "definition": "Deterministic local classification, exclusion, or automation logic."
+    },
+    {
+      "id": "privacy-zone",
+      "label": "Privacy Zone",
+      "definition": "A local condition in which selected capture or sharing is blocked."
+    },
+    {
+      "id": "privacy-firewall",
+      "label": "Privacy Firewall",
+      "definition": "The mandatory policy layer for every outbound payload."
+    },
+    {
+      "id": "vault",
+      "label": "Vault",
+      "definition": "Encrypted local activity storage."
+    },
+    {
+      "id": "sync-vault",
+      "label": "Sync Vault",
+      "definition": "An end-to-end encrypted dataset shared by paired devices."
+    },
+    {
+      "id": "device",
+      "label": "Device",
+      "definition": "A paired PeakActivity installation."
+    },
+    {
+      "id": "insight",
+      "label": "Insight",
+      "definition": "A deterministic analysis or optional AI-generated explanation."
+    },
+    {
+      "id": "report",
+      "label": "Report",
+      "definition": "A user-readable summary that is not shared until approved."
+    },
+    {
+      "id": "approved-timesheet",
+      "label": "Approved Timesheet",
+      "definition": "A report artifact explicitly approved for a recipient."
+    },
+    {
+      "id": "ai-mode",
+      "label": "AI Mode",
+      "definition": "The selected AI connection state: Off, Peak AI, or Custom Endpoint."
+    },
+    {
+      "id": "peak-ai",
+      "label": "Peak AI",
+      "definition": "PeakActivity-served access to the provider and model selected by PeakActivity."
+    },
+    {
+      "id": "custom-endpoint",
+      "label": "Custom Endpoint",
+      "definition": "A user-configured endpoint and model, including an external or paired-device service."
+    },
+    {
+      "id": "receipt",
+      "label": "Receipt",
+      "definition": "A record of destination, purpose, fields, policy, and approval."
+    },
+    {
+      "id": "plugin",
+      "label": "Plugin",
+      "definition": "A signed capability-limited extension."
+    },
+    {
+      "id": "category-weight",
+      "label": "Category weight",
+      "definition": "A number chosen by the user to tune that user’s own category weighting."
+    },
+    {
+      "id": "category-weighting",
+      "label": "Category weighting",
+      "definition": "A local report computed from category weights chosen by the user."
+    }
+  ],
+  "states": {
+    "recording": [
+      "Recording",
+      "Paused",
+      "Scheduled pause",
+      "Permission required",
+      "Source unavailable",
+      "Vault locked"
+    ],
+    "sync": [
+      "Not configured",
+      "Pairing",
+      "Syncing",
+      "Up to date",
+      "Offline",
+      "Conflict requires review",
+      "Key recovery required",
+      "Device revoked"
+    ],
+    "ai": [
+      "Off",
+      "Peak AI ready",
+      "Custom Endpoint ready",
+      "Connection test failed",
+      "Approval required",
+      "Request in progress",
+      "Usage limit reached",
+      "Disabled by policy"
+    ],
+    "subscription": [
+      "Free",
+      "Trial",
+      "Active",
+      "Payment action required",
+      "Grace period",
+      "Canceled",
+      "Local Pro license"
+    ],
+    "integration_plugin": [
+      "Not connected",
+      "Permission review",
+      "Connected",
+      "Action required",
+      "Paused",
+      "Revoked"
+    ]
+  },
+  "actions": [
+    "Create Local Vault",
+    "Import existing data",
+    "Explore without recording",
+    "Open Today",
+    "Enable selected sources",
+    "Continue with these sources",
+    "Continue with fewer sources",
+    "Start recording",
+    "Pause recording",
+    "Pause temporarily",
+    "Pause for 15 minutes",
+    "Pause for 1 hour",
+    "Pause until tomorrow",
+    "Enter Private Mode",
+    "Resume recording",
+    "Start manual timer",
+    "Stop manual timer",
+    "Add manual entry",
+    "Split event",
+    "Merge adjacent activities",
+    "Download PeakActivity",
+    "Review source",
+    "Get help",
+    "Review organization policy",
+    "Review aggregate reports",
+    "Appeal a policy decision",
+    "Add privacy rule",
+    "Exclude this activity",
+    "Delete activity",
+    "Edit category",
+    "Assign project",
+    "Create rule from selection",
+    "Preview data",
+    "Approve and send",
+    "Cancel request",
+    "Enable Peak AI",
+    "Configure Custom Endpoint",
+    "Turn AI off",
+    "Test connection",
+    "Save endpoint",
+    "Remove endpoint",
+    "Set up sync",
+    "Pair device",
+    "Revoke device",
+    "Create recovery kit",
+    "Export data",
+    "Delete data",
+    "Lock vault",
+    "Unlock vault",
+    "Review permissions",
+    "Grant permission",
+    "Open system settings",
+    "Upgrade plan",
+    "Manage subscription",
+    "Download invoice",
+    "Cancel subscription",
+    "Install plugin",
+    "Update plugin",
+    "Revoke access",
+    "Uninstall"
+  ],
+  "ai_modes": [
+    {
+      "id": "off",
+      "label": "Off"
+    },
+    {
+      "id": "peak-ai",
+      "label": "Peak AI"
+    },
+    {
+      "id": "custom-endpoint",
+      "label": "Custom Endpoint"
+    }
+  ],
+  "forbidden_terms": [
+    "Edge AI",
+    "Local AI",
+    "Hybrid AI",
+    "BYOK",
+    "Client AI",
+    "Cloud Fallback",
+    "Monitoring Mode",
+    "Productivity Score",
+    "Employee Rank"
+  ],
+  "flows": [
+    "permission",
+    "egress",
+    "ai",
+    "sync",
+    "purchase",
+    "destructive-action",
+    "policy-update"
+  ],
+  "contract_version": 3
+}

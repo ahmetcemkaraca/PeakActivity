@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "base_commit": "25e34c71882fd4cf054731bf7f74ca92b934b0d6",
+  "base_tree": "4184f84fd64f4e5bd0be1ef581960e1014c55318",
+  "allowed_changes": [
+    ".github/FUNDING.yml",
+    ".github/ISSUE_TEMPLATE/bug-report.md",
+    ".github/ISSUE_TEMPLATE/bug_report.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/ISSUE_TEMPLATE/everything-else.md",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/dependabot.yml",
+    ".github/stale.yml",
+    ".github/workflows/codeql.yml",
+    ".github/workflows/dependabot-automerge.yml",
+    ".github/workflows/diagram.yml",
+    ".github/workflows/greetings.yml",
+    ".github/workflows/public-policy.yml",
+    ".github/workflows/release.yml",
+    ".github/workflows/test.yml",
+    ".github/workflows/winget.yml",
+    ".gitignore",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "FORKED_FROM.md",
+    "Makefile",
+    "README.md",
+    "SECURITY.md",
+    "aw.spec",
+    "docs/README.md",
+    "docs/api.md",
+    "docs/build.md",
+    "docs/capabilities.json",
+    "docs/crypto-adr.md",
+    "docs/e2ee-protocol-v1.md",
+    "docs/e2ee-threat-model.md",
+    "docs/experience.json",
+    "docs/package-catalog.json",
+    "docs/privacy.md",
+    "docs/provenance.md",
+    "docs/roadmap.md",
+    "docs/security.md",
+    "docs/source.md",
+    "docs/usage.md",
+    "scripts/export_source.py",
+    "scripts/notarize.sh",
+    "scripts/package/README.txt",
+    "scripts/package/activitywatch-setup.iss",
+    "scripts/package/aw-tauri.iss",
+    "scripts/package/build_app_tauri.sh",
+    "scripts/package/deb/control",
+    "scripts/package/dmgbuild-settings.py",
+    "scripts/package/move-to-aw-modules.sh",
+    "scripts/package/package-all.sh",
+    "scripts/package/package-appimage.sh",
+    "scripts/package/package-deb.sh",
+    "scripts/package/stage_helpers.py",
+    "scripts/public_policy.py",
+    "scripts/public_policy_config.json",
+    "scripts/validate_egress_boundary.py",
+    "scripts/validate_experience.py",
+    "scripts/release_evidence.py",
+    "scripts/tests/test_export_source.py",
+    "scripts/tests/test_public_policy.py",
+    "scripts/tests/test_validate_egress_boundary.py",
+    "scripts/tests/test_validate_experience.py",
+    "scripts/tests/test_release_evidence.py",
+    "scripts/tests/test_stage_helpers.py"
+  ],
+  "restricted_paths": [
+    ".peakactivity-backup",
+    ".peakactivity-private",
+    ".peakactivity-research",
+    ".peakactivity-staging",
+    ".superpowers",
+    "docs/superpowers",
+    "docs/roadmap/epics",
+    "docs/strategy",
+    "docs/compliance",
+    "docs/design",
+    "runbooks",
+    "public-md",
+    "CLIENT_SIDE_AI_IMPLEMENTATION.md",
+    "EDGE_AI_IMPLEMENTATION.md"
+  ],
+  "public_surfaces": [
+    "README.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "FORKED_FROM.md",
+    "docs/*.md",
+    ".github/*.md",
+    ".github/*.yml",
+    ".github/ISSUE_TEMPLATE/*"
+  ],
+  "content_rules": {
+    "non-english-public-copy": [
+      "\\b(g\u00f6rev|gizlilik|kullan\u0131c\u0131|a\u015fama|yap\u0131lacak|tamamland\u0131|\u00f6zellikler|ba\u011f\u0131ml\u0131l\u0131k|do\u011frulama)\\b"
+    ],
+    "absolute-private-path": [
+      "(?:^|[\\s`(])/(?:root|home|Users)/",
+      "[A-Za-z]:[\\\\/](?:Users|Dev)[\\\\/]"
+    ],
+    "private-reference": [
+      "peakactivity-(?:internal|release|pro|cloud|website)\\b",
+      "\\.peakactivity-(?:backup|private|research|staging)",
+      "\\.internal\\b"
+    ],
+    "unsupported-compliance-claim": [
+      "\\b(?:GDPR|HIPAA|SOC ?2|AI Act)[ -](?:compliant|certified)\\b"
+    ],
+    "upstream-support-route": [
+      "(?:forum\\.activitywatch\\.net|erik@bjareho\\.lt|discord\\.gg|activitywatch\\.net/donate)"
+    ]
+  },
+  "secret_patterns": [
+    "gh[pousr]_[A-Za-z0-9]{36,255}",
+    "github_pat_[A-Za-z0-9_]{60,255}",
+    "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+    "AKIA[0-9A-Z]{16}"
+  ],
+  "capabilities": "docs/capabilities.json",
+  "experience": "docs/experience.json",
+  "claim_terms": {
+    "encrypted-default": [
+      "encrypted-by-default",
+      "encrypted vault"
+    ],
+    "e2ee-sync": [
+      "E2EE",
+      "end-to-end encrypted sync"
+    ],
+    "peak-ai": [
+      "Peak AI"
+    ],
+    "custom-endpoint": [
+      "Custom Endpoint"
+    ],
+    "android": [
+      "Android client"
+    ],
+    "privacy-firewall": [
+      "Privacy Firewall"
+    ],
+    "deterministic-rules": [
+      "deterministic rules"
+    ],
+    "insights-reports": [
+      "basic reports"
+    ],
+    "manual-time-entry": [
+      "manual time entry"
+    ],
+    "desktop-update-integrity": [
+      "verified desktop update-integrity flow"
+    ],
+    "notification-history": [
+      "notification history"
+    ],
+    "website": [
+      "branded product website"
+    ],
+    "freelancer-workspace": [
+      "Freelancer workspace"
+    ],
+    "plugin-ecosystem": [
+      "plugin ecosystem"
+    ],
+    "ios": [
+      "iOS companion"
+    ],
+    "enterprise": [
+      "Enterprise product"
+    ],
+    "local-llm": [
+      "on-device LLM",
+      "bundled LLM"
+    ]
+  },
+  "required_statements": {
+    "README.md": [
+      "PeakActivity is an independent ActivityWatch derivative",
+      "ActivityWatch does not endorse or maintain PeakActivity",
+      "Mozilla Public License 2\\.0",
+      "pre-alpha source bootstrap",
+      "25e34c71882fd4cf054731bf7f74ca92b934b0d6",
+      "\\]\\(docs/capabilities\\.json\\)",
+      "\\]\\(docs/roadmap\\.md\\)",
+      "FORKED_FROM\\.md"
+    ]
+  },
+  "brand_surfaces": [
+    "aw-tauri/src-tauri/tauri.conf.json"
+  ],
+  "workflow": ".github/workflows/public-policy.yml"
+}
