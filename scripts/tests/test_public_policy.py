@@ -152,6 +152,7 @@ def test_submodule_contents_are_opaque(repo):
     assert "legacy-product-identifier" not in rules(repo)
 
     git(root, "update-index", "--cacheinfo", "160000", git(root, "rev-parse", "HEAD^"), "module")
+    git(root, "commit", "-qm", "updated module pin")
     config["allowed_changes"].append("module")
     assert "legacy-product-identifier" in rules(repo)
 
