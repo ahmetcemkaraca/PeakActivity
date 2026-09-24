@@ -369,6 +369,8 @@ def scan_tree(root: Path, config: PolicyConfig, rule_group=None) -> Report:
         modules = {path for path, mode in (base_entries | entries).items() if mode == "160000"}
         # ponytail: read only configured brand metadata inside opaque gitlinks; never recurse through component sources.
         for relative in config["brand_surfaces"]:
+            if any(relative.startswith(module + "/") for module in modules if module not in changed):
+                continue
             path = root / relative
             if not path.exists():
                 continue

@@ -139,12 +139,21 @@ def test_inline_annotation_example_is_not_a_product_claim(repo):
 
 
 def test_submodule_contents_are_opaque(repo):
-    root, _ = repo
+    root, config = repo
     git(root, "update-index", "--add", "--cacheinfo", "160000", git(root, "rev-parse", "HEAD"), "module")
     git(root, "commit", "-qm", "module")
+    config["base_commit"] = git(root, "rev-parse", "HEAD")
+    config["base_tree"] = git(root, "rev-parse", "HEAD^{tree}")
     (root / "module").mkdir()
     (root / "module/README.md").write_text("confidential-repository")
+    (root / "module/tauri.conf.json").write_text('{"identifier":"net.activitywatch.desktop"}')
+    config["brand_surfaces"] = ["module/tauri.conf.json"]
     assert "module/README.md" not in policy.scan_tree(*repo)["scanned_paths"]
+    assert "legacy-product-identifier" not in rules(repo)
+
+    git(root, "update-index", "--cacheinfo", "160000", git(root, "rev-parse", "HEAD^"), "module")
+    config["allowed_changes"].append("module")
+    assert "legacy-product-identifier" in rules(repo)
 
 
 def test_capability_claim_cannot_promote_planned_to_available(repo):
