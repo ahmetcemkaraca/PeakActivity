@@ -3,7 +3,7 @@
 	url = https://github.com/ActivityWatch/aw-core.git
 [submodule "aw-client"]
 	path = aw-client
-	url = https://github.com/ActivityWatch/aw-client.git
+	url = https://github.com/ahmetcemkaraca/aw-client.git
 [submodule "aw-server"]
 	path = aw-server
 	url = https://github.com/ActivityWatch/aw-server.git
@@ -18,13 +18,13 @@
 	url = https://github.com/ActivityWatch/aw-watcher-window.git
 [submodule "aw-server-rust"]
 	path = aw-server-rust
-	url = https://github.com/ActivityWatch/aw-server-rust.git
+	url = https://github.com/ahmetcemkaraca/aw-server-rust.git
 [submodule "aw-watcher-input"]
 	path = aw-watcher-input
 	url = https://github.com/ActivityWatch/aw-watcher-input.git
 [submodule "aw-tauri"]
 	path = aw-tauri
-	url = https://github.com/activitywatch/aw-tauri
+	url = https://github.com/ahmetcemkaraca/aw-tauri.git
 [submodule "awatcher"]
 	path = awatcher
 	url = https://github.com/2e3s/awatcher
