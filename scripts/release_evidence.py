@@ -10,8 +10,10 @@ import re
 import shutil
 import subprocess
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
+from export_source import safe_path
 from public_policy import strict_json
 
 
@@ -62,12 +64,49 @@ def check_sbom(spdx, cyclone):
     return sorted(set(unknown))
 
 
-def create(source, artifacts, notices, instructions, output, release_id, syft="syft"):
+def check_build_record(path, manifest, sums, artifacts):
+    sha256(path)
+    record = strict_json(path.read_bytes())
+    fields = {"schema_version", "source_unchanged", "source_commit", "source", "components",
+              "command", "started_at", "finished_at", "artifacts", "status"}
+    if (not isinstance(record, dict) or set(record) != fields
+            or type(record["schema_version"]) is not int or record["schema_version"] != 1
+            or record["source_unchanged"] is not True
+            or record.get("source_commit") != manifest["commit"]
+            or record.get("source") != sums or record.get("components") != manifest["components"]
+            or not isinstance(record.get("command"), list) or not record["command"]
+            or any(not isinstance(arg, str) for arg in record["command"])
+            or record["status"] != "unsigned local build record; requires independent builder review"):
+        raise ValueError("build record does not bind the supplied source")
+    try:
+        started, finished = (datetime.fromisoformat(record[field]) for field in ("started_at", "finished_at"))
+    except (TypeError, ValueError) as error:
+        raise ValueError("invalid build record timestamps") from error
+    if started.tzinfo is None or finished.tzinfo is None or finished < started:
+        raise ValueError("invalid build record timestamp order or timezone")
+    entries = record.get("artifacts")
+    if not isinstance(entries, list) or len(entries) != len(artifacts):
+        raise ValueError("build record artifact set mismatch")
+    expected = {artifact.name: sha256(artifact) for artifact in artifacts}
+    if (any(not isinstance(item, dict) or set(item) != {"path", "name", "sha256"}
+            or any(not isinstance(value, str) for value in item.values()) for item in entries)
+            or len({item["name"] for item in entries}) != len(entries)
+            or any(not safe_path(item["path"]) or Path(item["path"]).name != item["name"] for item in entries)
+            or {item["name"]: item["sha256"] for item in entries} != expected):
+        raise ValueError("build record artifact digest mismatch")
+    return record
+
+
+def create(source, artifacts, notices, instructions, output, release_id, syft="syft", build_record=None):
     if not re.fullmatch(r"peakactivity-v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", release_id):
         raise ValueError("invalid release identifier")
     if output.exists() or not artifacts or len({path.name for path in artifacts}) != len(artifacts):
         raise ValueError("output must be new and artifact names must be unique")
     source_manifest, sums = source_inputs(source)
+    if build_record is None:
+        raise ValueError("a same-build record is required")
+    check_build_record(build_record, source_manifest, sums, artifacts)
+    build_digest = sha256(build_record)
     sha256(notices)
     sha256(instructions)
     if not notices.read_text().strip() or not instructions.read_text().strip():
@@ -101,15 +140,20 @@ def create(source, artifacts, notices, instructions, output, release_id, syft="s
                 raise ValueError("source changed while assembling evidence")
         shutil.copyfile(notices, staging / "THIRD_PARTY_NOTICES.txt")
         shutil.copyfile(instructions, staging / "BUILD.md")
+        shutil.copyfile(build_record, staging / "build-record.json")
+        if sha256(staging / "build-record.json") != build_digest:
+            raise ValueError("build record changed while assembling evidence")
+        check_build_record(staging / "build-record.json", source_manifest, sums, artifacts)
         lock = {
             "schema_version": 1, "release_id": release_id, "source_commit": source_manifest["commit"],
             "source": sums, "components": source_manifest["components"], "artifacts": evidence,
             "notices_sha256": sha256(staging / "THIRD_PARTY_NOTICES.txt"),
             "build_instructions_sha256": sha256(staging / "BUILD.md"),
+            "build_record_sha256": build_digest,
             "sbom_tool": tool,
             "sbom_command": "syft scan <artifact> --source-name <release-id> --source-version <artifact-sha256> -q -o spdx-json=<output> -o cyclonedx-json=<output>",
             "status": "unsigned candidate; not approved for publication",
-            "pending_acceptance": ["platform signing and notarization", "public exact-source URL", "license and asset review", "privacy and security audit"],
+            "pending_acceptance": ["independent builder and dependency review", "platform signing and notarization", "public exact-source URL", "license and asset review", "privacy and security audit"],
         }
         (staging / "release.lock.json").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n")
         checksums = [f"{sha256(path)}  {path.name}" for path in sorted(staging.iterdir())]
@@ -127,9 +171,10 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--release-id", required=True)
     parser.add_argument("--syft", default="syft")
+    parser.add_argument("--build-record", type=Path, required=True)
     args = parser.parse_args()
     try:
-        lock = create(args.source, args.artifact, args.notices, args.instructions, args.output, args.release_id, args.syft)
+        lock = create(args.source, args.artifact, args.notices, args.instructions, args.output, args.release_id, args.syft, args.build_record)
     except (OSError, ValueError, TypeError, KeyError, subprocess.CalledProcessError):
         parser.exit(1, "Release evidence rejected: invalid input, failed scanner or prohibited runtime.\n")
     print(json.dumps({"release_id": lock["release_id"], "artifacts": len(lock["artifacts"]), "status": lock["status"]}))

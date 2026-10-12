@@ -16,16 +16,27 @@ WAYLAND_ARG := $(if $(filter linux,$(PLATFORM)),--helper "aw-awatcher=$(abspath 
 .PHONY: build package helpers experience-check boundary-check test policy source clean
 
 helpers:
-	$(MAKE) -C "$(WINDOW_DIR)" build
-	cd "$(WINDOW_DIR)" && poetry run pip install --no-deps "$(abspath $(CLIENT_DIR))" && poetry run make package
-	$(MAKE) -C "$(AFK_DIR)" build
-	cd "$(AFK_DIR)" && poetry run pip install --no-deps "$(abspath $(CLIENT_DIR))" && poetry run make package
+	cd "$(WINDOW_DIR)" && poetry install && poetry run python -m pip install --no-deps "$(abspath $(CLIENT_DIR))"
+	cd "$(WINDOW_DIR)" && poetry run python "$(abspath scripts/package/build_helper_evidence.py)" \
+	  --collector "$(abspath $(WINDOW_DIR))" --client "$(abspath $(CLIENT_DIR))" --helper aw-watcher-window \
+	  --platform "$(PLATFORM)" --output "$(PACKAGE_STAGE)-evidence/aw-watcher-window"
+	cd "$(AFK_DIR)" && poetry install && poetry run python -m pip install --no-deps "$(abspath $(CLIENT_DIR))"
+	cd "$(AFK_DIR)" && poetry run python "$(abspath scripts/package/build_helper_evidence.py)" \
+	  --collector "$(abspath $(AFK_DIR))" --client "$(abspath $(CLIENT_DIR))" --helper aw-watcher-afk \
+	  --platform "$(PLATFORM)" --output "$(PACKAGE_STAGE)-evidence/aw-watcher-afk"
 ifeq ($(PLATFORM),linux)
-	cargo build --locked --release --manifest-path "$(WAYLAND_DIR)/Cargo.toml"
+	$(PYTHON) scripts/package/build_helper_evidence.py --collector "$(abspath $(WAYLAND_DIR))" \
+	  --helper aw-awatcher --platform linux --output "$(PACKAGE_STAGE)-evidence/aw-awatcher"
 endif
 	$(PYTHON) scripts/package/stage_helpers.py --platform "$(PLATFORM)" \
 	  --helper "aw-watcher-window=$(abspath $(WINDOW_DIR))/dist/aw-watcher-window" \
 	  --helper "aw-watcher-afk=$(abspath $(AFK_DIR))/dist/aw-watcher-afk" \
+	  --record "aw-watcher-window=$(PACKAGE_STAGE)-evidence/aw-watcher-window" \
+	  --record "aw-watcher-afk=$(PACKAGE_STAGE)-evidence/aw-watcher-afk" \
+	  --source "aw-watcher-window=$$(git -C "$(WINDOW_DIR)" rev-parse HEAD)" \
+	  --source "aw-watcher-afk=$$(git -C "$(AFK_DIR)" rev-parse HEAD)" \
+	  $(if $(filter linux,$(PLATFORM)),--record "aw-awatcher=$(PACKAGE_STAGE)-evidence/aw-awatcher" --source "aw-awatcher=$$(git -C "$(WAYLAND_DIR)" rev-parse HEAD)",) \
+	  --client-commit "$$(git -C "$(CLIENT_DIR)" rev-parse HEAD)" --architecture "$$(uname -m)" \
 	  $(WAYLAND_ARG) --output "$(PACKAGE_STAGE)"
 
 build: helpers experience-check
