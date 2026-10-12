@@ -25,16 +25,37 @@ Preserve their notices and provide corresponding source for distributed
 modifications. Review third-party component and asset obligations for the actual
 artifact; do not infer them from the superproject license alone.
 
-To assemble unsigned evidence for already-built native artifacts, use:
+Run the build from a clean checkout with the reviewed, recursively pinned
+component graph. Artifacts must not exist before the command starts. The wrapper
+exports source before and after, compares the actual worktree bytes to the export,
+and binds newly produced artifact hashes to that source. Choose the artifact path
+for the target platform:
 
 ```sh
-python3 scripts/release_evidence.py --source ../peakactivity-source-export \
-  --artifact ../artifacts/peakactivity-installer.deb \
+python3 scripts/build_evidence.py --root . \
+  --artifact aw-tauri/src-tauri/target/release/bundle/deb/peakactivity-installer.deb \
+  --output ../peakactivity-build -- make build
+```
+
+The wrapper records command arguments; do not put credentials in them. Use a clean
+reviewed build environment. The record does not attest to the compiler, downloaded
+dependencies, environment, or reproducibility, and is not signed builder evidence.
+Local component overrides outside the pinned checkout are unsuitable for this
+release procedure. The pre/post check rejects source or generated tracked-file
+changes; development builds can run without the evidence wrapper.
+
+To assemble unsigned release evidence from that build, use:
+
+```sh
+python3 scripts/release_evidence.py --source ../peakactivity-build/source \
+  --build-record ../peakactivity-build/build-record.json \
+  --artifact aw-tauri/src-tauri/target/release/bundle/deb/peakactivity-installer.deb \
   --notices ../artifacts/THIRD_PARTY_NOTICES.txt --instructions docs/build.md \
   --release-id peakactivity-v0.1.0 --output ../release-evidence
 ```
 
 The command requires Syft and records its version, both SBOM formats, artifact and
-source hashes, notices and build instructions in `release.lock.json`. Unsupported
+source hashes, the matching build record, notices and build instructions in
+`release.lock.json`. Missing or mismatched build records are rejected. Unsupported
 or empty scanner results fail. Unresolved license metadata remains visible; the
 output is an unsigned candidate and never an automatic publication approval.

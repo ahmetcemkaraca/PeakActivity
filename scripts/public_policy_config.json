@@ -70,7 +70,9 @@
     "scripts/tests/test_validate_egress_boundary.py",
     "scripts/tests/test_validate_experience.py",
     "scripts/tests/test_release_evidence.py",
-    "scripts/tests/test_stage_helpers.py"
+    "scripts/tests/test_stage_helpers.py",
+    "scripts/build_evidence.py",
+    "scripts/tests/test_build_evidence.py"
   ],
   "restricted_paths": [
     ".peakactivity-backup",
