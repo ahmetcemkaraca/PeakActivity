@@ -16,9 +16,25 @@ python3 scripts/export_source.py --root . --output ../peakactivity-source-export
 
 The output contains a normalized source archive, per-file hashes, component source
 revisions and an unsigned checksum manifest. This is source provenance, not a
-binary SBOM, signature or license approval. Generate the dependency SBOM with the
-reviewed SBOM tool against the exact release inputs and retain its version and
-command. Scan the final binary separately before distribution.
+binary SBOM, signature or license approval. Inventory declared dependencies from
+the verified source export separately:
+
+```sh
+python3 scripts/source_inventory.py --source ../peakactivity-source-export \
+  --output ../peakactivity-source-inventory
+```
+
+The command reads only recorded Cargo, npm, Poetry and Gradle lock files, verifies
+their archive bytes against the source manifest, and retains SPDX, CycloneDX and
+Syft inventories with input hashes, scanner configuration and unresolved licenses.
+It includes development and build declarations. Gradle buildscript locks retain
+their original path/hash even when the scanner needs a filename alias. Missing or
+unrecognized locks remain outside this inventory.
+
+These declarations can include unused and other-platform packages. They do not
+prove which dependencies entered a binary, establish runtime completeness or
+approve licenses. Scan the final binary separately before distribution; an empty
+artifact inventory still fails the release-evidence checks.
 
 ActivityWatch-derived files remain covered by the [MPL 2.0](../LICENSE.txt).
 Preserve their notices and provide corresponding source for distributed
