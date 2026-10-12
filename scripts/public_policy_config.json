@@ -63,6 +63,7 @@
     "scripts/package/package-appimage.sh",
     "scripts/package/package-deb.sh",
     "scripts/package/stage_helpers.py",
+    "scripts/package/build_helper_evidence.py",
     "scripts/public_policy.py",
     "scripts/public_policy_config.json",
     "scripts/validate_egress_boundary.py",
@@ -75,6 +76,7 @@
     "scripts/tests/test_validate_experience.py",
     "scripts/tests/test_release_evidence.py",
     "scripts/tests/test_stage_helpers.py",
+    "scripts/tests/test_build_helper_evidence.py",
     "scripts/build_evidence.py",
     "scripts/tests/test_build_evidence.py"
   ],

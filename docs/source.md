@@ -60,6 +60,23 @@ Local component overrides outside the pinned checkout are unsuitable for this
 release procedure. The pre/post check rejects source or generated tracked-file
 changes; development builds can run without the evidence wrapper.
 
+The desktop helper recipe also creates same-build helper records. Each Python
+collector records exact collector and SDK source exports and verifies the installed
+SDK's code bytes, even when an unrelated SDK reports the same version. Included
+module evidence comes from the actual built executable and external extension/base
+library files. Freezer-generated bootstrap bytecode is identified separately from
+committed collector source. Installed distribution versions describe the build
+environment, not the set of shipping dependencies.
+
+Helper staging verifies those records against selected commits, platform,
+architecture, bytes, executable modes and links before and after copying. Its
+records and source exports remain outside bundled runtime resources. The Rust
+Wayland helper has a separate locked Cargo source/output record; Python freezer
+evidence does not apply to it. Retain all helper evidence alongside the final build
+record, and verify its component commits against the release's recursive source
+graph. Unsigned helper records do not close independent builder, native SBOM,
+license or platform signing acceptance.
+
 To assemble unsigned release evidence from that build, use:
 
 ```sh
